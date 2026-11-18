@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>ЛУЧ · Проверка синхронизации</title>
+<style>
+:root{font-family:system-ui,-apple-system,sans-serif;background:#f4f7f9;color:#172b38;font-size:16px}
+*{box-sizing:border-box}body{margin:0;padding:24px 16px}.wrap{max-width:680px;margin:auto}
+h1{font-size:24px;margin:0 0 8px}h2{font-size:18px;margin:0 0 12px}
+p{line-height:1.55}small,.muted{color:#586a76}.panel{background:white;border:1px solid #d9e3e7;border-radius:14px;padding:20px;margin:16px 0}
+label{font-weight:650;display:block;margin:10px 0 6px}textarea,input{width:100%;border:1px solid #a9bbc4;border-radius:8px;padding:10px;font:inherit;min-height:42px}
+textarea{min-height:95px;resize:vertical}button{border:0;border-radius:9px;background:#17637e;color:white;padding:11px 15px;margin:8px 6px 0 0;cursor:pointer;font-weight:650}
+button:disabled{opacity:.45;cursor:not-allowed}.secondary{background:#e7eef1;color:#172b38}
+#status{white-space:pre-wrap;background:#edf4f7;border-radius:10px;padding:12px;min-height:44px}
+a{color:#17637e}strong{font-weight:750}.warn{color:#9a4c1b}
+</style>
+</head>
+<body>
+<main class="wrap">
+<p><a href="./index.html">← Вернуться к ЛУЧ</a></p>
+<h1>Проверка синхронизации между устройствами</h1>
+<p><strong>Только тест!</strong> Эта страница передаёт небольшую вымышленную заметку. Она <strong>не получает и не отправляет</strong> пациентов, курсы, телефоны или календарь из основного «ЛУЧ».</p>
+<section class="panel">
+<h2>1. Проверка доступа без VPN</h2>
+<p class="muted">Проверим доступность Firebase SDK и серверов Google. Успех не гарантирует доступность конкретного проекта.</p>
+<button type="button" id="network-check">Проверить доступность</button>
+</section>
+<section class="panel">
+<h2>2. Настройка Firebase</h2>
+<p class="muted">Используй только настройки Web app из Firebase Console (apiKey, authDomain, projectId, appId). Не вставляй пароль, приватный ключ или JSON сервисного аккаунта.</p>
+<label for="firebase-config">Публичная конфигурация Firebase Web app</label>
+<textarea id="firebase-config" placeholder='{"apiKey":"...","authDomain":"...firebaseapp.com","projectId":"...","appId":"..."}' spellcheck="false"></textarea>
+<label for="email">E-mail тестового пользователя</label>
+<input type="email" id="email" autocomplete="username" placeholder="test@example.com">
+<label for="password">Пароль</label>
+<input type="password" id="password" autocomplete="current-password">
+<button type="button" id="sign-in">Подключить</button>
+<button type="button" id="sign-out" class="secondary" disabled>Выйти</button>
+</section>
+<section class="panel">
+<h2>3. Проверка обмена</h2>
+<p>Зайди под одним тестовым аккаунтом с Mac и iPhone. Измени заметку на одном устройстве — второе увидит её автоматически.</p>
+<p><small>Последняя полученная версия: <strong id="remote-version">—</strong></small></p>
+<label for="pilot-text">Тестовая заметка (до 200 символов)</label>
+<textarea id="pilot-text" maxlength="200" disabled placeholder="Например: проверка с Mac"></textarea>
+<button type="button" id="save-note" disabled>Отправить заметку</button>
+<button type="button" id="reload-note" class="secondary" disabled>Принять облачную версию</button>
+<p class="muted">Если оба устройства изменили заметку одновременно, сохранение с устаревшей версией будет отклонено — существующие данные не затираются.</p>
+</section>
+<section class="panel">
+<h2>Состояние</h2>
+<div id="status" role="status" aria-live="polite">Не подключено. Сначала проверь доступность.</div>
+<p class="warn"><strong>Не использовать для реальных пациентов.</strong> Эта демонстрация не предназначена для медицинских персональных данных.</p>
+</section>
+</main>
+<script type="module" src="./sync-lab.mjs"></script>
+</body>
+</html>
