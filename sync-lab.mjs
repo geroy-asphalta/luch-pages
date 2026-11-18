@@ -21,24 +21,7 @@ function resetSession(){
  $('pilot-text').value='';$('password').value='';refresh();
 }
 
-$('network-check').onclick=async()=>{
- $('network-check').disabled=true;
- const servers=[
-  ['Firebase SDK','https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js'],
-  ['Firestore','https://firestore.googleapis.com/'],
-  ['Авторизация','https://identitytoolkit.googleapis.com/']
- ];
- const results=await Promise.all(servers.map(async([name,url])=>{
-  try{
-   // A no-cors response may be opaque or an HTTP error: we check only
-   // that the browser can reach the host without a network/CSP failure.
-   await fetch(url,{mode:'no-cors',cache:'no-store',signal:AbortSignal.timeout(10000)});
-   return name+': сеть доступна';
-  }catch{return name+': нет ответа из сети';}
- }));
- status(results.join('\n')+'\nДля входа в проект нужна дополнительная проверка.');
- $('network-check').disabled=false;
-};
+// Connectivity check is an independent classic script in sync-lab.html.
 
 $('sign-in').onclick=async()=>{
  busy=true;refresh();
@@ -61,8 +44,8 @@ $('sign-in').onclick=async()=>{
   }
   const credential=await api.authSDK.signInWithEmailAndPassword(auth,email,password);
   $('password').value='';
-  ref=fsSDK.doc(firestore,PILOT_COLLECTION,credential.user.uid);
-  unsub=fsSDK.onSnapshot(ref,snapshot=>{
+  ref=api.fsSDK.doc(firestore,PILOT_COLLECTION,credential.user.uid);
+  unsub=api.fsSDK.onSnapshot(ref,snapshot=>{
    if(snapshot.metadata.fromCache){
     status('Пока видна кэшированная версия. Для безопасного сохранения нужен ответ сервера.');
     return;

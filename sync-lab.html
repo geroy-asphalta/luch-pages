@@ -13,6 +13,7 @@ p{line-height:1.55}small,.muted{color:#586a76}.panel{background:white;border:1px
 label{font-weight:650;display:block;margin:10px 0 6px}textarea,input{width:100%;border:1px solid #a9bbc4;border-radius:8px;padding:10px;font:inherit;min-height:42px}
 textarea{min-height:95px;resize:vertical}button{border:0;border-radius:9px;background:#17637e;color:white;padding:11px 15px;margin:8px 6px 0 0;cursor:pointer;font-weight:650}
 button:disabled{opacity:.45;cursor:not-allowed}.secondary{background:#e7eef1;color:#172b38}
+#network-results{margin-top:12px;white-space:pre-wrap;background:#edf4f7;border-radius:10px;padding:12px;min-height:44px}
 #status{white-space:pre-wrap;background:#edf4f7;border-radius:10px;padding:12px;min-height:44px}
 a{color:#17637e}strong{font-weight:750}.warn{color:#9a4c1b}
 </style>
@@ -26,6 +27,7 @@ a{color:#17637e}strong{font-weight:750}.warn{color:#9a4c1b}
 <h2>1. Проверка доступа без VPN</h2>
 <p class="muted">Проверим доступность Firebase SDK и серверов Google. Успех не гарантирует доступность конкретного проекта.</p>
 <button type="button" id="network-check">Проверить доступность</button>
+<div id="network-results" role="status" aria-live="polite" class="network-results">Результат проверки появится здесь.</div>
 </section>
 <section class="panel">
 <h2>2. Настройка Firebase</h2>
@@ -55,6 +57,61 @@ a{color:#17637e}strong{font-weight:750}.warn{color:#9a4c1b}
 <p class="warn"><strong>Не использовать для реальных пациентов.</strong> Эта демонстрация не предназначена для медицинских персональных данных.</p>
 </section>
 </main>
-<script type="module" src="./sync-lab.mjs"></script>
+<script>
+(function () {
+  // This small network check runs independently of Firebase modules.
+  // The button works even when JavaScript modules are blocked by the network.
+  const button = document.getElementById('network-check');
+  const output = document.getElementById('status');
+  const networkOutput = document.getElementById('network-results');
+  const endpoints = [
+    ['Firebase SDK', 'https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js'],
+    ['Firestore', 'https://firestore.googleapis.com/'],
+    ['Авторизация', 'https://identitytoolkit.googleapis.com/']
+  ];
+  output.textContent = 'Страница готова. Нажми «Проверить доступность».';
+  networkOutput.textContent = 'Нажми кнопку выше — проверка начнётся сразу.';
+  button.addEventListener('click', async function () {
+    button.disabled = true;
+    const results = endpoints.map(function (entry) { return entry[0] + ': проверяется…'; });
+    const show = function () {
+      const message = 'Результат сетевой проверки (без VPN):\n' +
+        results.join('\n') +
+        '\nОтвет сервера — это ещё не проверка входа в Firebase.';
+      output.textContent = message;
+      networkOutput.textContent = message;
+    };
+    show(); // Immediate visual feedback, before slow network requests.
+    try {
+      await Promise.all(endpoints.map(async function (entry, index) {
+        const name = entry[0], url = entry[1];
+        const controller = typeof AbortController === 'function' ? new AbortController() : null;
+        let timer;
+        try {
+          const options = {mode: 'no-cors', cache: 'no-store'};
+          if (controller) options.signal = controller.signal;
+          const request = fetch(url, options).then(function () { return true; });
+          const deadline = new Promise(function (resolve) {
+            timer = setTimeout(function () {
+              if (controller) controller.abort();
+              resolve(false);
+            }, 8000);
+          });
+          const received = await Promise.race([request, deadline]);
+          results[index] = name + ': ' + (received ? 'сервер ответил' : 'нет ответа за 8 секунд');
+        } catch (error) {
+          results[index] = name + ': ошибка соединения';
+        } finally {
+          clearTimeout(timer);
+          show();
+        }
+      }));
+    } finally {
+      button.disabled = false;
+    }
+  });
+})();
+</script>
+<script type="module" src="./sync-lab.mjs?v=2" onerror="document.getElementById('status').textContent='Не удалось загрузить модуль синхронизации. Проверь соединение и обнови страницу.';"></script>
 </body>
 </html>
