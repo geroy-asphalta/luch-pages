@@ -1,0 +1,840 @@
+:root{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:#203447;background:#f4f7f9}*{box-sizing:border-box}body{margin:0}button,select,input{font:inherit}button{cursor:pointer}button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #86b5df;outline-offset:2px}.hidden{display:none!important}
+.topbar{height:72px;display:flex;align-items:center;gap:22px;background:#172b38;color:#fff;padding:0 26px}.logo{display:flex;align-items:center;gap:11px;margin-right:12px}.mark{background:#294a4c;color:#81e7c2;display:grid;place-items:center;border-radius:12px;width:39px;height:39px;font-size:29px}.logo b{font-size:22px;letter-spacing:1px}.logo small{display:block;font-size:9px;color:#a8c1c9;letter-spacing:1px;text-transform:uppercase}.demo{border-radius:30px;background:#4b402f;color:#f5d99a;font-weight:800;font-size:10px;letter-spacing:.6px;padding:10px 13px}.topbar button{margin-left:auto;background:none;color:#cfdfec;border:1px solid #526575;border-radius:10px;padding:9px 13px;font-size:12px}
+.layout{display:flex;min-height:calc(100vh - 72px)}.sidebar{width:226px;flex:none;background:#fff;border-right:1px solid #e6ebef;padding:29px 13px;display:flex;flex-direction:column;gap:6px}.sidebar-heading{font-size:10px;font-weight:800;letter-spacing:1.1px;color:#a4b1ba;margin:0 12px 16px}.nav{border:0;background:transparent;text-align:left;display:flex;align-items:center;gap:13px;color:#697d8c;padding:13px;border-radius:10px;width:100%}.nav span{font-size:20px;width:24px;text-align:center}.nav b{font-size:12px}.nav:hover{background:#f1f5f7}.nav.active{color:#23825e;background:#e7f5ed}.sidebar-note{margin-top:auto;background:#f2f6f7;border-radius:12px;padding:15px;font-size:12px;color:#738592;line-height:1.5}.sidebar-note b{color:#445a69}.sidebar-note p{margin:7px 0 0}
+main{padding:32px 29px;flex:1;min-width:0}.head{display:flex;justify-content:space-between;gap:16px;align-items:center;margin:0 0 24px}.eyebrow{font-size:10px;font-weight:800;letter-spacing:1.7px;color:#30a477}h1{font-size:27px;letter-spacing:-.6px;margin:8px 0}h2{font-size:18px;margin:0}.head p{font-size:12px;color:#90a1af;margin:0}.month-controls{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #e4ebf0;border-radius:12px;padding:6px}.month-controls b{min-width:126px;text-align:center;font-size:12px;text-transform:capitalize}.month-controls button{background:#fff;border:1px solid #e1e7ed;color:#4c6376;border-radius:8px;padding:8px 12px;font-weight:700}.month-controls #reset-month{font-size:10px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin-bottom:24px}.stat{background:#fff;border:1px solid #e2e9ee;border-radius:14px;padding:17px;display:flex;gap:13px;align-items:center}.stat-icon{display:grid;place-items:center;background:#e6f5ed;color:#278b64;height:40px;width:40px;border-radius:11px;font-size:20px}.stat:nth-child(2) .stat-icon{background:#fff0d4;color:#b58423}.stat:nth-child(3) .stat-icon{background:#efe8fa;color:#8469ba}.stat:nth-child(4) .stat-icon{background:#fce8f0;color:#b3607e}.stat strong{display:block;font-size:23px}.stat small{display:block;font-size:10px;color:#94a3ae}
+.workspace{background:#fff;border:1px solid #e4eaef;border-radius:15px;overflow:hidden;box-shadow:0 3px 22px #11263809}.toolbar{padding:15px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.filters,.actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.filters select{border:1px solid #dce6ed;padding:10px;border-radius:9px;color:#607589;font-size:12px;background:#fff}.count{font-size:11px;color:#97a5af}.actions button,.maintenance-form button{background:#fff;border:1px solid #dbe4eb;border-radius:9px;padding:10px 12px;font-size:11px;font-weight:750;color:#536c7e}.actions button.primary,.maintenance-form button.primary{background:#347c99;color:#fff;border-color:#347c99}.actions button:hover,.maintenance-form button:hover{filter:brightness(.96)}
+.legend{display:flex;gap:14px;padding:12px 17px;flex-wrap:wrap;border-top:1px solid #ecf0f2;border-bottom:1px solid #ecf0f2}.legend span{display:flex;align-items:center;gap:5px;font-size:10px;color:#8293a1}.dot{height:10px;width:10px;border:1px solid #d6e0e6;border-radius:3px;display:inline-block;background:#fff}.dot.final{background:#a8e8c3;border-color:#6fc69a}.dot.skip{background:#48515c;border-color:#48515c}.dot.maintenance{background:#b66b3e;border-color:#b66b3e}.dot.lab{background:#f6d0dd;border-color:#e9b5c5}.dot.issued{background:#e66d8b;border-color:#e66d8b}
+.scroll{max-width:100%;overflow:auto;scrollbar-color:#cad6df transparent}.calendar,.data-table{border-collapse:separate;border-spacing:0;min-width:max-content}.calendar th,.calendar td{border-right:1px solid #eaf0f2;border-bottom:1px solid #eaf0f2;height:42px;min-width:46px;text-align:center;padding:4px 3px;white-space:nowrap}.calendar th{position:sticky;top:0;background:#f5f8fa;color:#697f90;font-size:10px;z-index:2}.calendar th small{display:block;font-size:9px;font-weight:400;margin-top:4px;color:#a0aeb8}.calendar th.off{background:#edf2f5;color:#9cabb6}.calendar .sticky{position:sticky;text-align:left;z-index:3;background:white}.calendar th.sticky{z-index:5;background:#f5f8fa}.calendar .id{min-width:70px;width:70px;left:0}.calendar .name{min-width:155px;width:155px;left:70px}.calendar .machine{min-width:90px;width:90px;max-width:90px;left:225px;box-shadow:2px 0 5px #1f3d5010}.calendar .name b{font-size:11px}.calendar .name small{display:block;color:#91a1ae;font-size:9px;margin-top:3px}.calendar tbody td.sticky{font-size:10px;color:#4d6171}
+.calendar .day{position:relative;cursor:cell;font-size:11px;font-weight:800;color:#596f80;user-select:none}.calendar .day.off{background:#f4f6f8;color:#b0bcc5}.calendar .day.session{background:white}.calendar .day.final{background:#d9f0e3;color:#258157}.calendar .day.skip{background:#48515c;color:#fff}.calendar .day.maintenance{background:#b66b3e;color:#fff;font-size:15px}.calendar .day.lab{background:#f5d2e0;color:#9c4c6e}.calendar .day.issued{background:#e56b89;color:#fff}.calendar .day.selected{outline:2px solid #298cb4;outline-offset:-2px;z-index:1}.calendar .day:hover{box-shadow:inset 0 0 0 2px #b7cddd}.lab-dot{position:absolute;right:3px;bottom:3px;width:5px;height:5px;border-radius:50%;background:#b73a6b}.issued .lab-dot{background:white}.footnote{border-top:1px solid #eaf0f2;padding:14px 17px;font-size:11px;color:#8697a5;line-height:1.6}
+.section-title{display:flex;align-items:center;justify-content:space-between;padding:22px;border-bottom:1px solid #e8edf0}.section-title span{font-size:11px;color:#93a4af}.data-table{width:100%;min-width:750px;font-size:12px}.data-table td,.data-table th{text-align:left;padding:13px 17px;border-bottom:1px solid #e9eef2}.data-table th{background:#f7f9fa;font-size:11px;color:#758895}.maintenance-form{display:flex;gap:13px;align-items:end;padding:22px;flex-wrap:wrap}.maintenance-form label{display:flex;flex-direction:column;gap:8px;font-size:11px;color:#748999}.maintenance-form input,.maintenance-form select{padding:11px;border:1px solid #dbe4ea;border-radius:8px;min-width:180px}.item-list{padding:0 21px 20px}.list-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 0;border-bottom:1px solid #edf0f3;font-size:12px}.list-item button{border:0;border-radius:7px;background:#feecec;color:#a7565d;padding:8px 10px}.list-item small{color:#91a2ac}.empty{padding:28px;color:#95a6b2;font-size:12px}footer{font-size:10px;color:#95a5b3;margin-top:22px;line-height:1.6}.toast{position:fixed;bottom:18px;right:18px;background:#1d3541;color:white;padding:12px 16px;border-radius:10px;box-shadow:0 8px 30px #21384742;font-size:12px;opacity:0;transform:translateY(10px);transition:all .2s;pointer-events:none}.toast.show{opacity:1;transform:translateY(0)}
+@media(max-width:1000px){.sidebar{width:175px}.main{padding:20px}.stats{gap:8px}.stat{padding:13px}}@media(max-width:700px){.topbar{height:62px;padding:0 12px;gap:8px}.logo small,.topbar .long{display:none}.logo b{font-size:19px}.demo{font-size:8px;padding:7px}.sidebar{width:57px;padding:15px 6px}.sidebar-heading,.sidebar .nav b,.sidebar-note{display:none}.sidebar .nav{justify-content:center;padding:13px 5px}.sidebar .nav span{font-size:21px}main{padding:15px 8px}.head{align-items:flex-start;flex-direction:column}.head h1{font-size:23px}.month-controls{width:100%;justify-content:space-between}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.toolbar{padding:10px}.filters,.actions{width:100%}.actions button{flex:1}.calendar .machine{display:none}.calendar .id{min-width:61px;width:61px}.calendar .name{left:61px;min-width:113px;width:113px}.legend{gap:9px}.legend span{font-size:9px}}
+
+
+/* Outages and reassignment demo */
+.dot.breakdown{background:#ffc7be;border-color:#d48072}.dot.delivered{background:#ddf4e5;border-color:#73b89a}
+.calendar .day.breakdown{background:#ffe0d8;color:#a14435;font-size:15px}
+.calendar .day.delivered{background:#dff4e7;color:#24774f}
+.calendar .day .delivered-mark{font-size:10px;position:absolute;right:1px;top:0;color:#26805c}
+.calendar .day .transfer-mark{font-size:10px;position:absolute;left:1px;top:0;color:#377eb1}
+.operational{padding:20px}.operational h3{font-size:14px;margin:24px 0 9px}
+.ops-form{display:flex;gap:15px;align-items:end;flex-wrap:wrap;padding:15px;background:#f8fafb;border:1px solid #e4eaef;border-radius:12px}
+.ops-form label{display:flex;flex-direction:column;gap:8px;font-size:11px;color:#607589}
+.ops-form input[type="date"],.ops-form select{min-height:40px;padding:9px;border:1px solid #dce6ed;border-radius:9px;background:white;color:#334957;min-width:170px}
+.ops-form label.check-line{flex-direction:row;align-items:center;min-height:40px}
+.ops-form .ops-wide{width:100%}
+.ops-form button,.preview-actions button{padding:11px 15px;border:1px solid #dce6ed;border-radius:8px;background:white;font-size:12px;cursor:pointer}
+.ops-form button.primary,.preview-actions button.primary{background:#347c99;border-color:#347c99;color:white}
+.candidate-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:11px}
+.candidate{display:flex!important;flex-direction:row!important;align-items:center;gap:8px!important;background:white;border:1px solid #dce6ed;border-radius:9px;padding:10px!important;color:#344b5c!important}
+.candidate small{color:#849aa8}
+.muted{color:#8799a6;font-size:12px;line-height:1.6}.muted p,p.muted{margin:6px 0}
+.preview{margin-top:16px;border:1px solid #bbd6e4;border-radius:12px;padding:16px;background:#f5fafc;font-size:12px;line-height:1.6}
+.preview .data-table{min-width:600px}
+.preview-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:15px}
+.safety-note{font-size:12px;line-height:1.65;padding:12px 15px;background:#fff7e9;color:#815b24;border-left:3px solid #dba75d;border-radius:7px}
+.operational .item-list{padding:0}.operational .list-item{flex-wrap:wrap}
+.operational .list-item small{display:inline}
+@media(max-width:700px){.ops-form{padding:12px}.ops-form label{width:100%}.ops-form input[type="date"],.ops-form select{width:100%}.operational{padding:12px}.ops-form .check-line{width:100%}}
+
+.list-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.list-actions input[type=date]{padding:8px;border:1px solid #dce6ed;border-radius:8px;color:#405569;max-width:160px}.list-actions button{font-size:11px}
+
+
+/* Patient and treatment course editor — v0.3 */
+.section-title .patient-new,.patient-courses-title button,.patient-header-actions button,.course-actions button,
+.patient-form-actions button{cursor:pointer;border-radius:9px;border:1px solid #dce5eb;background:#fff;color:#486474;padding:10px 13px;font-size:12px;font-weight:700}
+.section-title button.primary,.patient-form-actions .primary,.patient-courses-title button{background:#347c99;color:#fff;border-color:#347c99}
+.patient-warning{margin:0;padding:10px 19px;background:#fff8ee;color:#86682e;font-size:11px;line-height:1.5;border-bottom:1px solid #f0e6cf}
+.patient-layout{display:grid;grid-template-columns:minmax(215px,270px) minmax(0,1fr);gap:0;min-height:450px}
+.patient-directory{border-right:1px solid #e6ecf0;background:#fafcfd;padding:20px 14px}
+.patient-directory label{font-size:11px;color:#6c8293;font-weight:700}
+.patient-directory input{margin:8px 0 15px;width:100%;padding:11px;border:1px solid #dce5eb;border-radius:9px;font-size:12px;background:white;color:#2d4354}
+.patient-list{display:flex;flex-direction:column;gap:5px;max-height:590px;overflow:auto}
+.patient-pick{display:block;width:100%;border:1px solid transparent;border-radius:9px;padding:12px;text-align:left;background:transparent;color:#345064;cursor:pointer}
+.patient-pick:hover{background:#f0f5f8}.patient-pick.active{background:#e5f3f9;border-color:#c9e1ec}
+.patient-pick b{display:block;font-size:12px;white-space:normal;overflow-wrap:anywhere}
+.patient-pick small{display:block;margin-top:5px;color:#8498a5;font-size:10px}
+.patient-main{padding:23px;min-width:0}
+.patient-empty{padding:18px;color:#788c9b;font-size:12px;border:1px dashed #e0e8ee;border-radius:11px}
+.patient-empty h3{font-size:18px;color:#304b5e;margin-top:0}
+.patient-header{display:flex;align-items:start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.patient-header h3{margin:0;font-size:21px;color:#223b4d}
+.patient-header p{margin:7px 0 0;color:#8a9ca9;font-size:12px}
+.patient-header-actions{display:flex;gap:8px;flex-wrap:wrap}
+.patient-header-actions button[data-p-action="archive"]{color:#9e545c}
+.patient-info{display:grid;grid-template-columns:1fr 1fr;gap:11px 18px;padding:16px 0 20px;margin-top:12px;border-bottom:1px solid #e9eef1;font-size:12px;color:#536d80}
+.patient-info .full{grid-column:1/-1;white-space:pre-wrap;overflow-wrap:anywhere}
+.patient-courses-title{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:24px 0 13px}
+.patient-courses-title h3{font-size:15px;margin:0}
+.course-card{border:1px solid #e2e9ee;border-radius:12px;margin-bottom:12px;padding:14px 16px}
+.course-heading{display:flex;align-items:center;flex-wrap:wrap;gap:9px}
+.course-heading>div{flex:1;min-width:130px}
+.course-heading b{font-size:13px}.course-heading small{display:block;font-size:9px;color:#91a2ad;margin-top:4px}
+.course-type{border-radius:6px;padding:5px 8px;background:#eaf3f9;color:#327299;font-size:11px;font-weight:700}
+.course-status{border-radius:6px;padding:5px 8px;background:#f0f3f5;color:#708491;font-size:10px}
+.course-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:15px 0;color:#5c7280;font-size:11px;overflow-wrap:anywhere}
+.course-facts b{color:#374f5d}
+.course-hint{font-size:11px;color:#8296a4;line-height:1.4;margin:8px 0}
+.course-actions{display:flex;gap:8px;border-top:1px solid #eef1f4;padding-top:12px;margin-top:12px}
+.course-actions button{padding:7px 10px;font-size:11px}
+.course-actions button[data-c-action="archive"]{color:#9e5555}
+.patient-courses-title button:disabled{opacity:.4;cursor:not-allowed}
+#patient-editor{border-top:1px solid #e2ebf0;margin-top:20px;padding-top:20px}
+#patient-editor>h3{margin:0 0 16px;font-size:16px}
+.patient-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;background:#f8fafb;border:1px solid #e2eaf0;padding:17px;border-radius:12px}
+.patient-form label{display:flex;flex-direction:column;gap:7px;font-size:11px;font-weight:650;color:#566d7c;min-width:0}
+.patient-form label.wide,.patient-form .wide{grid-column:1/-1}
+.patient-form input,.patient-form select,.patient-form textarea{border:1px solid #dce6ec;border-radius:8px;padding:9px 11px;background:white;color:#293f4f;font:inherit;font-size:12px;min-width:0;width:100%}
+.patient-form input[type="checkbox"]{width:auto}
+.patient-form label.patient-tt{display:flex;flex-direction:row;align-items:center;align-self:end;padding-bottom:13px}
+.patient-form-actions{display:flex;gap:8px;flex-wrap:wrap;grid-column:1/-1}
+.patient-hlt-note{color:#87642a;background:#fff8ed;border-radius:7px;padding:10px;line-height:1.5;font-size:11px}
+.course-preview{font-size:12px;color:#465d6f}
+.patient-open{display:inline-block;border:0;padding:3px 0;background:transparent;color:inherit;font-size:11px;font-weight:800;cursor:pointer;text-align:left;white-space:normal}
+.patient-open:hover{text-decoration:underline;color:#257eaf}
+.patient-open:focus-visible{outline:2px solid #298cb4;border-radius:4px}
+.calendar .name .type-tag{display:inline-block;font-size:9px;padding:2px 4px;border-radius:4px;background:#eaf3fb;color:#276a97;margin-left:3px}
+@media(max-width:950px){.patient-layout{grid-template-columns:220px minmax(0,1fr)}.course-facts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){.patient-layout{display:block}.patient-directory{border-right:0;border-bottom:1px solid #e6ecf0;padding:12px}.patient-list{max-height:160px}.patient-main{padding:13px}.patient-form{grid-template-columns:1fr;padding:12px}.patient-form label.wide,.patient-form .wide{grid-column:1}.course-facts{grid-template-columns:repeat(2,minmax(0,1fr))}.patient-info{grid-template-columns:1fr}.patient-courses-title{flex-wrap:wrap}}
+
+
+/* Referral issuance: selected cells directly, otherwise a chosen week. */
+.clear-selection{border:1px solid #d8e4eb;border-radius:8px;padding:7px 10px;background:#fff;color:#52718a;font-size:11px;cursor:pointer}
+.clear-selection:hover{background:#ecf5fa}
+.issue-dialog{width:min(650px,calc(100vw - 24px));max-width:none;max-height:min(85vh,800px);overflow:auto;border:1px solid #d9e4e9;border-radius:16px;padding:20px;background:#fff;color:#203447;box-shadow:0 20px 70px #0e263c44;font-size:12px}
+.issue-dialog::backdrop{background:rgba(16,35,49,.46)}
+.issue-dialog-header{display:flex;justify-content:space-between;align-items:center;gap:15px}
+.issue-dialog h2{font-size:18px;color:#203b4c;margin:0}
+.issue-close{border:0;background:#f0f5f7;border-radius:9px;width:32px;height:32px;font-size:23px;line-height:1;color:#557186;cursor:pointer}
+.issue-dialog-hint{line-height:1.5;color:#718b9b;margin:12px 0 20px}
+.issue-week-controls{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.issue-week-controls label{display:flex;flex-direction:column;gap:7px;color:#637d8c;font-weight:650;font-size:11px}
+.issue-week-controls select,.issue-week-controls input{height:40px;width:100%;min-width:0;border:1px solid #dae4eb;background:#fff;border-radius:9px;padding:9px;color:#344c5e;font-size:12px}
+.issue-week-preview{margin:17px 0;padding:13px 14px;border-radius:10px;background:#f6f9fa;border:1px solid #e7edf1;line-height:1.5}
+.issue-week-preview .issue-period{margin:0 0 9px;color:#24556e}
+.issue-week-preview .data-table{min-width:430px}
+.issue-week-preview .data-table th,.issue-week-preview .data-table td{padding:9px 11px}
+.issue-dialog-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:10px}
+.issue-dialog-actions button{border:1px solid #dce6ed;border-radius:9px;background:#fff;color:#536d7e;padding:10px 14px;font-size:12px;font-weight:700;cursor:pointer}
+.issue-dialog-actions button.primary{background:#347c99;color:#fff;border-color:#347c99}
+.issue-dialog-actions button:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:700px){.issue-dialog{padding:14px}.issue-week-controls{grid-template-columns:1fr}.issue-dialog-actions button{flex:1}}
+
+
+/* Patient data form: ELN choice colored like the original worksheet. */
+.patient-form select.eln-select{font-weight:750;transition:background-color .12s,color .12s}
+.patient-form select.eln-select.eln-yes,.eln-badge.eln-yes{background:#fce3e3;color:#a43c43;border-color:#eab5b5}
+.patient-form select.eln-select.eln-no,.eln-badge.eln-no{background:#def3e6;color:#26764c;border-color:#a9d9bb}
+.eln-badge{display:inline-flex;align-items:center;border:1px solid transparent;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:800;line-height:1.2;vertical-align:middle}
+.patient-form input[name="phone"]{font-variant-numeric:tabular-nums;letter-spacing:.02em}
+
+
+/* ICD-10 category C search / subcode editor */
+.icd-field{grid-column:1/-1;border:1px solid #dce7ed;border-radius:11px;background:#fff;padding:13px;min-width:0}
+.icd-field>label{display:block;font-size:11px;font-weight:750;color:#526e7c;margin-bottom:9px}
+.icd-field>input[type=search]{width:100%;border:1px solid #d9e4e9;border-radius:9px;padding:11px;background:white;color:#2b4657;font-size:13px}
+.icd-picker{display:grid;grid-template-columns:minmax(180px,1fr) minmax(180px,1fr);gap:12px;margin-top:12px}
+.icd-list{border:1px solid #e0e9ed;border-radius:9px;max-height:205px;overflow:auto;overscroll-behavior:contain;background:#fbfdfe}
+.icd-list-head{font-size:10px;font-weight:750;color:#59778a;background:#eff6f9;position:sticky;top:0;padding:9px}
+.icd-group{cursor:pointer;display:flex;align-items:center;gap:9px;width:100%;padding:10px;border:0;border-bottom:1px solid #eef2f4;text-align:left;color:#3c5260;background:transparent;font-size:11px}
+.icd-group strong{flex:none;color:#2c6889;font-size:12px}
+.icd-group span{flex:1;line-height:1.4}
+.icd-group small{font-size:13px;color:#bb883b}
+.icd-group.active{background:#dceef5}
+.icd-group:hover{background:#ebf5f9}
+.icd-subpanel{border:1px solid #e0e9ed;border-radius:9px;min-width:0;padding:10px;background:#fbfdfe}
+.icd-subpanel label,.icd-subpanel .icd-sub-title{font-size:11px;color:#4b6e82;font-weight:750;margin:0 0 10px;display:block}
+.icd-subpanel select{max-width:100%;width:100%;padding:9px;border:1px solid #d8e4e9;border-radius:8px;background:#fff;color:#344d5c;font-size:11px;white-space:normal}
+.icd-subpanel small{display:block;font-size:10px;color:#8b9fac;margin-top:9px}
+.icd-current{margin-top:10px;padding:8px 10px;background:#eff6f9;color:#356c88;border-radius:8px;font-size:11px;line-height:1.5;min-height:34px}
+#ctv-quick{margin-bottom:8px}
+@media(max-width:700px){.icd-field{padding:10px}.icd-picker{grid-template-columns:1fr}.icd-list{max-height:170px}}
+
+
+/* CTV filter and grounded fraction/ROD/SOD suggestion. */
+.ctv-dose-suggestion{grid-column:1/-1;background:#f4f8fa;border:1px solid #e0e9ef;border-radius:9px;padding:12px;color:#405d6f;line-height:1.55;font-size:12px}
+.ctv-dose-suggestion .ctv-suggest-details{display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:space-between}
+.ctv-suggest-details b{font-size:12px;color:#295a73}
+.ctv-suggest-details span:not(.ctv-applied){font-variant-numeric:tabular-nums}
+.ctv-suggest-details small{width:100%;font-size:10px;color:#8296a5}
+.ctv-dose-suggestion .ctv-caution{color:#ac6f2b;font-size:11px;line-height:1.5;margin:0}
+.ctv-suggest-details button{padding:8px 10px;color:#fff;background:#347c99;border-radius:8px;border:1px solid #347c99;font-size:11px;font-weight:700;cursor:pointer}
+.ctv-applied{color:#2c7657;font-size:11px;font-weight:650}
+.patient-form #ctv-quick:disabled{background:#f2f5f6;color:#8b9da7;cursor:not-allowed}
+
+
+/* Structured target doses: one slash-separated summary, independent zones underneath. */
+.course-zone-details{display:flex;flex-direction:column;gap:5px;padding:8px 10px;background:#f4f8fa;border:1px solid #e4edf1;border-radius:8px;color:#476e7e;font-size:10px;margin-bottom:7px;line-height:1.5}
+.ctv-zones{width:100%;display:flex;flex-direction:column;gap:6px;padding:8px;border:1px solid #deeaef;border-radius:8px;background:#fff}
+.ctv-zone-row{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;font-size:11px}
+.ctv-zone-row b{font-size:11px;color:#405b70}
+.ctv-zone-row span{font-variant-numeric:tabular-nums;text-align:right}
+#ctv-boost-wrap{display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:10px;background:#eef5fa;border-radius:9px;padding:12px;color:#2f6581}
+#ctv-boost-wrap.hidden{display:none}
+#ctv-boost-wrap input[type=checkbox]{width:19px;height:19px;accent-color:#347c99;flex:none}
+.patient-form input[name=dose],.patient-form input[name=sod]{font-variant-numeric:tabular-nums}
+@media(max-width:700px){.ctv-zone-row{flex-direction:column;gap:3px}.ctv-zone-row span{text-align:left}}
+
+
+/* Self-service local CTV catalog editor */
+.catalog-controls{display:grid;grid-template-columns:200px minmax(170px,1fr) auto;gap:12px;align-items:end;padding:15px 20px;border-bottom:1px solid #e5ecef}
+.catalog-controls label{display:flex;flex-direction:column;gap:6px;font-size:11px;font-weight:750;color:#5b7482}
+.catalog-controls select,.catalog-controls input[type=search]{width:100%;height:38px;padding:8px 10px;border:1px solid #d8e5eb;border-radius:8px;color:#385366;background:#fff;font-size:12px}
+.catalog-controls .catalog-show-hidden{display:flex;flex-direction:row;align-items:center;gap:6px;white-space:nowrap;height:38px;font-size:11px}
+.catalog-layout{display:grid;grid-template-columns:minmax(270px,.9fr) minmax(340px,1.1fr);gap:16px;padding:18px;align-items:start}
+.catalog-list{display:flex;flex-direction:column;gap:11px;max-height:740px;overflow:auto;min-width:0}
+.catalog-item{border:1px solid #e1eaed;border-radius:11px;padding:14px;background:#fff}
+.catalog-item.catalog-muted{opacity:.72;background:#f4f5f6}
+.catalog-item-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap}
+.catalog-item-top>div{flex:1;min-width:130px}
+.catalog-item-top b{color:#314e5f;font-size:12px}
+.catalog-item-top span:not(.catalog-code){font-size:11px;font-weight:700;color:#608192}
+.catalog-code{display:inline-block;font-size:11px;padding:4px 6px;border-radius:6px;color:#237293;background:#ecf6fa;font-weight:750}
+.catalog-item-top small{display:block;margin-top:5px;font-size:10px;color:#91a3af}
+.catalog-item p{font-size:11px;color:#5d7380;line-height:1.5;margin:10px 0}
+.catalog-item .catalog-boost-info{color:#45718a}
+.catalog-actions,.catalog-form-actions{display:flex;gap:7px;flex-wrap:wrap}
+.catalog-actions button,.catalog-form-actions button,.catalog-zones-heading button{border:1px solid #d5e2e8;color:#3a6984;background:#fff;padding:7px 10px;border-radius:7px;font-size:11px;font-weight:650;cursor:pointer}
+.catalog-actions button:hover{background:#eff6f9}
+.catalog-editor{border:1px solid #dfe9ee;border-radius:12px;padding:16px;background:#f9fbfc}
+.catalog-editor h3{font-size:16px;margin:0 0 8px;color:#2d495c}
+.catalog-editor .muted{font-size:11px;line-height:1.5}
+.catalog-form{display:flex;flex-direction:column;gap:12px;margin-top:14px}
+.catalog-form label{display:flex;flex-direction:column;gap:6px;min-width:0;font-size:11px;font-weight:700;color:#526e7d}
+.catalog-form input,.catalog-form select{width:100%;min-width:0;border:1px solid #dce5ea;border-radius:8px;background:white;color:#334c5c;padding:9px 10px;font-size:12px}
+.catalog-zones-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:5px;font-size:12px}
+.catalog-zone{display:grid;grid-template-columns:minmax(100px,1.5fr) minmax(75px,1fr) minmax(75px,1fr) 28px;gap:8px;align-items:end;border-bottom:1px solid #e4edf1;padding:10px 0}
+.catalog-zone>button{height:34px;border:1px solid #e1d8d8;border-radius:7px;background:#fff;color:#a55f5f;font-size:18px;cursor:pointer}
+.catalog-zone>button:disabled{opacity:.3;cursor:not-allowed}
+.catalog-boost-box{padding:12px;background:#f0f6fa;border-radius:9px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.catalog-boost-box>b,.catalog-boost-box>p{grid-column:1/-1;margin:0}
+.catalog-boost-box>b{font-size:12px;color:#426c83}
+.catalog-form-actions button.primary{background:#347c99;border-color:#347c99;color:white}
+.catalog-preview{margin-top:15px;border-top:1px solid #d9e6ed;padding-top:14px;font-size:11px;line-height:1.5;color:#425f70}
+.catalog-preview h3{margin:0 0 9px}
+.catalog-preview p{margin:8px 0}
+.catalog-review-zones{padding:8px 11px;border-radius:7px;background:#fff;border:1px solid #e6ecf0}
+.catalog-review-zones p{font-variant-numeric:tabular-nums}
+.catalog-warning{border-left:3px solid #cb904a;background:#fff6e9;padding:9px;font-size:11px;color:#8a672d}
+.catalog-blank{padding:20px;color:#78909c;font-size:12px;border:1px dashed #dce5e9;border-radius:10px}
+@media(max-width:900px){.catalog-layout{grid-template-columns:1fr}.catalog-list{max-height:400px}.catalog-controls{grid-template-columns:1fr 1fr}.catalog-controls .catalog-show-hidden{grid-column:1/-1}}
+@media(max-width:550px){.catalog-layout{padding:10px}.catalog-controls{grid-template-columns:1fr;padding:12px}.catalog-controls .catalog-show-hidden{grid-column:1}.catalog-zone{grid-template-columns:1fr 1fr 28px}.catalog-zone label:first-child{grid-column:1/-1}.catalog-zone>button{grid-column:3;grid-row:2}.catalog-editor{padding:12px}}
+
+
+/* Concurrent chemoradiotherapy administrative schedules: preview, labs and calendar badges */
+.hlt-fields{background:#f1f7fa;border:1px solid #d9e8ee;border-radius:11px;padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:12px;min-width:0}
+.hlt-fields h4{grid-column:1/-1;margin:0;font-size:13px;color:#37627a}
+.hlt-fields label{min-width:0}
+.hlt-fields .hlt-auto-note,.hlt-fields .hlt-reanchor,.hlt-fields p.wide{grid-column:1/-1}
+.hlt-auto-note{padding:9px 11px;background:#fff;border-radius:8px;color:#4c7285;font-size:11px;line-height:1.5}
+.hlt-auto-note p{margin:0}
+.hlt-fields .hlt-reanchor{display:flex;flex-direction:row;align-items:center;gap:10px;padding:8px 0;line-height:1.45}
+.hlt-fields .hlt-reanchor input[type=checkbox]{width:auto;flex:none}
+.hlt-fields input[type=number],.hlt-fields input[type=date]{background:#fff}
+.hlt-plan{margin:12px 0;border:1px solid #dae9ef;border-radius:9px;background:#f6fafc;font-size:11px;color:#3b6277}
+.hlt-plan summary{cursor:pointer;padding:10px 12px;font-weight:750;list-style-position:inside}
+.hlt-plan-grid{max-height:200px;overflow:auto;padding:8px 12px;border-top:1px solid #e1edf1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.hlt-plan-item{display:flex;flex-direction:column;gap:4px;background:#fff;padding:8px 10px;border-radius:7px}
+.hlt-plan-item span{font-size:10px;color:#677f8f}
+.hlt-preview{margin-top:12px;padding:10px 12px;background:#eff8fa;border:1px solid #dbe9ed;border-radius:9px;font-size:11px;max-height:240px;overflow:auto}
+.hlt-preview>p{margin:7px 0}
+.hlt-alert{border-left:3px solid #ce8b39;background:#fff8ea;padding:8px 12px;color:#95672b;margin:9px 0;font-size:11px}
+.hlt-alert p{margin:7px 0}
+.calendar .day.chemo-day{box-shadow:inset 0 -2px 0 #5c8cb0}
+.calendar .day .chemo-mark{position:absolute;left:2px;top:2px;line-height:1;border-radius:3px;padding:2px 3px;font-size:8px;font-weight:800;letter-spacing:-.025em;color:#266789;background:#e3f1fa;pointer-events:none}
+.calendar .day.issued .chemo-mark{background:#f9e9ef;color:#914864}
+@media(max-width:700px){.hlt-fields{grid-template-columns:1fr;padding:11px}.hlt-fields h4,.hlt-fields .hlt-auto-note,.hlt-fields .hlt-reanchor,.hlt-fields p.wide{grid-column:1}.hlt-plan-grid{grid-template-columns:1fr}}
+
+/* Dedicated planned-chemotherapy marker in the calendar legend. */
+.legend .dot.chemo{background:#5c8cb0;border-color:#5c8cb0}
+
+
+/* 0.7: operator-defined holidays and per-course final-fraction planning before maintenance */
+.calendar th.holiday-head{background:#d9c2de;color:#76547c}
+.calendar th.holiday-head:not(.working-exception) small{color:#76547c}
+.calendar th.holiday-head.working-exception{background:#e3f5eb;color:#307450}
+.calendar th .holiday-marker{font-size:9px;color:#76547c;margin-top:1px}
+.calendar th.working-exception .holiday-marker{color:#23825c}
+.calendar tbody td.day.holiday-day.off:not(.session):not(.final):not(.skip):not(.maintenance):not(.breakdown):not(.lab):not(.issued):not(.chemo-day):not(.delivered):not(.maintenance-final){background:#f0e5f2;color:#76547c}
+.calendar .day.holiday-day.session{background:#f7fbf9}
+.calendar .day.maintenance-final{background:#d7efe1;color:#2b7557;position:relative}
+.calendar .day .maintfinal-mark{position:absolute;left:2px;top:2px;background:#dbeaf1;color:#306c83;border-radius:3px;padding:2px 3px;font-size:7px;line-height:1;pointer-events:none;font-weight:800}
+.legend .dot.workholiday{background:#ffd9d6}
+.legend .dot.maintfinal{background:#d7efe1}
+.workday-form{padding:18px 20px;border-bottom:1px solid #e5ecef;display:grid;grid-template-columns:170px minmax(150px,1fr) 180px auto auto;gap:12px;align-items:end}
+.workday-form>label{display:flex;flex-direction:column;gap:7px;font-size:11px;font-weight:700;color:#526c7f}
+.workday-form input:not([type=checkbox]),.workday-form select{width:100%;min-width:0;border:1px solid #d7e2e9;border-radius:8px;padding:9px;font-size:12px;height:38px;background:white;color:#355169}
+.workday-form .workday-check{flex-direction:row;align-items:center;gap:9px;padding-bottom:10px;white-space:nowrap}
+.workday-form .workday-check input{width:17px;height:17px;accent-color:#397f98}
+.workday-form button{min-height:38px}
+.workday-current{margin:12px 20px;color:#668290;font-size:11px}
+.workday-heading{font-size:13px;color:#486b7e;margin:10px 20px}
+.workday-list{padding:8px 20px 18px;display:flex;flex-direction:column;gap:8px}
+.workday-row{padding:12px 14px;border:1px solid #e1e9ee;border-radius:10px;background:#fff;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.workday-row>div:first-child{display:flex;flex-direction:column;gap:5px}
+.workday-row b{font-size:12px;color:#405b6d}
+.workday-row small{font-size:10px;color:#8296a3}
+.workday-actions{display:flex;flex-wrap:wrap;gap:8px}
+.workday-actions button{border:1px solid #d7e3e9;border-radius:7px;padding:7px 10px;background:#fff;color:#496c80;font-size:11px;cursor:pointer}
+.workday-actions button.working{background:#ddf3e6;color:#267b4d;border-color:#b6deca;font-weight:700}
+.workday-actions button.nonworking{background:#fff0ed;color:#ab5a50;border-color:#f0c7c1;font-weight:700}
+.workday-empty{font-size:12px;color:#8698a3;border:1px dashed #d8e2e9;border-radius:10px;padding:16px;line-height:1.6}
+.workday-note{margin:8px 20px 24px;font-size:11px;line-height:1.6}
+.workday-affected{margin:12px 0;padding:10px;background:#f5f9fb;border:1px solid #e2ebef;border-radius:9px;max-height:210px;overflow:auto;font-size:11px;color:#486b7f}
+.workday-affected p{margin:4px 0}
+.maint-explain{margin:12px 18px;font-size:11px;line-height:1.6}
+.maintenance-entry{margin:9px 0;border:1px solid #dfe8ed;background:#fff;border-radius:11px;padding:14px}
+.maintenance-entry-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.maintenance-entry-head b{color:#405c6b;font-size:12px}
+.maintenance-entry-head small{font-size:10px;color:#7d919c}
+.maintenance-entry-head button,.maintenance-choice button{border:1px solid #d6e3e9;border-radius:7px;background:white;color:#426b82;padding:7px 10px;font-size:11px;cursor:pointer;white-space:nowrap}
+.maintenance-entry>.muted{font-size:11px;margin:12px 0}
+.maintenance-exceptions{display:flex;flex-direction:column;gap:7px}
+.maintenance-choice{display:flex;justify-content:space-between;align-items:center;gap:14px;border:1px solid #e7edf0;background:#f9fcfd;padding:10px;border-radius:8px}
+.maintenance-choice span{font-size:11px;color:#586f7b}
+.maintenance-choice b{color:#355f75}
+#maint-preview{margin:14px 18px}
+@media(max-width:1150px){.workday-form{grid-template-columns:1fr 1fr}.workday-form .workday-check{justify-content:flex-start}}
+@media(max-width:650px){.workday-form{grid-template-columns:1fr;padding:12px}.workday-form .workday-check{padding-bottom:0}.workday-list{padding:8px 12px}.workday-current,.workday-heading,.workday-note{margin-left:12px}.maintenance-choice{flex-wrap:wrap}.maintenance-choice button{margin-left:auto}}
+
+
+/* Russian federal production calendar 2026–2027. Custom department exceptions remain first priority. */
+.production-calendar{margin:15px 18px 12px;padding:15px;border:1px solid #dce7ed;border-radius:12px;background:#f7fafc}
+.production-header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:9px}
+.production-header h3{font-size:13px;font-weight:750;margin:0;color:#3e6479}
+.production-header label{display:flex;align-items:center;gap:10px;color:#506c7c;font-size:11px;font-weight:700}
+.production-header select{height:34px;padding:6px 28px 6px 10px;border:1px solid #cfdfe7;border-radius:8px;color:#315b73;background:white;font-size:12px}
+.production-calendar>.muted{font-size:11px;line-height:1.5;margin:0 0 12px}
+.production-list{display:flex;flex-direction:column;gap:7px;max-height:440px;overflow:auto;overscroll-behavior:contain}
+.production-list .workday-row{background:#fff}
+.production-list .production-overridden{border-color:#a9d2c0;background:#f0faf5}
+.production-list .workday-actions button{max-width:225px;white-space:normal;text-align:center;line-height:1.3}
+.production-source{font-size:10px;color:#7b919f;margin:12px 0 0;line-height:1.6}
+.production-source a{color:#367f9b;text-decoration:underline;text-underline-offset:2px}
+@media(max-width:700px){.production-calendar{margin:10px;padding:11px}.production-list{max-height:385px}.production-header h3{font-size:12px}}
+
+
+/* 0.9 — Google-Sheets-style synthetic patient register, separate from the LT calendar. */
+.patients-register{background:#fff;min-width:0}
+.register-toolbar{display:grid;grid-template-columns:minmax(220px,2fr) minmax(165px,1fr) minmax(155px,1fr) auto;align-items:end;gap:10px;padding:14px 18px;border-bottom:1px solid #e1eaf0;background:#f9fcfd}
+.register-toolbar label{display:flex;flex-direction:column;gap:6px;font-size:11px;font-weight:700;color:#5d7889;min-width:0}
+.register-toolbar input,.register-toolbar select{width:100%;min-width:0;height:38px;border:1px solid #d7e4eb;border-radius:8px;padding:7px 10px;background:#fff;color:#2f4c60;font-size:12px}
+.register-count{align-self:center;white-space:nowrap;font-size:11px;font-weight:700;color:#537a90}
+.patient-register-scroll{max-height:min(66vh,750px);overflow:auto;overscroll-behavior:contain;position:relative;scrollbar-gutter:stable;border-bottom:1px solid #e4edf1}
+.patient-register-scroll:focus-visible{outline:2px solid #397f9a;outline-offset:-2px}
+.patient-register-table{border-collapse:separate;border-spacing:0;table-layout:fixed;min-width:calc(1835px + var(--notes-column-width,105px));width:100%;font-size:11px;color:#40596a}
+.patient-register-table th,.patient-register-table td{border-bottom:1px solid #e6edf2;border-right:1px solid #edf1f4;padding:8px 10px;text-align:left;vertical-align:middle;line-height:1.45}
+.patient-register-table th{position:sticky;top:0;z-index:3;background:#eaf1f5;color:#49697b;font-size:10px;white-space:nowrap;font-weight:800;letter-spacing:.008em;box-shadow:0 1px 0 #dbe5eb}
+.patient-register-table td{background:#fff;overflow:hidden;text-overflow:ellipsis;max-height:56px}
+.patient-register-table tbody tr:nth-child(even) td{background:#fafcfd}
+.patient-register-table tbody tr:hover td{background:#f0f8fc}
+.patient-register-table tbody tr.reg-selected td{background:#e9f4fa}
+.patient-register-table th.reg-id,.patient-register-table td.reg-id{position:sticky;left:0;width:76px;min-width:76px;z-index:2;white-space:nowrap;font-variant-numeric:tabular-nums}
+.patient-register-table th.reg-name,.patient-register-table td.reg-name{position:sticky;left:76px;width:188px;min-width:188px;z-index:2;box-shadow:2px 0 5px #142f3e0b}
+.patient-register-table th.reg-id,.patient-register-table th.reg-name{z-index:5;background:#e2eef4}
+.patient-register-table .reg-course{width:110px}
+.patient-register-table .reg-dx{width:75px}
+.patient-register-table .reg-ctv{width:132px;white-space:normal}
+.patient-register-table .reg-machine{width:112px}
+.patient-register-table .reg-eln{width:70px}
+.patient-register-table .reg-phone{width:141px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.patient-register-table .reg-notes{width:var(--notes-column-width,105px);min-width:var(--notes-column-width,105px);max-width:var(--notes-column-width,105px);white-space:nowrap}
+.patient-register-table .reg-type{width:73px;text-align:center}
+.patient-register-table .reg-start{width:103px;white-space:nowrap}
+.patient-register-table .reg-status-cell{width:135px}
+.patient-register-table .reg-number{width:80px;text-align:center}
+.patient-register-table .reg-dose{width:106px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.patient-register-table .reg-chemo,.patient-register-table .reg-end{width:105px;white-space:nowrap}
+.patient-register-table .reg-actions-cell{width:146px}
+.reg-person-open{display:block;border:0;background:transparent;text-align:left;font-size:11px;font-weight:800;color:#2c637e;white-space:normal;overflow-wrap:anywhere;cursor:pointer;padding:0}
+.reg-person-open:hover{text-decoration:underline}
+.reg-person-open:focus-visible{outline:2px solid #327c9a;outline-offset:3px;border-radius:3px}
+.reg-empty{color:#a2b3bf}
+.reg-boost{display:block;font-size:9px;font-weight:750;color:#567e9d;margin-top:3px}
+.reg-status{display:inline-block;border-radius:6px;padding:4px 7px;font-size:10px;font-weight:750;white-space:nowrap;background:#f1f4f6;color:#667d8b}
+.reg-status-active{background:#e3f3e9;color:#367454}
+.reg-status-planned{background:#fff3db;color:#996b30}
+.reg-status-done{background:#e7f0fb;color:#3b718f}
+.reg-status-archived{background:#eeeef0;color:#767c82}
+.reg-status-none{background:#f3f3f3;color:#8e99a1}
+.reg-actions{display:flex;align-items:center;gap:4px}
+.reg-actions button{cursor:pointer;border:1px solid #d8e5ec;border-radius:6px;padding:5px 7px;background:#fff;font-size:10px;font-weight:700;color:#3e6c83;white-space:nowrap}
+.reg-actions button:hover{background:#e9f3f8}
+.reg-actions button:disabled{opacity:.4;cursor:not-allowed}
+.register-hint{padding:9px 17px;margin:0;background:#f9fcfd;color:#8ba0ad;font-size:10px;line-height:1.55}
+.reg-no-results{padding:35px 20px;font-size:12px;color:#7c94a3}
+.patient-register-detail{padding:17px 20px 20px;border-top:1px solid #e6edf0}
+.patient-register-detail #patient-detail:not(.hidden){margin-bottom:12px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;clip-path:inset(50%)}
+@media(max-width:1100px){.register-toolbar{grid-template-columns:minmax(180px,2fr) minmax(145px,1fr)}.register-count{justify-self:start}}
+@media(max-width:650px){.register-toolbar{grid-template-columns:1fr 1fr;padding:12px;gap:9px}.register-toolbar label:first-child{grid-column:1/-1}.register-count{grid-column:1/-1;font-size:10px}.patient-register-scroll{max-height:60vh}.patient-register-table th.reg-id,.patient-register-table td.reg-id{width:61px;min-width:61px;padding:7px 6px}.patient-register-table th.reg-name,.patient-register-table td.reg-name{left:61px;width:128px;min-width:128px;padding:7px 6px}.patient-register-detail{padding:12px}.register-hint{padding:10px 12px}}
+
+
+/* Automatic (calendar-only) inference for prior fractions; never clinical proof. */
+.calendar .day.elapsed.session:not(.issued):not(.lab){background:#edf5fa;color:#41748d}
+.calendar .day.elapsed.final:not(.issued):not(.lab){background:#d6efe3;color:#287953}
+.calendar .day .elapsed-mark{position:absolute;right:2px;top:0;font-size:10px;font-weight:900;color:#5187a0;pointer-events:none;opacity:.85}
+.calendar .day.final .elapsed-mark{color:#22825e}
+.legend .dot.elapsed{background:#edf5fa;border-color:#95bbc9}
+.reg-progress{width:110px;min-width:110px;text-align:center;font-variant-numeric:tabular-nums;font-weight:750;color:#476f82}
+.course-progress-note{font-size:11px;line-height:1.5;padding:10px 12px;background:#f1f8fa;border:1px solid #dfeaf0;color:#3b667a;border-radius:8px;margin-top:12px}
+.course-progress-note span{color:#758d9a}
+.course-actions .course-discharge{background:#e6f2ea;border-color:#b8dfca;color:#26784d}
+.discharge-dialog{width:min(590px,calc(100vw - 26px));max-width:none;max-height:85vh;overflow:auto;border:1px solid #d4e3e9;border-radius:15px;padding:20px 22px;background:white;color:#29465a;box-shadow:0 25px 70px #0d243d44}
+.discharge-dialog::backdrop{background:#102d3f80}
+.discharge-dialog h2{font-size:17px;margin:0}
+.discharge-info{padding:13px 0 8px;line-height:1.65;font-size:12px;color:#567487}
+.discharge-info p{margin:6px 0}
+.discharge-info .discharge-patient{font-size:15px;color:#2c5369}
+.discharge-deferred{padding:7px 10px;background:#fff2e3;border-radius:6px;color:#9a6d2d}
+.discharge-confirm-label{display:flex;align-items:flex-start;gap:10px;font-size:12px;line-height:1.45;margin:15px 0;padding:12px;border:1px solid #d5e6e1;border-radius:9px;background:#f2faf6;color:#446b5e;cursor:pointer}
+.discharge-confirm-label input{width:18px;height:18px;flex:none;margin:0;accent-color:#397c5d}
+.discharge-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px}
+.discharge-actions button{padding:10px 13px;border:1px solid #d3e1e8;border-radius:8px;background:#fff;color:#4a6980;font-weight:750;font-size:12px;cursor:pointer}
+.discharge-actions .primary{background:#347c99;color:white;border-color:#347c99}
+.discharge-actions button:disabled{opacity:.4;cursor:not-allowed}
+@media(max-width:650px){.discharge-dialog{padding:14px}.discharge-actions button{flex:1}}
+
+/* CAL-001: a final planned fraction stays green even with other status badges. */
+.calendar .day.session.final{background:#a8e8c3;color:#176b45}
+.calendar .day.session.final.elapsed{background:#90ddb1;color:#155e3d}
+.calendar .day.session.final.issued .lab-dot{width:7px;height:7px;background:#fff;border:2px solid #a52e58}
+
+/* Workdays 1.1 — compact expandable months, one-click department workday toggle. */
+.production-calendar{background:#fff;border:0;padding:4px 20px 12px;margin:12px 0 0}
+.production-header{margin-bottom:12px}
+.production-header h3{font-size:14px;color:#334f62}
+.production-calendar>.muted{font-size:11px;color:#718895;line-height:1.65;margin-bottom:15px}
+.production-list{gap:9px;max-height:none;overflow:visible}
+.holiday-month{border:1px solid #e1e8ed;border-radius:11px;background:#fff;overflow:hidden}
+.holiday-month>summary{display:flex;align-items:center;gap:10px;min-height:54px;list-style:none;padding:12px 15px;cursor:pointer}
+.holiday-month>summary::-webkit-details-marker{display:none}
+.holiday-month>summary:hover{background:#f7fafb}
+.holiday-month[open]>summary{background:#f7fafb;border-bottom:1px solid #e5edf1}
+.holiday-month-name{font-size:13px;font-weight:750;color:#345669;min-width:95px}
+.holiday-month-meta{font-size:11px;color:#8294a0;margin-left:auto;text-align:right}
+.holiday-chevron{font-size:19px;font-weight:600;color:#6c899a;transition:transform .15s ease}
+.holiday-month[open] .holiday-chevron{transform:rotate(180deg)}
+.holiday-month-days{padding:0 14px}
+.holiday-day-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;min-height:54px;border-bottom:1px solid #eff2f5}
+.holiday-day-row:last-child{border-bottom:0}
+.holiday-day-row.is-overridden .holiday-day-info small{color:#2c825e}
+.holiday-day-info{display:flex;flex-direction:column;gap:4px;min-width:0}
+.holiday-day-info b{font-size:11px;color:#425f70;font-weight:700}
+.holiday-day-info small{font-size:10px;color:#8b9ba7}
+.holiday-toggle{flex:none;min-width:123px;min-height:36px;border:1px solid #d9e2e7;background:#f6f8fa;color:#657a86;border-radius:9px;padding:8px 11px;font-size:11px;font-weight:750;white-space:nowrap}
+.holiday-toggle.is-working{background:#e1f3e9;color:#277b55;border-color:#b2dec6}
+.holiday-toggle:hover{filter:brightness(.97)}
+.holiday-toggle:focus-visible,.holiday-month>summary:focus-visible,.workday-advanced>summary:focus-visible{outline:3px solid #8fc2dc;outline-offset:-3px}
+.workday-feedback{margin:7px 20px 16px;padding:10px 12px;border:1px solid #dce7ec;border-radius:9px;color:#4d7184;background:#f7fafc;font-size:11px;line-height:1.6}
+.workday-advanced{margin:10px 20px 20px;border:1px solid #e3eaf0;border-radius:11px;overflow:hidden;background:#fff}
+.workday-advanced>summary{display:flex;align-items:center;flex-wrap:wrap;gap:7px 14px;padding:15px;cursor:pointer;color:#476879;font-size:12px;font-weight:750}
+.workday-advanced>summary small{font-weight:400;color:#8da0ac;font-size:11px}
+.workday-advanced[open]>summary{border-bottom:1px solid #e9eef2;background:#fafcfd}
+.workday-advanced .workday-form{margin:0;border:0;border-radius:0}
+.workday-advanced .workday-list{max-height:320px;overflow:auto}
+@media(max-width:650px){
+ .production-calendar{padding:4px 12px 12px;margin:8px 0 0}
+ .holiday-month>summary{padding:11px;gap:6px}
+ .holiday-month-name{font-size:12px;min-width:75px}
+ .holiday-month-meta{font-size:10px}
+ .holiday-month-days{padding:0 10px}
+ .holiday-day-row{gap:9px}
+ .holiday-day-info b{font-size:10px}
+ .holiday-day-info small{font-size:9px}
+ .holiday-toggle{min-width:108px;min-height:39px;padding:8px;font-size:10px}
+ .workday-feedback{margin:7px 12px 13px}
+ .workday-advanced{margin:10px 12px 16px}
+}
+
+/* Spreadsheet-style direct row dragging. No additional movement buttons. */
+.patient-register-table tbody tr[data-person-id],
+.calendar tbody tr[data-person-id]{user-select:none;-webkit-user-select:none}
+.patient-register-table tbody tr[data-person-id] td.reg-name,
+.calendar tbody tr[data-person-id] td.name{cursor:grab}
+.patient-register-table tbody tr[data-person-id] .reg-person-open,
+.calendar tbody tr[data-person-id] .patient-open{cursor:grab}
+.patient-register-table tbody tr[data-person-id] td.reg-name:active,
+.calendar tbody tr[data-person-id] td.name:active,
+.patient-register-table tbody tr[data-person-id] .reg-person-open:active,
+.calendar tbody tr[data-person-id] .patient-open:active{cursor:grabbing}
+.patient-register-table tbody tr.patient-dragging td,
+.calendar tbody tr.patient-dragging td{opacity:.46}
+.patient-register-table tbody tr.patient-drop-before td,
+.calendar tbody tr.patient-drop-before td{box-shadow:inset 0 3px 0 #159467}
+.patient-register-table tbody tr.patient-drop-after td,
+.calendar tbody tr.patient-drop-after td{box-shadow:inset 0 -3px 0 #159467}
+.patient-register-table tbody tr.patient-drop-before td.reg-id,
+.patient-register-table tbody tr.patient-drop-before td.reg-name,
+.patient-register-table tbody tr.patient-drop-after td.reg-id,
+.patient-register-table tbody tr.patient-drop-after td.reg-name{background:#e7f7f0}
+.patient-drag-ghost{position:fixed;pointer-events:none;z-index:9999;max-width:280px;padding:10px 14px;border:1px solid #7cbaa3;border-radius:9px;background:#fff;color:#275948;box-shadow:0 9px 28px #142d3b33;font-size:12px;font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body.patient-row-is-moving,body.patient-row-is-moving *{cursor:grabbing!important;user-select:none!important;-webkit-user-select:none!important}
+@media(pointer:coarse){
+ .patient-register-table tbody td.reg-name,
+ .calendar tbody td.name{touch-action:none}
+}
+
+
+/* A rectangular selection keeps event and last-fraction colors visible. */
+.calendar tbody td.day{cursor:crosshair}
+body.calendar-range-moving .calendar tbody td.day{cursor:crosshair}
+.calendar tbody td.day.selected{outline:2px solid #2588b0;outline-offset:-2px}
+
+/* Shared light 46px buttons with matching 24px icons for all three calendar actions. */
+.actions button.action-with-icon,
+.actions button.action-with-icon.primary{
+ display:inline-flex;align-items:center;justify-content:center;
+ position:relative;flex:0 0 46px;width:46px;height:46px;
+ min-height:46px;padding:0;border-radius:10px;
+ background:#f7fafc;border:1px solid #d8e4ec;color:#34586d;
+}
+.actions button.action-with-icon:not(:disabled):hover,
+.actions button.action-with-icon.primary:not(:disabled):hover{
+ background:#edf4f8;border-color:#bdd3df;filter:none;
+}
+.actions button.action-with-icon:focus-visible{
+ outline:2px solid #3d91b8;outline-offset:2px;
+}
+.actions button.action-with-icon .action-icon{
+ width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;
+ flex:0 0 24px;line-height:0;
+}
+.actions button.action-with-icon .action-icon svg{width:24px;height:24px;display:block}
+.actions button.action-with-icon:disabled{
+ /* Keep the icon outline identical to the enabled action; only interaction is disabled. */
+ opacity:1;color:#34586d;cursor:not-allowed;
+}
+/* Dynamic accessible tooltip on hover and keyboard focus. Touch buttons keep aria-label,
+   and existing toast feedback explains each completed action. */
+.actions button.action-with-icon::after{
+ content:attr(data-tooltip);position:absolute;top:calc(100% + 8px);right:0;
+ width:max-content;max-width:min(260px,calc(100vw - 28px));
+ background:#26343d;color:#fff;padding:8px 11px;border-radius:8px;
+ font-size:12px;font-weight:500;line-height:1.4;text-align:left;white-space:normal;
+ box-shadow:0 8px 18px #152b3c33;pointer-events:none;
+ visibility:hidden;opacity:0;z-index:12;
+}
+.actions button.action-with-icon:hover::after,
+.actions button.action-with-icon:focus-visible::after{visibility:visible;opacity:1}
+.toolbar{position:relative;z-index:6}
+@media(hover:none){.actions button.action-with-icon:hover:not(:focus-visible)::after{visibility:hidden;opacity:0}}
+@media(max-width:700px){
+ .actions button.action-with-icon{width:46px;height:46px;min-height:46px;flex:0 0 46px}
+}
+
+
+/* An empty trailing table column supplies scrolling room on wide screens.
+   It is not a calendar day and never represents a treatment session. */
+.calendar th.calendar-tail,.calendar td.calendar-tail{
+ min-width:var(--calendar-trailing-width,0px);
+ width:var(--calendar-trailing-width,0px);
+ padding:0;border:0;pointer-events:none;background:transparent;
+}
+
+/* Patient-course context menu and one-screen early discharge. No trash/drop zone. */
+.patient-register-table .reg-menu-button{font-size:18px;min-width:29px;min-height:30px;padding:1px 5px;line-height:1;border-radius:7px}
+.reg-status-early{background:#f7e9e8;color:#944c50}
+.patient-context-menu{position:fixed;z-index:1200;min-width:205px;max-width:min(275px,calc(100vw - 16px));padding:5px;border:1px solid #d5e2e9;border-radius:11px;background:#fff;box-shadow:0 12px 35px #1b37454a}
+.patient-context-menu button{display:block;width:100%;padding:12px;border:0;border-radius:7px;background:transparent;color:#35576a;text-align:left;font:inherit;font-size:12px;font-weight:650;cursor:pointer}
+.patient-context-menu button:hover,.patient-context-menu button:focus-visible{background:#f0f6f9;outline:0}
+.patient-context-menu .patient-context-danger{color:#a54c50}
+.patient-context-menu .patient-context-danger:hover,.patient-context-menu .patient-context-danger:focus-visible{background:#fff0ee}
+.patient-context-divider{height:1px;margin:4px 8px;background:#e1e9ed}
+.patient-early-dialog form{display:grid;gap:12px}
+.patient-early-dialog form>label{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:750;color:#526d7f}
+.patient-early-dialog input,.patient-early-dialog select,.patient-early-dialog textarea{width:100%;max-width:100%;border:1px solid #d5e2e9;border-radius:8px;padding:10px 11px;background:#fff;color:#29465a;font:inherit;font-size:13px}
+.patient-early-dialog .safety-note{margin:0}
+.patient-early-dialog .discharge-actions{margin-top:4px}
+@media(max-width:650px){
+ .patient-register-table .reg-menu-button{min-width:38px;min-height:38px;font-size:22px}
+ .patient-context-menu button{min-height:44px;font-size:13px}
+ .patient-early-dialog form>label{font-size:13px}
+}
+
+/* Keep per-course actions visible beside the sticky patient name, including on iPhone. */
+.reg-person-wrap{display:flex;align-items:center;gap:5px;min-width:0}
+.reg-person-wrap .reg-person-open{flex:1;min-width:0}
+.reg-person-wrap .reg-menu-button{flex:none;align-self:center;color:#527387}
+
+/* Warm clear yellow weekend columns (slightly higher contrast).
+   Nonworking Sat/Sun only: working Saturday exceptions stay ordinary.
+   Holiday badges and all treatment, lab, issue, skip and maintenance colors win. */
+.calendar thead th.weekend-head:not(.holiday-head){
+ background:#f6e5a1;color:#6d581e;
+}
+.calendar thead th.weekend-head:not(.holiday-head) small{color:#776226}
+.calendar tbody td.day.weekend-day.off:not(.holiday-day):not(.session):not(.final):not(.skip):not(.maintenance):not(.breakdown):not(.lab):not(.issued):not(.chemo-day):not(.delivered):not(.maintenance-final){
+ background:#fff0bd;color:#796327;
+}
+
+
+/* A single patient card slides over the unchanged schedule. The full register
+   remains in the same DOM, but appears only after requesting archived records. */
+.filters button.action-with-icon,
+.filters button.action-with-icon.primary{
+ display:inline-flex;align-items:center;justify-content:center;
+ position:relative;flex:0 0 46px;width:46px;height:46px;
+ min-height:46px;padding:0;border-radius:10px;
+ background:#f7fafc;border:1px solid #d8e4ec;color:#34586d;
+}
+.filters button.action-with-icon:not(:disabled):hover,
+.filters button.action-with-icon.primary:not(:disabled):hover{
+ background:#edf4f8;border-color:#bdd3df;filter:none;
+}
+.filters button.action-with-icon:focus-visible{
+ outline:2px solid #3d91b8;outline-offset:2px;
+}
+.filters button.action-with-icon .action-icon{
+ width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;
+ flex:0 0 24px;line-height:0;
+}
+.filters button.action-with-icon .action-icon svg{width:24px;height:24px;display:block}
+.filters button.action-with-icon:disabled{
+ /* Keep the icon outline identical to the enabled action; only interaction is disabled. */
+ opacity:1;color:#34586d;cursor:not-allowed;
+}
+/* Dynamic accessible tooltip on hover and keyboard focus. Touch buttons keep aria-label,
+   and existing toast feedback explains each completed action. */
+.filters button.action-with-icon::after{
+ content:attr(data-tooltip);position:absolute;top:calc(100% + 8px);left:0;
+ width:max-content;max-width:min(260px,calc(100vw - 28px));
+ background:#26343d;color:#fff;padding:8px 11px;border-radius:8px;
+ font-size:12px;font-weight:500;line-height:1.4;text-align:left;white-space:normal;
+ box-shadow:0 8px 18px #152b3c33;pointer-events:none;
+ visibility:hidden;opacity:0;z-index:12;
+}
+.filters button.action-with-icon:hover::after,
+.filters button.action-with-icon:focus-visible::after{visibility:visible;opacity:1}
+
+@media(hover:none){.filters button.action-with-icon:hover:not(:focus-visible)::after{visibility:hidden;opacity:0}}
+@media(max-width:700px){
+ .filters button.action-with-icon{width:46px;height:46px;min-height:46px;flex:0 0 46px}
+}
+
+
+
+.patient-card-drawer{
+ position:fixed;inset:0 0 0 auto;
+ width:min(760px,100vw);max-width:none;height:100dvh;max-height:100dvh;
+ margin:0;padding:0;border:0;border-radius:18px 0 0 18px;
+ background:#fff;color:#203447;box-shadow:-16px 0 50px #172b3850;
+ overflow:hidden;
+}
+.patient-card-drawer::backdrop{background:rgba(18,35,47,.40)}
+.patient-card-top{
+ display:flex;align-items:center;justify-content:space-between;gap:14px;
+ padding:18px 22px;border-bottom:1px solid #e4ebef;background:#f8fafb;
+}
+.patient-card-kicker{font-size:10px;font-weight:800;letter-spacing:1.2px;color:#368c73}
+.patient-card-top h2{margin:4px 0 0;font-size:19px}
+.patient-card-top-actions{display:flex;gap:9px;align-items:center}
+.patient-card-top-actions button{
+ border:1px solid #dbe4eb;border-radius:9px;padding:10px 12px;
+ background:#fff;color:#4b687c;font-size:12px;font-weight:750;cursor:pointer;
+}
+.patient-card-top-actions .patient-card-close{
+ padding:0;width:39px;height:39px;font-size:25px;line-height:1;
+}
+.patient-card-top-actions button:hover{background:#edf4f8}
+.patient-card-scroll{
+ height:calc(100dvh - 78px);overflow-y:auto;overscroll-behavior:contain;
+ padding-bottom:env(safe-area-inset-bottom,0px);
+}
+.patient-card-content .patient-warning{margin:0;border-radius:0}
+.patient-card-content .patient-register-scroll{max-height:40vh}
+.patient-card-content .patient-register-hint{font-size:11px}
+.patient-card-content .patient-main{padding:17px 22px 28px}
+.patient-card-content .patient-register-detail{min-width:0}
+.patient-card-content .section-title{padding:15px 22px}
+.patient-card-content .section-title h2{font-size:15px}
+.patient-card-content .section-title button{font-size:11px}
+.patient-card-content #patient-detail:empty{display:none}
+.patient-card-content .register-toolbar{padding:15px 20px}
+.patient-card-content .patient-register-scroll{scrollbar-gutter:stable}
+.patient-card-drawer button:focus-visible{outline:2px solid #3890b8;outline-offset:2px}
+@media(max-width:700px){
+ .patient-card-drawer{width:100vw;height:100dvh;max-height:100dvh;border-radius:0}
+ .patient-card-top{padding:12px 14px;gap:8px}
+ .patient-card-top h2{font-size:16px}
+ .patient-card-top-actions button{padding:9px;font-size:11px}
+ .patient-card-top-actions .patient-card-close{width:36px;height:36px}
+ .patient-card-content .patient-main{padding:12px 13px 28px}
+ .filters button.action-with-icon{width:46px;height:46px;min-height:46px;flex:0 0 46px}
+}
+
+
+/* Calendar patient contact fields: same source as the patient register.
+   On desktop they stay frozen; on a narrow screen they scroll with the dates. */
+.calendar th.calendar-phone,.calendar td.calendar-phone{
+ width:145px;min-width:145px;max-width:145px;left:315px;
+}
+.calendar th.calendar-notes,.calendar td.calendar-notes{
+ width:var(--notes-column-width,105px);min-width:var(--notes-column-width,105px);max-width:var(--notes-column-width,105px);left:460px;
+}
+.calendar td.calendar-phone,.calendar td.calendar-notes{
+ text-align:left;font-size:10px;font-weight:500;color:#4d6171;
+ overflow:hidden;text-overflow:ellipsis;background:#fff;
+}
+.calendar td.calendar-phone{white-space:nowrap;font-variant-numeric:tabular-nums}
+.calendar th.calendar-notes,.calendar td.calendar-notes{
+ box-shadow:2px 0 5px #1f3d5010;
+}
+.calendar .calendar-note-value{
+ display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;
+ line-clamp:2;overflow:hidden;white-space:normal;
+ overflow-wrap:anywhere;line-height:1.4;
+}
+.calendar .calendar-empty{color:#a2b0b9}
+@media(max-width:1200px){
+ /* Keep enough room for dates, even when phone/notes columns are present. */
+ .calendar td.calendar-phone,.calendar td.calendar-notes{
+  position:static;left:auto;box-shadow:none;
+ }
+ .calendar th.calendar-phone,.calendar th.calendar-notes{
+  position:sticky;top:0;left:auto;z-index:2;box-shadow:none;
+ }
+}
+
+/* Calendar event pictograms: test tube and IV bag take precedence over fraction number.
+   Purely visual; existing selected, issued, completed, and maintenance markers remain. */
+.calendar th[data-date],.calendar td.day{min-width:46px;height:42px}
+.calendar td.day.has-treatment-event{padding:2px 1px}
+.calendar .calendar-treatment-events{display:flex;justify-content:center;align-items:center;gap:1px;width:100%;height:30px;padding-top:3px;pointer-events:none}
+.calendar .calendar-event-icon{display:block;flex:none;width:20px;height:26px}
+.calendar .calendar-event-icon--chemo{width:22px;height:27px}
+.calendar .calendar-treatment-events--both .calendar-event-icon{width:19px;height:24px}
+.calendar td.day.has-treatment-event .calendar-fraction-small{position:absolute;top:3px;right:4px;z-index:1;font-size:10px;font-weight:800;line-height:1;color:#456073;pointer-events:none}
+.calendar td.day.has-treatment-event.final .calendar-fraction-small{color:#176b45}
+.calendar td.day.has-treatment-event.issued .calendar-fraction-small{color:#fff}
+.calendar td.day.has-treatment-event .calendar-event-status-label{position:absolute;bottom:2px;left:2px;right:2px;font-size:9px;line-height:1;color:inherit;pointer-events:none}
+.calendar td.day.has-treatment-event .elapsed-mark,.calendar td.day.has-treatment-event .delivered-mark{top:auto;bottom:2px;right:2px}
+.calendar td.day.has-treatment-event .lab-dot{right:auto;left:3px;bottom:3px}
+.calendar td.day.has-lab-event:not(.issued):not(.final):not(.skip):not(.maintenance):not(.breakdown):not(.delivered){background:#f9e6ef}
+.calendar td.day.has-chemo-event:not(.has-lab-event):not(.issued):not(.final):not(.skip):not(.maintenance):not(.breakdown):not(.delivered){background:#e1f0fa}
+.calendar td.day.has-lab-event.has-chemo-event:not(.issued):not(.final):not(.skip):not(.maintenance):not(.breakdown):not(.delivered){background:#f0e9f8}
+/* Compact 46×42 px date cells are shared by desktop and mobile. */
+
+/* Keep a skipped session graphite even if lab/issued event classes coexist. */
+.calendar tbody td.day.skip{background:#48515c;color:#fff}
+
+/* Maintenance in calendar cells: a white wrench on copper, never a larger day cell. */
+.calendar tbody td.day.maintenance{background:#b66b3e;color:#fff}
+.calendar .calendar-maintenance-symbol{display:flex;align-items:center;justify-content:center;width:100%;height:100%;pointer-events:none}
+.calendar .calendar-maintenance-symbol .calendar-maintenance-wrench{display:block;width:24px;height:24px}
+/* If lab/chemo is also scheduled, retain its original symbol and badge TO with a small wrench. */
+.calendar .calendar-maintenance-corner{position:absolute;top:1px;left:1px;display:flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:3px;background:#b66b3e;color:#fff;z-index:1;pointer-events:none}
+.calendar .calendar-maintenance-corner .calendar-maintenance-wrench{display:block;width:13px;height:13px}
+
+
+/* ELN and foldable phone: keep 46x42 px date cells and earlier clinical colors. */
+.calendar.calendar-phone-collapsed th.calendar-phone,.calendar.calendar-phone-collapsed td.calendar-phone{width:38px;min-width:38px;max-width:38px;padding-left:2px;padding-right:2px;text-align:center}
+.calendar.calendar-phone-collapsed th.calendar-notes,.calendar.calendar-phone-collapsed td.calendar-notes{left:353px}
+.calendar-phone-toggle{display:inline-flex;align-items:center;justify-content:center;gap:5px;border:0;border-radius:5px;background:transparent;color:inherit;font:inherit;font-weight:800;cursor:pointer;padding:5px 2px;white-space:nowrap}
+.calendar-phone-toggle:hover,.calendar-phone-toggle:focus-visible{background:#e0edf3;outline:2px solid #84b6d0;outline-offset:0}
+.calendar-phone-icon{display:none;font-size:14px;font-weight:700;color:#567c90}
+.calendar.calendar-phone-collapsed .calendar-phone-icon{display:inline}
+.calendar.calendar-phone-collapsed .calendar-phone-value{display:none}
+@media(max-width:1200px){
+ .calendar th.calendar-phone,.calendar td.calendar-phone,.calendar th.calendar-notes,.calendar td.calendar-notes{left:auto}
+}
+
+/* Compact notes columns follow the longest visible note (105–300 px).
+   On phones, cap at 205px; long notes remain readable via title/card. */
+@media(max-width:700px){
+ .calendar th.calendar-notes,.calendar td.calendar-notes{
+  width:min(var(--notes-column-width,105px),205px);
+  min-width:min(var(--notes-column-width,105px),205px);
+  max-width:min(var(--notes-column-width,105px),205px);
+ }
+ .patient-register-table .reg-notes{
+  width:min(var(--notes-column-width,105px),205px);
+  min-width:min(var(--notes-column-width,105px),205px);
+  max-width:min(var(--notes-column-width,105px),205px);
+ }
+ .patient-register-table{min-width:calc(1835px + min(var(--notes-column-width,105px),205px))}
+}
+
+/* Card-only demo patients remain aligned with the existing compact calendar.
+   These date cells have no .day class or data-id, so treatment actions cannot select them. */
+.calendar tr.calendar-no-course-row td.calendar-no-course-day{
+ min-width:46px;height:42px;
+ background:#f7fafb;color:#9aaab5;cursor:default;
+}
+.calendar tr.calendar-no-course-row td.name small{
+ color:#829ba9;font-style:italic;
+}
+.calendar tr.calendar-no-course-row td.calendar-no-course-day:hover{box-shadow:none}
+
+/* Compact ELN status below the patient name replaces the separate 60px column.
+   Colors communicate yes/no, while an unset status is kept neutral. */
+.calendar .name .calendar-patient-meta{display:flex;align-items:center;flex-wrap:nowrap;gap:2px 5px;min-width:0;max-width:100%;overflow:hidden;margin-top:3px;line-height:1.2}
+.calendar .name .calendar-patient-ctv{font-size:9px;flex:1 1 auto;min-width:0;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.calendar .name .calendar-eln-indicator{display:inline-flex;align-items:center;flex:none;border:1px solid transparent;border-radius:4px;padding:2px 4px;font-size:9px;font-weight:800;line-height:1.1;white-space:nowrap}
+.calendar .name .calendar-eln-yes{background:#fce3e3;color:#a43c43;border-color:#eab5b5}
+.calendar .name .calendar-eln-no{background:#def3e6;color:#26764c;border-color:#a9d9bb}
+.calendar .name .calendar-eln-unknown{background:#edf2f5;color:#647889;border-color:#d7e1e8}
+
+/* Overview: active patient count + today's persistent administrative checklist. */
+.stats{grid-template-columns:max-content minmax(0,360px);align-items:start;justify-content:start;gap:14px}
+.dashboard-active-compact{display:inline-flex;align-items:center;justify-self:start;align-self:start;gap:7px;min-height:42px;padding:9px 12px;border:1px solid #e2e9ee;border-radius:10px;background:#fff;white-space:nowrap}
+.dashboard-active-icon{flex:none;color:#6c8393}
+.dashboard-active-label{font-size:12px;font-weight:600;color:#617789}
+.dashboard-active-count{font-size:21px;line-height:1;font-weight:800;color:#203447;font-variant-numeric:tabular-nums}
+.today-tasks{width:100%;max-width:360px;min-width:0;border:1px solid #e2e9ee;border-radius:14px;background:#fff;padding:15px 18px;box-shadow:0 3px 18px #11263806}
+.today-tasks-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:9px}
+.today-tasks-head h2{font-size:15px;font-weight:800;letter-spacing:-.2px;color:#284459;margin:0}
+.today-tasks-head small{font-size:10px;color:#94a3ae}
+.today-tasks-count{font-size:10px;color:#638093;border-radius:30px;background:#f0f5f8;padding:6px 9px;font-weight:750;white-space:nowrap}
+.today-tasks-list{list-style:none;display:flex;flex-direction:column;gap:5px;max-height:220px;overflow-y:auto;margin:0;padding:0 3px 0 0}
+.today-task{display:flex;align-items:center;gap:10px;min-height:38px;padding:5px 8px;border-radius:9px;background:#f7fafb;border:1px solid #edf2f5}
+.today-task-check{flex:none;display:grid;place-items:center;border:2px solid #a2b4bf;border-radius:7px;width:25px;height:25px;background:#fff;color:transparent;font-size:17px;font-weight:850;line-height:1;cursor:pointer;padding:0}
+.today-task-check:hover,.today-task-check:focus-visible{border-color:#22825b;outline:2px solid #9ed7b9;outline-offset:1px}
+.today-task.is-done .today-task-check{background:#29a76c;color:#fff;border-color:#29a76c}
+.today-task-text{min-width:0;flex:1;font-size:12px;line-height:1.4;color:#3b5668;overflow-wrap:anywhere}
+.today-task.is-done .today-task-text{color:#8c9da8;text-decoration:line-through}
+.today-task-call{flex:none;display:grid;place-items:center;text-decoration:none;border-radius:8px;width:32px;height:31px;background:#e3f3fb;border:1px solid #b4d9ed;color:#2d7799;font-size:18px}
+.today-task-call:hover,.today-task-call:focus-visible{background:#c9e7f7;outline:2px solid #7ebbdc}
+.today-task-call.is-unavailable{background:#f4f6f7;border-color:#e5ebef;color:#bdc8ce;cursor:default}
+.today-tasks-empty{margin:10px 0 3px;color:#8d9fa9;font-size:12px}
+@media(max-width:790px){
+ .stats{grid-template-columns:minmax(0,1fr);gap:10px}
+ .dashboard-active-compact{padding:8px 11px;min-height:40px}
+ .today-tasks{padding:12px 13px}
+ .today-tasks-list{max-height:260px}
+ .today-task-text{font-size:11px}
+}
+
+/* Two-line calendar identity: surname/initials above a nonwrapping CTV + ELN row.
+   Full names/CTV remain available through tooltips and patient cards. */
+.calendar .name .calendar-patient-primary{display:flex;align-items:center;gap:3px;min-width:0;max-width:100%;overflow:hidden}
+.calendar .name .calendar-patient-primary .patient-open{flex:0 1 auto;min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.calendar .name .calendar-patient-primary .type-tag{flex:none;margin-left:0}
+
+
+/* Compact action menu for session/date cells. It sits outside .scroll so it
+   does not get clipped by the calendar's horizontal overflow. */
+.calendar-cell-context-menu{
+ position:fixed;z-index:1250;min-width:225px;max-width:min(305px,calc(100vw - 16px));
+ padding:6px;border:1px solid #d5e2e9;border-radius:11px;background:#fff;
+ box-shadow:0 12px 35px #1b37454a
+}
+.calendar-cell-menu-summary{
+ padding:7px 11px 9px;margin:0 0 4px;color:#768e9d;font-size:11px;
+ font-weight:700;border-bottom:1px solid #e7eff3
+}
+.calendar-cell-context-menu button{
+ display:flex;align-items:center;gap:11px;min-height:42px;width:100%;
+ padding:7px 10px;border:0;border-radius:7px;background:transparent;
+ color:#35576a;text-align:left;font:inherit;font-size:12px;font-weight:650
+}
+.calendar-cell-context-menu button:hover:not(:disabled),
+.calendar-cell-context-menu button:focus-visible{
+ background:#f0f6f9;outline:2px solid #91bfd5;outline-offset:-2px
+}
+.calendar-cell-context-menu button:disabled{opacity:.45;cursor:not-allowed}
+.calendar-cell-menu-icon{display:inline-flex;flex:none;align-items:center;justify-content:center;width:26px}
+.calendar-cell-menu-icon svg{width:24px;height:24px}
+@media(max-width:700px){
+ .calendar-cell-context-menu button{min-height:44px;font-size:13px}
+}

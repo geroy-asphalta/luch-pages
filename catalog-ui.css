@@ -1,0 +1,93 @@
+/* Dense CTV index: show ICD codes first, then names only. A single selected CTV owns the details. */
+.catalog-title{padding:13px 18px;gap:10px}
+.catalog-title>div{display:flex;flex-direction:column;gap:3px}
+.catalog-title small{color:#80919b;font-size:11px}
+.catalog-add-button{display:grid;place-items:center;flex:0 0 40px;width:40px;height:40px;
+ border:1px solid #d8e4ec;border-radius:9px;background:#f7fafc;color:#34586d;cursor:pointer}
+.catalog-add-button:hover{background:#ebf2f6}
+[data-panel="ctv-catalog"] .patient-warning{margin:0;padding:8px 18px;
+ border-radius:0;border-left:0;border-right:0;font-size:10px;line-height:1.4}
+.catalog-controls{grid-template-columns:minmax(220px,1fr) auto;gap:12px;
+ align-items:end;padding:10px 18px}
+.catalog-controls .catalog-search-label{width:100%;max-width:580px}
+.catalog-controls .catalog-show-hidden{height:38px}
+.catalog-layout{grid-template-columns:minmax(0,1fr);gap:14px;align-items:start;padding:12px 18px}
+.catalog-layout.catalog-editing{grid-template-columns:minmax(0,1.35fr) minmax(330px,1fr)}
+.catalog-list{display:block;min-width:0;max-height:none;overflow:visible}
+.catalog-index{border-top:1px solid #e6ecef;border-bottom:1px solid #e6ecef}
+.catalog-group{min-width:0;border-bottom:1px solid #edf0f2}
+.catalog-group:last-child{border-bottom:0}
+.catalog-group-header{display:flex;align-items:center;gap:10px;width:100%;
+ min-height:44px;padding:6px 10px;border:0;border-radius:0;background:transparent;
+ text-align:left;color:#364b56;cursor:pointer}
+.catalog-group-header:hover,.catalog-group-header[aria-expanded="true"]{background:#f6f8f9}
+.catalog-group-chevron{width:14px;flex:0 0 14px;font-size:18px;
+ font-weight:400;color:#8da1aa;text-align:center;line-height:1}
+.catalog-group-code{width:44px;flex:0 0 44px;color:#3b5765;
+ font-size:13px;font-weight:750;font-variant-numeric:tabular-nums}
+.catalog-group-name{flex:1;min-width:0;font-size:12px;font-weight:550;line-height:1.35}
+.catalog-group-count{font-size:11px;color:#8b9da6;min-width:16px;text-align:right}
+.catalog-group-body{margin:0 10px 8px 35px;padding:1px 0 1px 12px;
+ border-left:2px solid #dce7ec}
+.catalog-entry{width:100%;min-height:33px;display:flex;align-items:center;gap:7px;
+ padding:5px 10px;border:0;border-radius:5px;background:transparent;color:#405765;
+ text-align:left;font-size:12px;line-height:1.35;cursor:pointer}
+.catalog-entry:hover{background:#f1f5f7}
+.catalog-entry.catalog-entry-active{background:#eaf4f8;color:#275a72;font-weight:650}
+.catalog-entry-name{flex:1;min-width:0;overflow-wrap:anywhere}
+.catalog-entry-tag{border:1px solid #e0e6e9;border-radius:4px;
+ padding:1px 4px;flex:0 0 auto;color:#7d8f99;font-size:9px;font-weight:500}
+.catalog-entry-chevron{flex:0 0 10px;color:#a0b0b9;font-size:16px;text-align:right}
+.catalog-inspector{margin-top:12px;border:1px solid #dee7eb;border-radius:10px;
+ background:#fafcfd;padding:15px 17px;color:#3c5260}
+.catalog-inspector-header{display:flex;justify-content:space-between;align-items:start;gap:10px}
+.catalog-inspector-header small{font-size:10px;color:#8397a1}
+.catalog-inspector-header h3{font-size:16px;margin:4px 0 0;font-weight:700;color:#304b5a}
+.catalog-inspector-close{display:grid;place-items:center;width:30px;height:30px;
+ flex:0 0 30px;border:0;border-radius:7px;background:#e9eef1;
+ color:#5f7785;font-size:20px;cursor:pointer}
+.catalog-inspector-facts{display:flex;gap:20px;flex-wrap:wrap;padding:12px 0;
+ margin-top:10px;border-top:1px solid #e4ebee;border-bottom:1px solid #e4ebee}
+.catalog-inspector-facts>span{display:flex;flex-direction:column;gap:3px}
+.catalog-inspector-facts small{color:#8397a1;font-size:10px}
+.catalog-inspector-facts b{color:#304c5b;font-size:13px;font-variant-numeric:tabular-nums}
+.catalog-inspector-zones{margin-top:13px;font-size:11px}
+.catalog-inspector-zones h4{font-size:11px;margin:0 0 7px;color:#536d7c}
+.catalog-inspector-zones>div{display:flex;justify-content:space-between;gap:10px;
+ align-items:baseline;padding:5px 0;border-bottom:1px solid #edf0f2;line-height:1.5}
+.catalog-inspector-zones>div span:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.catalog-inspector-boost{font-size:11px;color:#587487;line-height:1.4}
+.catalog-detail-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px}
+.catalog-detail-actions button{border:1px solid #d5e2e8;border-radius:7px;
+ background:#fff;color:#3a6984;padding:7px 10px;font-size:11px;font-weight:650;cursor:pointer}
+.catalog-detail-actions button:hover{background:#eff6f9}
+.catalog-editor{position:sticky;top:12px;max-height:calc(100vh - 24px);
+ overflow-y:auto;overscroll-behavior:contain}
+.catalog-editor-header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.catalog-editor-header h3{margin:0}
+.catalog-editor-header button{width:30px;height:30px;border:0;background:#eaf0f3;
+ border-radius:8px;color:#5c707d;font-size:20px;cursor:pointer}
+.catalog-group-header:focus-visible,.catalog-entry:focus-visible,
+.catalog-inspector-close:focus-visible,.catalog-add-button:focus-visible,
+.catalog-detail-actions button:focus-visible{outline:2px solid #2f8cb3;outline-offset:2px}
+@media(max-width:1050px){
+ .catalog-layout.catalog-editing{grid-template-columns:1fr}
+ .catalog-layout.catalog-editing .catalog-list{display:none}
+ .catalog-editor{position:static;max-height:none;overflow:visible}
+}
+@media(max-width:700px){
+ .catalog-title{padding:10px 12px}
+ [data-panel="ctv-catalog"] .patient-warning{padding:8px 12px}
+ .catalog-controls{grid-template-columns:1fr;gap:6px;padding:10px 12px}
+ .catalog-controls .catalog-search-label{max-width:none}
+ .catalog-controls .catalog-show-hidden{height:30px}
+ .catalog-layout{padding:8px 12px}
+ .catalog-group-header{min-height:44px;padding:6px 5px;gap:7px}
+ .catalog-group-code{width:40px;flex-basis:40px}
+ .catalog-group-name{font-size:12px}
+ .catalog-group-body{margin-left:20px;padding-left:9px}
+ .catalog-entry{min-height:40px;padding:7px 8px}
+ .catalog-inspector{padding:12px}
+ .catalog-inspector-facts{gap:16px}
+ .catalog-inspector-zones>div{flex-wrap:wrap;gap:2px 10px}
+}

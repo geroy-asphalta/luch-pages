@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#172b38">
+<meta name="description" content="ЛУЧ: демонстрационный календарь лучевой терапии.">
+<link rel="stylesheet" href="./style.css?v=1.30">
+<link rel="stylesheet" href="./catalog-ui.css?v=3">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="./icon.svg">
+<title>ЛУЧ · Календарь</title>
+</head>
+<body>
+<div class="app">
+<header class="topbar">
+ <div class="logo"><span class="mark">✳</span><span><b>ЛУЧ</b><small>Календарь отделения</small></span></div>
+ <div class="demo">ДЕМО · ВЫМЫШЛЕННЫЕ ПАЦИЕНТЫ</div>
+ <button id="reset" title="Восстановить демо">↺ <span class="long">Сбросить демо</span></button>
+</header>
+<div class="layout">
+<aside class="sidebar">
+ <div class="sidebar-heading">РАБОЧЕЕ ПРОСТРАНСТВО</div>
+ <button class="nav active" data-view="calendar"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle" focusable="false"><circle cx="9.7" cy="5.6" r="4"/><path d="M6.7 10.8C4 11.6 2.5 13.7 2.5 16.6V20M12.7 10.8c2 .5 3.5 1.6 4.3 2.6M6.9 17V20"/><circle cx="17.3" cy="18" r="5.1"/><path d="M17.3 15.5v5M14.8 18h5"/></svg></span><b>Пациенты</b></button>
+ 
+ <button class="nav" data-view="ctv-catalog"><span>☰</span><b>Справочник CTV</b></button>
+ <button class="nav" data-view="workdays"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle" focusable="false"><rect x="2.5" y="4.5" width="19" height="17" rx="2"/><path d="M7.5 2.5v4M16.5 2.5v4M2.5 9h19"/><path d="m12 11 1.5 3 3.3.5-2.4 2.4.6 3.2-3-1.6-3 1.6.6-3.2-2.4-2.4 3.3-.5z"/></svg></span><b>Рабочие дни / праздники</b></button>
+ <button class="nav" data-view="maintenance"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle" focusable="false"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94z"/></svg></span><b>ТО установок</b></button>
+ <button class="nav" data-view="breakdowns"><span>⚠</span><b>Поломки аппаратов</b></button>
+ <button class="nav" data-view="transfers"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle" focusable="false"><path d="M4 7h16m-4-4 4 4-4 4M20 17H4m4-4-4 4 4 4"/></svg></span><b>Переводы пациентов</b></button>
+ <button class="nav" data-view="journal"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle" focusable="false"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg></span><b>История действий</b></button>
+ <div class="sidebar-note"><b>Прототип 1.0</b><p>Все изменения пока сохраняются только в этом браузере. Синхронизация устройств ещё не подключена.</p></div>
+</aside>
+<main>
+<div class="head">
+ <div><div class="eyebrow">РАСПИСАНИЕ ПАЦИЕНТОВ</div><h1 id="title">Пациенты</h1><p>Расписание, техническое обслуживание и направления</p></div>
+ <div class="month-controls"><button id="prev" aria-label="Предыдущий месяц">‹</button><b id="month"></b><button id="next" aria-label="Следующий месяц">›</button><button id="reset-month" title="Вернуться к текущей неделе">Сегодня</button></div>
+</div>
+<div class="stats" id="stats"></div>
+<section data-panel="calendar" class="workspace">
+<div class="toolbar">
+ <div class="filters"><button id="calendar-add-patient" type="button" class="action-with-icon" data-tooltip="Добавить пациента" aria-label="Добавить пациента">
+  <span class="action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7.3" r="3.2"/><path d="M3.4 20v-2a5.6 5.6 0 0 1 11.2 0v2"/><path d="M18.5 10.5v8M14.5 14.5h8"/></svg></span>
+ </button><select id="filter" aria-label="Установка"><option value="">Все установки</option></select><span class="count" id="selected-count">Выберите ячейки</span><button id="clear-selected" type="button" class="clear-selection hidden">Снять выделение</button></div>
+ <div class="actions">
+  <button class="primary action-with-icon" id="assign" type="button" data-tooltip="Назначить анализ крови" aria-label="Назначить анализ крови"><span class="action-icon" aria-hidden="true">+</span></button>
+  <button id="issue" type="button" class="action-with-icon" data-tooltip="Выдать направления за неделю" aria-label="Выдать направления за неделю"><span class="action-icon" aria-hidden="true">✓</span></button>
+  <button id="skip" type="button" class="action-with-icon" data-tooltip="Пропустить сеанс — сначала выбери ячейки" aria-label="Пропустить сеанс"><span class="action-icon" aria-hidden="true">×</span></button>
+ </div>
+</div>
+<div class="scroll"><table id="calendar" class="calendar"><thead></thead><tbody></tbody></table></div>
+<div id="calendar-cell-menu" class="calendar-cell-context-menu hidden" role="menu" aria-label="Действия с сеансами и анализами"></div>
+</section>
+
+<dialog id="patient-card-dialog" class="patient-card-drawer" aria-labelledby="patient-card-title">
+ <div class="patient-card-top">
+  <div><span class="patient-card-kicker">КАРТОЧКА ПАЦИЕНТА</span><h2 id="patient-card-title">Данные и лечение</h2></div>
+  <div class="patient-card-top-actions">
+   <button id="patient-card-register-toggle" type="button" aria-expanded="false" aria-controls="patient-card-register">Все пациенты / архив</button>
+   <button id="patient-card-close" type="button" class="patient-card-close" aria-label="Закрыть карточку" title="Закрыть карточку">×</button>
+  </div>
+ </div>
+ <div class="patient-card-scroll">
+ <section class="patient-card-content">
+ <p class="patient-warning">Только вымышленные данные. Это демонстрационный реестр, не медицинская информационная система. Данные хранятся только в этом браузере.</p>
+ <div class="patients-register hidden" id="patient-card-register">
+  <div class="section-title"><h2>Все пациенты и архив</h2><button type="button" class="primary patient-new" id="patient-new">+ Добавить пациента</button></div>
+  <div class="register-toolbar">
+   <label for="patient-search">Поиск
+    <input id="patient-search" type="search" placeholder="ФИО, ID, Ds, CTV, телефон, заметки…" autocomplete="off">
+   </label>
+   <label for="patient-status-filter">Показать
+    <select id="patient-status-filter">
+     <option value="all">Все пациенты и курсы</option>
+     <option value="active">На лечении</option>
+     <option value="planned">Ожидают начала / без курса</option>
+     <option value="finished">Завершённые / архив</option>
+    </select>
+   </label>
+   <label for="patient-sort">Сортировка
+    <select id="patient-sort">
+     <option value="order">Общий порядок (добавление / вручную)</option>
+     <option value="name">По ФИО</option>
+     <option value="start-new">Начало ЛТ: новые выше</option>
+     <option value="diagnosis">По диагнозу</option>
+     <option value="machine">По установке</option>
+     <option value="status">По статусу</option>
+    </select>
+   </label>
+   <span id="patient-register-count" class="register-count" aria-live="polite"></span>
+  </div>
+  <div id="patient-list" class="patient-register-scroll" tabindex="0" role="region" aria-label="Таблица всех пациентов и курсов. Прокручивай вбок для остальных колонок."></div>
+  <p class="register-hint">Чтобы изменить порядок, зажми строку пациента левой кнопкой мыши, перетащи в нужное место и отпусти — зелёная линия покажет место вставки. В расписании работает точно так же. На телефоне удерживай ФИО, затем перетаскивай. Изменения сохраняются сразу и одинаковы в обоих разделах. Для перемещения нужен режим сортировки «Общий порядок». Несколько курсов пациента перемещаются вместе. Короткое нажатие по-прежнему открывает карточку или выбирает дату.</p>
+ </div>
+ <div class="patient-main patient-register-detail">
+  <div id="patient-detail" class="hidden"></div>
+  <div id="patient-editor" class="hidden"></div>
+  <div id="patient-preview" class="preview hidden"></div>
+ </div>
+</section>
+ </div>
+</dialog>
+<div id="patient-context-menu" class="patient-context-menu hidden" role="menu" aria-label="Действия с пациентом и курсом"></div>
+<dialog id="patient-early-dialog" class="discharge-dialog patient-early-dialog" aria-labelledby="patient-early-title">
+ <div class="issue-dialog-header">
+  <h2 id="patient-early-title">Досрочное завершение курса</h2>
+  <button type="button" class="issue-close" data-early-close aria-label="Закрыть">×</button>
+ </div>
+ <div id="patient-early-info" class="discharge-info"></div>
+ <form id="patient-early-form">
+  <label>Дата выписки<input type="date" name="date" required></label>
+  <label>Причина
+   <select name="reason" required>
+    <option value="">Выбери причину</option>
+    <option value="medical">По медицинским показаниям</option>
+    <option value="refusal">Отказ пациента</option>
+    <option value="transfer">Перевод в другое учреждение</option>
+    <option value="other">Другая причина</option>
+   </select>
+  </label>
+  <label>Комментарий<textarea name="comment" rows="3" maxlength="500" placeholder="Для другой причины обязательно"></textarea></label>
+  <p class="safety-note">Досрочная выписка прекращает только будущие плановые сеансы выбранного курса. Прошедшие даты не подтверждают фактическое лечение. История процедур и направления сохраняются, а другие курсы пациента не изменяются.</p>
+  <div class="discharge-actions">
+   <button type="submit" class="primary">Завершить курс досрочно</button>
+   <button type="button" data-early-cancel>Отмена</button>
+  </div>
+ </form>
+</dialog>
+
+<section data-panel="ctv-catalog" class="workspace hidden">
+ <div class="section-title catalog-title"><div><h2>Справочник CTV</h2><small>Шаблоны по группам МКБ-10</small></div><button type="button" class="catalog-add-button" id="ctv-catalog-add" aria-label="Добавить CTV" title="Добавить CTV"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button></div>
+ <p class="patient-warning">Редактируются только локальные шаблоны для вымышленных пациентов. Схемы и дозы не являются клиническим назначением. Сведения хранятся в этом браузере, без синхронизации.</p>
+ <div class="catalog-controls">
+  <label class="catalog-search-label">Поиск<input id="ctv-catalog-search" type="search" placeholder="Код МКБ, CTV, зона или доза…" autocomplete="off"></label>
+  <label class="catalog-show-hidden"><input id="ctv-catalog-hidden" type="checkbox"> Показывать скрытые</label>
+ </div>
+ <div class="catalog-layout">
+  <div id="ctv-catalog-list" class="catalog-list"></div>
+  <div id="ctv-catalog-editor" class="catalog-editor hidden"></div>
+ </div>
+</section>
+<section data-panel="workdays" class="workspace hidden">
+ <div class="section-title"><h2>Рабочие дни и праздники</h2><span>Россия · пятидневка</span></div>
+ <div class="production-calendar">
+  <div class="production-header"><h3>Праздники и переносы</h3>
+   <label>Год <select id="production-year"><option value="2026">2026</option><option value="2027">2027</option></select></label>
+  </div>
+  <p class="muted">Раскрой месяц и нажми на день. <b>Работаем</b> — сеансы будут запланированы, <b>Не работаем</b> — день пропускается. Повторное нажатие возвращает исходный график. Изменения сохраняются сразу, без подтверждения.</p>
+  <div id="production-list" class="production-list" aria-label="Праздничные месяцы"></div>
+  <p class="production-source">Федеральный производственный календарь РФ, 2026–2027. Региональные праздники добавляются ниже. Источники: <a href="https://www.consultant.ru/law/ref/calendar/proizvodstvennye/2026/" target="_blank" rel="noopener noreferrer">2026</a> · <a href="https://www.consultant.ru/document/cons_doc_LAW_544706/" target="_blank" rel="noopener noreferrer">2027</a>.</p>
+ </div>
+ <p id="workday-feedback" class="workday-feedback hidden" role="status" aria-live="polite"></p>
+ <details id="workday-advanced" class="workday-advanced">
+  <summary><span>Другие дни и исключения</span><small>Региональные праздники, рабочие субботы, ручные поправки</small></summary>
+  <form class="workday-form" id="workday-form">
+   <label>Дата <input id="workday-date" type="date" required></label>
+   <label>Название / причина <input id="workday-title" type="text" maxlength="90" placeholder="Например, местный праздник"></label>
+   <label>Тип дня <select id="workday-type"><option value="holiday">Праздник</option><option value="exception">Исключение рабочего графика</option></select></label>
+   <label class="workday-check"><input id="workday-working" type="checkbox"> В этот день работаем</label>
+   <button type="submit" class="primary">Сохранить сразу</button>
+  </form>
+  <p class="workday-current" id="workday-status">Выбери дату</p>
+  <h3 class="workday-heading">Решения отделения</h3>
+  <div id="workday-list" class="workday-list"></div>
+  <p class="muted workday-note">Изменение рабочего дня автоматически пересчитывает будущие плановые сеансы и невыданные анализы перед ХТ. Даты ХТ и уже выданные направления автоматически не переносятся.</p>
+ </details>
+</section>
+<section data-panel="maintenance" class="workspace hidden">
+ <div class="section-title"><h2>ТО установок</h2><span>События влияют на график всех пациентов установки</span></div>
+ <form id="maint-form" class="maintenance-form"><label>Дата<input id="maint-date" type="date" required></label><label>Установка<select id="maint-machine"></select></label><button type="submit" class="primary">Добавить ТО</button></form>
+ <p class="muted maint-explain">Если это последняя фракция курса, её можно отдельно запланировать утром перед началом ТО. Другие сеансы останутся заблокированы. Такая отметка не подтверждает фактическое проведение лечения.</p>
+ <div id="maintenance-list" class="item-list"></div>
+ <div id="maint-preview" class="preview hidden"></div>
+</section>
+
+<section data-panel="breakdowns" class="workspace hidden">
+ <div class="section-title"><h2>Поломки аппаратов</h2><span>Планирование простоя оборудования</span></div>
+ <div class="operational">
+  <form id="break-form" class="ops-form">
+   <label>Аппарат<select id="break-machine"></select></label>
+   <label>Дата поломки<input id="break-date" type="date" value="2026-11-12" required></label>
+   <label class="check-line"><input id="break-resolved" type="checkbox"> Известна дата восстановления</label>
+   <label id="resume-wrap" class="hidden">Первый день возобновления сеансов<input id="break-resume" type="date" value="2026-11-16"></label>
+   <div class="ops-wide"><b>Кого успели пролечить до поломки?</b><p class="muted">Отметь только пациентов с фактически проведённым сеансом в этот день. Остальные фракции останутся невыполненными в модели.</p><div id="break-completed" class="candidate-list"></div></div>
+   <button class="primary" type="submit">Предварительный просмотр</button>
+  </form>
+  <div id="break-preview" class="preview hidden"></div>
+  <h3>Зарегистрированные поломки</h3>
+  <div id="break-list" class="item-list"></div>
+ </div>
+</section>
+<section data-panel="transfers" class="workspace hidden">
+ <div class="section-title"><h2>Перевод на другой аппарат</h2><span>После отдельного согласования лечебного плана</span></div>
+ <div class="operational">
+  <p class="safety-note">Только моделирование дат! Смена установки для лучевой терапии требует проверки совместимости, плана, дозиметрии/QA и допуска клинической команды. Отметка здесь не означает разрешение проводить лечение.</p>
+  <form id="transfer-form" class="ops-form">
+   <label>Пациент<select id="transfer-patient"></select></label>
+   <label>Новый аппарат<select id="transfer-machine"></select></label>
+   <label>Дата начала на новом аппарате<input id="transfer-date" type="date" value="2026-11-16" required></label>
+   <div class="ops-wide muted" id="transfer-current"></div>
+   <button class="primary" type="submit">Предварительный просмотр</button>
+  </form>
+  <div id="transfer-preview" class="preview hidden"></div>
+  <h3>Переводы пациентов</h3>
+  <div id="transfer-list" class="item-list"></div>
+ </div>
+</section>
+<section data-panel="journal" class="workspace hidden"><div class="section-title"><h2>История изменений</h2><span>Только для этого браузера</span></div><div id="journal-list" class="item-list"></div></section>
+<footer>Учебный прототип. Не использовать для реальных пациентов, назначения лечения или подтверждения фактического проведения процедур.</footer>
+</main>
+</div></div>
+<dialog id="issue-dialog" class="issue-dialog" aria-labelledby="issue-dialog-title">
+ <div class="issue-dialog-header">
+  <h2 id="issue-dialog-title">Выдать направления за неделю</h2>
+  <button id="issue-dialog-close" type="button" class="issue-close" aria-label="Закрыть">×</button>
+ </div>
+ <p class="issue-dialog-hint">Выбери нужную неделю. Будут отмечены только уже назначенные, но ещё не выданные направления.</p>
+ <div class="issue-week-controls">
+  <label>Неделя в открытом календаре<select id="issue-week-options"></select></label>
+  <label>Или любая дата нужной недели<input type="date" id="issue-week-date"></label>
+ </div>
+ <div id="issue-week-preview" class="issue-week-preview" aria-live="polite"></div>
+ <div class="issue-dialog-actions">
+  <button id="issue-week-confirm" type="button" class="primary">Подтвердить выдачу</button>
+  <button id="issue-week-cancel" type="button">Отмена</button>
+ </div>
+</dialog>
+<dialog id="discharge-dialog" class="discharge-dialog" aria-labelledby="discharge-dialog-title">
+ <div class="issue-dialog-header">
+  <h2 id="discharge-dialog-title">Последняя фракция · решение о выписке</h2>
+  <button type="button" id="discharge-dialog-close" class="issue-close" aria-label="Закрыть">×</button>
+ </div>
+ <div id="discharge-info" class="discharge-info"></div>
+ <p class="safety-note">Дни, прошедшие по плану, лишь предполагаются выполненными. Программа не может установить факт лечения без проверки записей. Выписка оформляется только после твоего подтверждения. Если последний сеанс не состоялся, выбери «Нет» и отметь пропуск «Х» в календаре, чтобы пересчитать завершение курса.</p>
+ <label class="discharge-confirm-label"><input id="discharge-final-confirm" type="checkbox"> Подтверждаю: последняя фракция действительно проведена, пропуски и записи о лечении проверены.</label>
+ <div class="discharge-actions">
+  <button type="button" id="discharge-yes" class="primary" disabled>Да, выписываем</button>
+  <button type="button" id="discharge-no">Нет, не выписываем</button>
+  <button type="button" id="discharge-later">Позже</button>
+ </div>
+</dialog>
+<div role="status" aria-live="polite" id="toast" class="toast"></div>
+<script type="module" src="./app.mjs?v=1.36"></script>
+</body></html>
