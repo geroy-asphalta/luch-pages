@@ -12,7 +12,7 @@ import {orderedPersonIds,comparePatientEntries,reorderPatientDraft} from './pati
 import {setupPatientReordering} from './patient-drag.mjs';
 import {labSingleButtonDraft} from './lab-batch-preview.mjs';
 import {labButtonIntent,issueButtonIntent,skipButtonIntent,calendarActionIcon} from './calendar-action-ui.mjs';
-import {scrollCalendarToWeek,calendarWindowDates,enableCalendarHorizontalWheel} from './calendar-viewport.mjs?v=7';
+import {scrollCalendarToWeek,calendarWindowDates,enableCalendarHorizontalWheel} from './calendar-viewport.mjs?v=8';
 import {calendarContact} from './calendar-contact.mjs';
 import {calendarElnIndicator} from './calendar-eln-indicator.mjs';
 import {compactCalendarPatientName} from './calendar-patient-name.mjs';

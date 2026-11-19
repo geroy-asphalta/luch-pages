@@ -59,13 +59,37 @@ export function calendarNativeTrackpadAxes(env=typeof navigator==='undefined'?nu
  return /mac/i.test(platform)||/Macintosh|Mac OS X/i.test(String(env?.userAgent||''));
 }
 
-// Windows/Linux: a traditional vertical mouse wheel becomes horizontal over
-// session/date cells only. macOS: do not intercept either native trackpad axis.
-// Browser zoom gestures and horizontal gestures over dates remain native.
-export function enableCalendarHorizontalWheel(calendar,{nativeAxes=calendarNativeTrackpadAxes()}={}){
+// On Windows the wheel MUST scroll vertically everywhere in the timetable.
+// Only the native scrollbar thumb/track moves the calendar sideways. Blocking
+// Shift+wheel and horizontal-dominant trackpad gestures prevents accidental
+// horizontal movement without cancelling an ordinary vertical wheel event.
+// This does not affect macOS or touch swipes on iPhone.
+export function calendarWindowsScrollbarOnly(env=typeof navigator==='undefined'?null:navigator){
+ const platform=String(env?.userAgentData?.platform||env?.platform||'');
+ return /^win/i.test(platform)||/Windows NT/i.test(String(env?.userAgent||''));
+}
+
+// macOS keeps independent native trackpad axes; Linux retains the earlier date-cell
+// wheel behaviour. On Windows the native scrollbar is the horizontal control.
+export function enableCalendarHorizontalWheel(calendar,{
+ nativeAxes=calendarNativeTrackpadAxes(),
+ windowsScrollbarOnly=calendarWindowsScrollbarOnly()
+}={}){
  const scroller=calendar?.closest('.scroll');
  if(!scroller?.addEventListener)return false;
- if(nativeAxes)return true; // Native horizontal anywhere; native vertical anywhere.
+ if(nativeAxes)return true; // macOS: both axes stay browser-native.
+ if(windowsScrollbarOnly){
+  scroller.addEventListener('wheel',event=>{
+   if(event.ctrlKey||event.metaKey)return; // Browser zoom is unaffected.
+   // Vertical gestures are not intercepted, even when the cursor is over dates.
+   // Chrome/Edge can treat Shift+wheel as a horizontal scroll on Windows.
+   const horizontal=event.shiftKey||(
+    Math.abs(event.deltaX)>0&&Math.abs(event.deltaX)>=Math.abs(event.deltaY));
+   if(horizontal&&event.cancelable)event.preventDefault();
+  },{passive:false});
+  return true;
+ }
+ // Preserve the existing non-Windows/non-Mac behaviour.
  scroller.addEventListener('wheel',event=>{
   if(event.ctrlKey||event.metaKey)return; // Keep browser zoom gestures.
   if(!isCalendarDateWheelTarget(calendar,event.target)){
