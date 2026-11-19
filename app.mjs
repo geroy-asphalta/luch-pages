@@ -3,7 +3,7 @@ import {isWorkingDay,effectiveDay,effectiveDayLabel} from './work-calendar.mjs';
 import {createWorkdayUI} from './workday-ui.mjs';
 import {createOperationalUI} from './operations-ui.mjs';
 import {ensurePatientModel} from './patient-model.mjs';
-import {createPatientUI} from './patient-ui.mjs?v=4';
+import {createPatientUI} from './patient-ui.mjs?v=5';
 import {createCatalogUI} from './catalog-ui.mjs';
 import {currentCtvName} from './ctv-display.mjs';
 import {courseProgress,localToday,dischargeCandidates,dischargeBatchDraft} from './course-progress.mjs?v=2';
@@ -28,6 +28,7 @@ import {createImportedDemoState,installImportedDemoRoster} from './demo-roster.m
 import {installPhotoDemoRoster} from './demo-photo-roster.mjs';
 import {installPhotoCourseAssignments} from './demo-photo-course-assignments.mjs';
 import {calendarRosterRows} from './calendar-roster-rows.mjs';
+import {syncCourseStartStatusesDraft} from './course-start-status.mjs';
 import {installImportedLabColors} from './demo-lab-colors.mjs?v=1';
 import {createFirebaseDemoSync} from './firebase-demo-state-ui.mjs';
 
@@ -41,6 +42,7 @@ state=installPhotoDemoRoster(state);
 state=installPhotoCourseAssignments(state);
 state.breakdowns??=[];state.transfers??=[];state.audit??=[];
 state=ensurePatientModel(state);
+state=syncCourseStartStatusesDraft(state,localToday()).state;
 // Persist safe migration of pending HLT blood dates; issued referrals are untouched.
 try { localStorage.setItem(store,JSON.stringify(state)); } catch {}
 let month=localToday().slice(0,7),view='calendar',selected=new Set(),anchor=null,filter='',patientSort='order';
@@ -417,7 +419,7 @@ function maybeAskDischarge(){
 function renderJournal(){
  const arr=state.audit.slice().reverse();
  el('journal-list').innerHTML=arr.length?arr.map(a=>
- '<div class="list-item"><span><b>'+esc(a.patientId||a.machine||'Оборудование')+'</b> · '+esc(a.day||'')+' · '+({lab:'Кровь назначена','lab-assign':'Кровь назначена','lab-remove':'Назначение крови снято',issue:'Направление выдано','issue-undo':'Отмена выдачи направления',skip:'Пропуск',unskip:'Отмена пропуска',breakdown:'Поломка','breakdown-update':'Обновлено восстановление', 'breakdown-remove':'Отмена поломки',transfer:'Перевод аппарата','transfer-remove':'Отмена перевода','person-create':'Новый пациент','person-update':'Изменена карточка','person-archive':'Пациент в архиве','person-restore':'Пациент восстановлен','course-create':'Новый курс','course-update':'Изменён курс','course-archive':'Курс в архиве','course-restore':'Курс восстановлен','course-discharge':'Подтверждена выписка','course-discharge-early':'Досрочно завершён курс','course-discharge-deferred':'Выписка отложена','ctv-create':'Добавлена схема CTV','ctv-update':'Изменена схема CTV','ctv-hide':'CTV скрыт','ctv-show':'CTV восстановлен','ctv-reset':'CTV сброшен к исходному','chemo-plan':'План введений ХТ','calendar-day':'Рабочий календарь: дата изменена','calendar-day-remove':'Рабочий календарь: исключение удалено','patient-reorder':'Изменён порядок пациентов','patient-photo-roster':'Обновлён демонстрационный список','patient-photo-course':'Добавлены плановые курсы по снимку','maintenance-final':'Последняя фракция до ТО запланирована','maintenance-final-remove':'Исключение последней фракции до ТО снято','hlt-lab-align':'Дата анализа перед ХТ исправлена'}[a.kind]||a.kind)+(a.detail?' · '+esc(a.detail):'')+'</span><small>'+new Date(a.date).toLocaleString('ru-RU')+'</small></div>'
+ '<div class="list-item"><span><b>'+esc(a.patientId||a.machine||'Оборудование')+'</b> · '+esc(a.day||'')+' · '+({lab:'Кровь назначена','lab-assign':'Кровь назначена','lab-remove':'Назначение крови снято',issue:'Направление выдано','issue-undo':'Отмена выдачи направления',skip:'Пропуск',unskip:'Отмена пропуска',breakdown:'Поломка','breakdown-update':'Обновлено восстановление', 'breakdown-remove':'Отмена поломки',transfer:'Перевод аппарата','transfer-remove':'Отмена перевода','person-create':'Новый пациент','person-update':'Изменена карточка','person-archive':'Пациент в архиве','person-restore':'Пациент восстановлен','course-create':'Новый курс','course-update':'Изменён курс','course-archive':'Курс в архиве','course-restore':'Курс восстановлен','course-discharge':'Подтверждена выписка','course-start-auto':'Статус по первой фракции','course-discharge-early':'Досрочно завершён курс','course-discharge-deferred':'Выписка отложена','ctv-create':'Добавлена схема CTV','ctv-update':'Изменена схема CTV','ctv-hide':'CTV скрыт','ctv-show':'CTV восстановлен','ctv-reset':'CTV сброшен к исходному','chemo-plan':'План введений ХТ','calendar-day':'Рабочий календарь: дата изменена','calendar-day-remove':'Рабочий календарь: исключение удалено','patient-reorder':'Изменён порядок пациентов','patient-photo-roster':'Обновлён демонстрационный список','patient-photo-course':'Добавлены плановые курсы по снимку','maintenance-final':'Последняя фракция до ТО запланирована','maintenance-final-remove':'Исключение последней фракции до ТО снято','hlt-lab-align':'Дата анализа перед ХТ исправлена'}[a.kind]||a.kind)+(a.detail?' · '+esc(a.detail):'')+'</span><small>'+new Date(a.date).toLocaleString('ru-RU')+'</small></div>'
  ).join(''):'<div class="empty">Пока изменений нет — попробуй назначить анализы на календаре.</div>';
 }
 function setView(next){
@@ -435,6 +437,10 @@ function showCurrentWeek(){
  scrollCalendarToWeek(el('calendar'),weekBounds(today)?.start);
 }
 function render(){
+ // Keep the stored course status synchronized on day rollover and after edits,
+ // using the first actual planned fraction rather than the raw entered start.
+ const sync=syncCourseStartStatusesDraft(state,localToday());
+ if(sync.changed){state=sync.state;save();}
  const [y,m]=month.split('-');el('month').textContent=new Intl.DateTimeFormat('ru-RU',{month:'long',year:'numeric'}).format(new Date(Date.UTC(Number(y),Number(m)-1,1)));
  renderStats();renderCalendar();renderActionButtons();renderPatients();catalogUI.render();workdayUI.render();renderMaintenance();operations.renderBreakdowns();operations.renderTransfers();renderJournal();setView(view);maybeAskDischarge();
 }

@@ -6,6 +6,7 @@ import {emptyCatalog} from './ctv-catalog.mjs';
 import {parseDoseInput,doseZoneLabels,courseIsBreast} from './dose-zones.mjs';
 import {applyHltPlanDraft,migrateHltBloodDates} from './chemo-schedule.mjs';
 import {ensurePatientOrder} from './patient-order.mjs';
+import {automaticCourseStatus} from './course-start-status.mjs';
 
 const copy=s=>JSON.parse(JSON.stringify(s));
 const validDate=d=>typeof d==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(d)&&!Number.isNaN(Date.parse(d))&&new Date(d+'T00:00:00Z').toISOString().slice(0,10)===d;
@@ -174,6 +175,7 @@ export function createCourseDraft(state,personId,data){
  s.patients.push(course);
  const chemo=applyHltPlanDraft(s,course,null,data);
  if(chemo.error)return {error:chemo.error};
+ course.status=automaticCourseStatus(s,course)||course.status;
  log(s,'course-create',{patientId:course.id,detail:person.id+' · '+course.courseName,day:course.start});
  return {state:s,entry:course,chemoWarnings:chemo.warnings};
 }
@@ -210,6 +212,7 @@ export function updateCourseDraft(state,courseId,data){
    course.dischargeReview=null;
  const chemo=applyHltPlanDraft(s,course,previousCourse,data);
  if(chemo.error)return {error:chemo.error};
+ course.status=automaticCourseStatus(s,course)||course.status;
  log(s,'course-update',{patientId:course.id,detail:'Параметры '+course.courseName,day:course.start});
  return {state:s,entry:course,chemoWarnings:chemo.warnings};
 }

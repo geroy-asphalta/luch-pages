@@ -378,7 +378,7 @@ export function createPatientUI({getState,commitState,renderApp,notice,onDischar
     '<label>ЭЛН <select name="eln" class="eln-select '+elnClass(eln)+'">'+opts([['','Не выбрано'],['Да','Да'],['Нет','Нет']],eln)+'</select></label>'+
     '<label>Телефон <input name="phone" type="tel" inputmode="tel" autocomplete="off" placeholder="+7 (999) 123-45-67" value="'+esc(formatPhoneRU(p?.phone||''))+'" maxlength="18"></label>'+
     '<label class="wide">Примечания <textarea name="notes" maxlength="500" rows="3">'+esc(p?.notes||'')+'</textarea></label>'+
-    '<div class="patient-form-actions"><button type="submit" class="primary">Предварительный просмотр</button><button type="button" id="patient-edit-cancel">Закрыть</button></div>'+
+    '<div class="patient-form-actions"><button type="submit" class="primary">Сохранить</button><button type="button" id="patient-edit-cancel">Отмена</button></div>'+
     '</form>';
  }
  function courseForm(c,person){
@@ -402,7 +402,7 @@ export function createPatientUI({getState,commitState,renderApp,notice,onDischar
     '<label>РОД, Гр <input name="dose" type="text" inputmode="decimal" maxlength="36" value="'+esc(dose)+'" placeholder="2,67 / 3,2"></label>'+
     '<label>СОД, Гр <input name="sod" type="text" inputmode="decimal" maxlength="36" value="'+esc(sod)+'" placeholder="40,05 / 48"></label>'+
     '<label class="patient-tt"><input name="displayDose" type="checkbox" '+(d.displayDose?'checked':'')+'> Показывать накопленную дозу вместо номера фракции</label>'+
-    '<label>Статус <select name="status">'+opts(Object.entries(COURSE_STATUSES).filter(([key])=>key!=='early_completed'),d.status)+'</select></label>'+
+    '<label>Статус <select name="status">'+opts(Object.entries(COURSE_STATUSES).filter(([key])=>key!=='early_completed'),d.status)+'</select><small class="muted">«Ожидает начала» → «На лечении» автоматически с первой запланированной фракции (с учётом нерабочих дней). Завершение курса — отдельно.</small></label>'+
     '<div id="chemo-fields" class="hlt-fields wide hidden"><h4>План введений ХТ</h4>'+
     '<label>Количество введений ХТ <input name="chemoCount" type="number" min="1" max="52" value="'+esc(d.chemo?.count||'')+'" placeholder="Укажи количество"></label>'+
     '<label id="chemo-manual-date" class="hidden">Дата первого введения ХТ (C50) <input name="chemoFirstDate" type="date" value="'+esc(d.chemo?.mode==='manual'?d.chemo.firstDate||'':'')+'"></label>'+
@@ -429,7 +429,7 @@ export function createPatientUI({getState,commitState,renderApp,notice,onDischar
    el('patient-editor').innerHTML=html;
    el('patient-editor').classList.remove('hidden');
    el('patient-edit-cancel').onclick=closeEditor;
-   if(kind.startsWith('person')){const form=el('patient-person-form');wirePatientFields(form);form.onsubmit=submitPerson;}
+   if(kind.startsWith('person')){const form=el('patient-person-form');wirePatientFields(form);form.onsubmit=submitPerson;form.elements.name?.focus?.();}
    else {
      const form=el('patient-course-form');
      const ctvControl=wireCtv(form,{existing:Boolean(course),getState});
@@ -472,10 +472,28 @@ export function createPatientUI({getState,commitState,renderApp,notice,onDischar
  }
  function submitPerson(event){
    event.preventDefault();
+   if(!editor||!['person-create','person-edit'].includes(editor.kind))return;
    const data=Object.fromEntries(new FormData(event.currentTarget));
+   const isNew=editor.kind==='person-create';
    const s=getState();
-   const result=editor.kind==='person-create'?createPersonDraft(s,data):updatePersonDraft(s,editor.personId,data);
-   showPreview(result,editor.kind==='person-create'?'Создать новую карточку пациента?':'Сохранить изменение данных пациента?',editor.kind==='person-create'?'<p>После создания добавь курс, чтобы он появился в календаре.</p>':'<p>Имя обновится во всех связанных курсах. Сеансы не пересчитываются.</p>',result.entry?.id||selectedId,editor.kind==='person-create');
+   const result=isNew?createPersonDraft(s,data):updatePersonDraft(s,editor.personId,data);
+   if(result.error){notice(result.error);return;}
+   const personId=result.entry.id;
+   closeEditor();
+   selectedId=personId;
+   commitState(result.state);
+   if(isNew){
+     search='';statusFilter='all';
+     el('patient-search').value='';
+     el('patient-status-filter').value='all';
+     onPersonCreated();
+   }
+   renderApp();
+   if(isNew){
+     const listScroller=el('patient-list').closest?.('.scroll');
+     if(listScroller)listScroller.scrollTop=0;
+   }
+   notice(isNew?'Пациент добавлен':'Данные пациента сохранены');
  }
  function submitCourse(event){
    event.preventDefault();
