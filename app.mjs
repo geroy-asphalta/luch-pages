@@ -3,7 +3,7 @@ import {isWorkingDay,effectiveDay,effectiveDayLabel} from './work-calendar.mjs';
 import {createWorkdayUI} from './workday-ui.mjs';
 import {createOperationalUI} from './operations-ui.mjs';
 import {ensurePatientModel} from './patient-model.mjs';
-import {createPatientUI} from './patient-ui.mjs?v=3';
+import {createPatientUI} from './patient-ui.mjs?v=4';
 import {createCatalogUI} from './catalog-ui.mjs';
 import {currentCtvName} from './ctv-display.mjs';
 import {courseProgress,localToday,dischargeCandidates,dischargeBatchDraft} from './course-progress.mjs?v=2';
@@ -315,7 +315,14 @@ const cardDrawer=setupPatientCardDrawer({
  toggleButton:el('patient-card-register-toggle'),
  register:el('patient-card-register')
 });
-const patientUI=createPatientUI({getState:()=>state,commitState:next=>{state=next;save();},renderApp:()=>render(),notice,onDischargeRequest:courseId=>showDischargeDialog(courseId),onOpenCard:()=>cardDrawer.open(),getSort:()=>patientSort,onSortChange:next=>{patientSort=next;render();}});
+const patientUI=createPatientUI({getState:()=>state,commitState:next=>{state=next;save();},renderApp:()=>render(),notice,onDischargeRequest:courseId=>showDischargeDialog(courseId),onOpenCard:()=>cardDrawer.open(),getSort:()=>patientSort,onSortChange:next=>{patientSort=next;render();},
+  onPersonCreated:()=>{
+    // Creation takes priority over previous alphabetical/status sort or machine filter.
+    patientSort='order';filter='';el('filter').value='';
+    selected.clear();anchor=null;
+    const scroller=el('calendar').closest('.scroll');
+    if(scroller)scroller.scrollTop=0;
+  }});
 const catalogUI=createCatalogUI({getState:()=>state,commitState:next=>{state=next;save();},renderApp:()=>render(),notice});
 const workdayUI=createWorkdayUI({getState:()=>state,commitState:next=>{state=next;save();},renderApp:()=>render(),notice});
 cloudUI=createFirebaseDemoSync({

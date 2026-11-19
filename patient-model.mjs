@@ -88,8 +88,11 @@ export function createPersonDraft(state,data){
  const s=copy(state),ids=s.people.map(p=>Number(/^P-(\d+)$/.exec(p.id)?.[1]||0));
  let n=Math.max(0,...ids)+1,personId='P-'+String(n).padStart(3,'0');
  while(s.people.some(p=>p.id===personId)){n++;personId='P-'+String(n).padStart(3,'0');}
- const lastOrder=Math.max(-1,...s.people.map((p,i)=>Number.isSafeInteger(p.displayOrder)?p.displayOrder:i));
- const person={id:personId,...input.person,archived:false,createdAt:new Date().toISOString(),displayOrder:lastOrder+1};
+ // Insert each newly created patient at the top of the shared manual order.
+ // Normalize sparse/legacy ranks first so existing relative positions stay intact.
+ ensurePatientOrder(s);
+ for(const existing of s.people)existing.displayOrder+=1;
+ const person={id:personId,...input.person,archived:false,createdAt:new Date().toISOString(),displayOrder:0};
  s.people.push(person);log(s,'person-create',{patientId:personId,detail:'Создана демонстрационная карточка'});
  return {state:s,entry:person};
 }

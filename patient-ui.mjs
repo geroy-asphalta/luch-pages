@@ -261,7 +261,7 @@ function wireCtv(form,{existing=false,getState=()=>null}={}){
  }};
 }
 
-export function createPatientUI({getState,commitState,renderApp,notice,onDischargeRequest=()=>{},onOpenCard=()=>{},getSort=()=> 'order',onSortChange=()=>{}}){
+export function createPatientUI({getState,commitState,renderApp,notice,onDischargeRequest=()=>{},onOpenCard=()=>{},getSort=()=> 'order',onSortChange=()=>{},onPersonCreated=()=>{}}){
  let selectedId=null,editor=null,pending=null,search='',statusFilter='all';
  const people=()=>getState().people||[];
  const selected=()=>people().find(p=>p.id===selectedId);
@@ -440,20 +440,31 @@ export function createPatientUI({getState,commitState,renderApp,notice,onDischar
    }
    el('patient-editor').scrollIntoView({block:'nearest',behavior:'smooth'});
  }
- function showPreview(result,description,details='',afterCommitId=null){
+ function showPreview(result,description,details='',afterCommitId=null,isNewPerson=false){
    if(result.error){notice(result.error);return;}
-   pending={state:result.state,personId:afterCommitId||selectedId};
+   pending={state:result.state,personId:afterCommitId||selectedId,isNewPerson};
    el('patient-preview').innerHTML='<h3>Предварительный просмотр</h3><p>'+description+'</p>'+details+
     '<p class="safety-note">Изменения касаются только демонстрационного расписания. Это не подтверждение лечебного плана, дозы или фактического проведения процедуры.</p>'+
     '<div class="preview-actions"><button type="button" id="patient-confirm" class="primary">Подтвердить</button><button type="button" id="patient-cancel">Отмена</button></div>';
    el('patient-preview').classList.remove('hidden');
    el('patient-confirm').onclick=()=>{
      if(!pending)return;
-     const next=pending.state,personId=pending.personId;
+     const next=pending.state,personId=pending.personId,isNewPerson=pending.isNewPerson;
      closeEditor();
      selectedId=personId;
      commitState(next);
+     if(isNewPerson){
+       // A saved new patient is always visible in the first position.
+       search='';statusFilter='all';
+       el('patient-search').value='';
+       el('patient-status-filter').value='all';
+       onPersonCreated();
+     }
      renderApp();
+     if(isNewPerson){
+       const listScroller=el('patient-list').closest?.('.scroll');
+       if(listScroller)listScroller.scrollTop=0;
+     }
      notice('Изменения карточки сохранены');
    };
    el('patient-cancel').onclick=()=>{pending=null;el('patient-preview').classList.add('hidden');};
@@ -464,7 +475,7 @@ export function createPatientUI({getState,commitState,renderApp,notice,onDischar
    const data=Object.fromEntries(new FormData(event.currentTarget));
    const s=getState();
    const result=editor.kind==='person-create'?createPersonDraft(s,data):updatePersonDraft(s,editor.personId,data);
-   showPreview(result,editor.kind==='person-create'?'Создать новую карточку пациента?':'Сохранить изменение данных пациента?',editor.kind==='person-create'?'<p>После создания добавь курс, чтобы он появился в календаре.</p>':'<p>Имя обновится во всех связанных курсах. Сеансы не пересчитываются.</p>',result.entry?.id||selectedId);
+   showPreview(result,editor.kind==='person-create'?'Создать новую карточку пациента?':'Сохранить изменение данных пациента?',editor.kind==='person-create'?'<p>После создания добавь курс, чтобы он появился в календаре.</p>':'<p>Имя обновится во всех связанных курсах. Сеансы не пересчитываются.</p>',result.entry?.id||selectedId,editor.kind==='person-create');
  }
  function submitCourse(event){
    event.preventDefault();
