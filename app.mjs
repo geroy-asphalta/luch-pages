@@ -25,6 +25,7 @@ import {setupCalendarCellContextMenu} from './calendar-cell-context-menu.mjs';
 import {setupPatientCardDrawer} from './patient-card-drawer.mjs';
 import {createImportedDemoState,installImportedDemoRoster} from './demo-roster.mjs?v=5';
 import {installPhotoDemoRoster} from './demo-photo-roster.mjs';
+import {installPhotoCourseAssignments} from './demo-photo-course-assignments.mjs';
 import {calendarRosterRows} from './calendar-roster-rows.mjs';
 import {installImportedLabColors} from './demo-lab-colors.mjs?v=1';
 
@@ -35,6 +36,7 @@ try { state=JSON.parse(localStorage.getItem(store)); } catch { state=null; }
 state=installImportedDemoRoster(state);
 state=installImportedLabColors(state);
 state=installPhotoDemoRoster(state);
+state=installPhotoCourseAssignments(state);
 state.breakdowns??=[];state.transfers??=[];state.audit??=[];
 state=ensurePatientModel(state);
 // Persist safe migration of pending HLT blood dates; issued referrals are untouched.
@@ -389,7 +391,7 @@ function maybeAskDischarge(){
 function renderJournal(){
  const arr=state.audit.slice().reverse();
  el('journal-list').innerHTML=arr.length?arr.map(a=>
- '<div class="list-item"><span><b>'+esc(a.patientId||a.machine||'Оборудование')+'</b> · '+esc(a.day||'')+' · '+({lab:'Кровь назначена','lab-assign':'Кровь назначена','lab-remove':'Назначение крови снято',issue:'Направление выдано','issue-undo':'Отмена выдачи направления',skip:'Пропуск',unskip:'Отмена пропуска',breakdown:'Поломка','breakdown-update':'Обновлено восстановление', 'breakdown-remove':'Отмена поломки',transfer:'Перевод аппарата','transfer-remove':'Отмена перевода','person-create':'Новый пациент','person-update':'Изменена карточка','person-archive':'Пациент в архиве','person-restore':'Пациент восстановлен','course-create':'Новый курс','course-update':'Изменён курс','course-archive':'Курс в архиве','course-restore':'Курс восстановлен','course-discharge':'Подтверждена выписка','course-discharge-early':'Досрочно завершён курс','course-discharge-deferred':'Выписка отложена','ctv-create':'Добавлена схема CTV','ctv-update':'Изменена схема CTV','ctv-hide':'CTV скрыт','ctv-show':'CTV восстановлен','ctv-reset':'CTV сброшен к исходному','chemo-plan':'План введений ХТ','calendar-day':'Рабочий календарь: дата изменена','calendar-day-remove':'Рабочий календарь: исключение удалено','patient-reorder':'Изменён порядок пациентов','patient-photo-roster':'Обновлён демонстрационный список','maintenance-final':'Последняя фракция до ТО запланирована','maintenance-final-remove':'Исключение последней фракции до ТО снято','hlt-lab-align':'Дата анализа перед ХТ исправлена'}[a.kind]||a.kind)+(a.detail?' · '+esc(a.detail):'')+'</span><small>'+new Date(a.date).toLocaleString('ru-RU')+'</small></div>'
+ '<div class="list-item"><span><b>'+esc(a.patientId||a.machine||'Оборудование')+'</b> · '+esc(a.day||'')+' · '+({lab:'Кровь назначена','lab-assign':'Кровь назначена','lab-remove':'Назначение крови снято',issue:'Направление выдано','issue-undo':'Отмена выдачи направления',skip:'Пропуск',unskip:'Отмена пропуска',breakdown:'Поломка','breakdown-update':'Обновлено восстановление', 'breakdown-remove':'Отмена поломки',transfer:'Перевод аппарата','transfer-remove':'Отмена перевода','person-create':'Новый пациент','person-update':'Изменена карточка','person-archive':'Пациент в архиве','person-restore':'Пациент восстановлен','course-create':'Новый курс','course-update':'Изменён курс','course-archive':'Курс в архиве','course-restore':'Курс восстановлен','course-discharge':'Подтверждена выписка','course-discharge-early':'Досрочно завершён курс','course-discharge-deferred':'Выписка отложена','ctv-create':'Добавлена схема CTV','ctv-update':'Изменена схема CTV','ctv-hide':'CTV скрыт','ctv-show':'CTV восстановлен','ctv-reset':'CTV сброшен к исходному','chemo-plan':'План введений ХТ','calendar-day':'Рабочий календарь: дата изменена','calendar-day-remove':'Рабочий календарь: исключение удалено','patient-reorder':'Изменён порядок пациентов','patient-photo-roster':'Обновлён демонстрационный список','patient-photo-course':'Добавлены плановые курсы по снимку','maintenance-final':'Последняя фракция до ТО запланирована','maintenance-final-remove':'Исключение последней фракции до ТО снято','hlt-lab-align':'Дата анализа перед ХТ исправлена'}[a.kind]||a.kind)+(a.detail?' · '+esc(a.detail):'')+'</span><small>'+new Date(a.date).toLocaleString('ru-RU')+'</small></div>'
  ).join(''):'<div class="empty">Пока изменений нет — попробуй назначить анализы на календаре.</div>';
 }
 function setView(next){
@@ -500,7 +502,7 @@ catalogUI.setup();
 workdayUI.setup();
 el('reset').onclick=()=>{
  if(!confirm('Восстановить демонстрационные данные? Локальные изменения в этом браузере будут потеряны.'))return;
- state=ensurePatientModel(createImportedDemoState());state=installImportedLabColors(state);state=installPhotoDemoRoster(state);patientSort='order';selected.clear();hideWeekPreview();save();operations.reset();patientUI.reset();catalogUI.reset();workdayUI.reset();render();notice('Демонстрационные данные восстановлены');
+ state=ensurePatientModel(createImportedDemoState());state=installImportedLabColors(state);state=installPhotoDemoRoster(state);state=installPhotoCourseAssignments(state);patientSort='order';selected.clear();hideWeekPreview();save();operations.reset();patientUI.reset();catalogUI.reset();workdayUI.reset();render();notice('Демонстрационные данные восстановлены');
 };
 render();
 scrollCalendarToWeek(el('calendar'),weekBounds(localToday())?.start);
