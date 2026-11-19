@@ -386,6 +386,16 @@ main{padding:32px 29px;flex:1;min-width:0}.head{display:flex;justify-content:spa
 .discharge-info{padding:13px 0 8px;line-height:1.65;font-size:12px;color:#567487}
 .discharge-info p{margin:6px 0}
 .discharge-info .discharge-patient{font-size:15px;color:#2c5369}
+.discharge-list-intro{font-size:13px;color:#46677b;margin:0 0 12px}
+.discharge-list{display:grid;gap:8px;max-height:46vh;overflow-y:auto;overscroll-behavior:contain;padding:2px}
+.discharge-choice{display:flex;align-items:flex-start;gap:12px;padding:12px;border:1px solid #d5e3e9;border-radius:10px;background:#fbfdfe;cursor:pointer}
+.discharge-choice:has(input:checked){border-color:#a8d3be;background:#f3faf6}
+.discharge-choice input{width:19px;height:19px;flex:none;margin:2px 0 0;accent-color:#397c5d}
+.discharge-choice-content{display:flex;flex-direction:column;gap:3px;min-width:0}
+.discharge-choice-content b{color:#284c61;font-size:14px}
+.discharge-choice-content span{font-size:12px;line-height:1.5;color:#567487}
+.discharge-choice-content small{display:block;line-height:1.5}
+
 .discharge-deferred{padding:7px 10px;background:#fff2e3;border-radius:6px;color:#9a6d2d}
 .discharge-confirm-label{display:flex;align-items:flex-start;gap:10px;font-size:12px;line-height:1.45;margin:15px 0;padding:12px;border:1px solid #d5e6e1;border-radius:9px;background:#f2faf6;color:#446b5e;cursor:pointer}
 .discharge-confirm-label input{width:18px;height:18px;flex:none;margin:0;accent-color:#397c5d}

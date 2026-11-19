@@ -6,7 +6,7 @@ import {ensurePatientModel} from './patient-model.mjs';
 import {createPatientUI} from './patient-ui.mjs?v=3';
 import {createCatalogUI} from './catalog-ui.mjs';
 import {currentCtvName} from './ctv-display.mjs';
-import {courseProgress,localToday,dischargeCandidates,dischargeDecisionDraft} from './course-progress.mjs';
+import {courseProgress,localToday,dischargeCandidates,dischargeBatchDraft} from './course-progress.mjs?v=2';
 import {activePatientCount,todayTasks,toggleTodayTaskDraft} from './today-tasks.mjs?v=2';
 import {orderedPersonIds,comparePatientEntries,reorderPatientDraft} from './patient-order.mjs';
 import {setupPatientReordering} from './patient-drag.mjs';
@@ -314,59 +314,74 @@ const cardDrawer=setupPatientCardDrawer({
 const patientUI=createPatientUI({getState:()=>state,commitState:next=>{state=next;save();},renderApp:()=>render(),notice,onDischargeRequest:courseId=>showDischargeDialog(courseId),onOpenCard:()=>cardDrawer.open(),getSort:()=>patientSort,onSortChange:next=>{patientSort=next;render();}});
 const catalogUI=createCatalogUI({getState:()=>state,commitState:next=>{state=next;save();},renderApp:()=>render(),notice});
 const workdayUI=createWorkdayUI({getState:()=>state,commitState:next=>{state=next;save();},renderApp:()=>render(),notice});
-// A one-time question on the actual LAST PLANNED fraction day, not automatic
-// clinical completion based on clock time. "Later" is suppressed only in this tab.
+// The final-fraction question is grouped by day. A single explicit action
+// records every choice together; postponing only suppresses this tab's prompts.
 const dischargeSuppressed=new Set();
-let promptCheckedOnDay='',dischargeCourseId=null;
+let promptCheckedOnDay='',dischargePendingIds=[],dischargeDialogDay='';
 function closeDischargeDialog(){
  const dialog=el('discharge-dialog');
+ dischargePendingIds=[];
+ dischargeDialogDay='';
  if(dialog.open)dialog.close();
- dischargeCourseId=null;
+}
+function updateDischargeButton(){
+ const inputs=[...el('discharge-info').querySelectorAll('[data-discharge-course]')];
+ const checked=inputs.filter(input=>input.checked).length;
+ el('discharge-confirm').textContent=checked?'Подтвердить выписку ('+checked+')':'Оставить всех на лечении';
 }
 function showDischargeDialog(courseId=null){
  const dlg=el('discharge-dialog'),today=localToday();
- if(dlg.open||el('issue-dialog').open)return;
- let course=null;
+ if(dlg.open||[...document.querySelectorAll('dialog')].some(d=>d.open))return;
+ let entries;
  if(courseId){
-   course=state.patients.find(c=>c.id===courseId);
-   const progress=courseProgress(state,course,today);
-   if(!['active','planned'].includes(course?.status)||!progress.finalDate||progress.finalDate>today){
-     notice('Для решения о выписке нужна наступившая дата последней плановой фракции.');return;
-   }
+  const course=state.patients.find(c=>c.id===courseId);
+  const progress=courseProgress(state,course,today);
+  if(!['active','planned'].includes(course?.status)||!progress.finalDate||progress.finalDate>today){
+   notice('Для решения о выписке нужна наступившая дата последней плановой фракции.');return;
+  }
+  entries=[{course,progress,person:state.people?.find(p=>p.id===course.personId)}];
  }else{
-   const first=dischargeCandidates(state,today).find(x=>!dischargeSuppressed.has(x.course.id+'|'+today));
-   if(!first)return;
-   course=first.course;
+  entries=dischargeCandidates(state,today).filter(x=>!dischargeSuppressed.has(x.course.id+'|'+today));
  }
- dischargeCourseId=course.id;
- const info=courseProgress(state,course,today);
- el('discharge-info').innerHTML='<p class="discharge-patient"><b>'+esc(course.name)+'</b> · '+esc(course.courseName||'Курс')+'</p>'+
-   '<p>Аппарат: <b>'+esc(course.machine)+'</b> · Последняя фракция: <b>'+esc(info.finalDate)+'</b> · Всего: <b>'+info.total+'</b></p>'+
-   '<p>По датам автоматически учтено <b>'+info.elapsed+' / '+info.total+'</b> предыдущих плановых сеансов'+
-   (info.finalToday?'. Сегодня последняя фракция, её проведение необходимо подтвердить отдельно.':
-   '. Последняя дата уже прошла — проверь историю перед решением.')+'</p>'+
-   (course.treatmentType==='ХЛТ'&&course.chemo?.firstDate&&course.chemo.count&&addDays(course.chemo.firstDate,(course.chemo.count-1)*7)>info.finalDate?'<p class="discharge-deferred">Внимание: в плане ХЛТ есть введения химии после последней фракции ЛТ. Проверь этот план перед выпиской.</p>':'')+
-   (course.dischargeReview?.decision==='no'?'<p class="discharge-deferred">Ранее выписка была отложена. Можно изменить решение после проверки.</p>':'');
- const confirm=el('discharge-final-confirm');
- confirm.checked=false;
- el('discharge-yes').disabled=true;
+ if(!entries.length)return;
+ dischargeDialogDay=today;
+ dischargePendingIds=entries.map(x=>x.course.id);
+ el('discharge-dialog-title').textContent=entries.length===1?'Подтверждение выписки':'Выписка пациентов · '+entries.length;
+ el('discharge-info').innerHTML='<p class="discharge-list-intro">Отметь тех, кого выписываем. По умолчанию выбраны все '+entries.length+' курс(а). Сними галочку, если выписку нужно отложить.</p>'+
+  '<div class="discharge-list">'+entries.map(({course,person,progress})=>{
+   const chemoAfter=course.treatmentType==='ХЛТ'&&course.chemo?.firstDate&&course.chemo.count&&
+    addDays(course.chemo.firstDate,(course.chemo.count-1)*7)>progress.finalDate;
+   return '<label class="discharge-choice"><input type="checkbox" data-discharge-course="'+esc(course.id)+'" checked>'+
+    '<span class="discharge-choice-content"><b>'+esc(person?.name||course.name)+'</b><span>'+esc(course.courseName||'Курс')+
+    ' · '+esc(course.machine)+' · '+esc(progress.finalDate)+' · '+progress.total+' фр.</span>'+
+    (chemoAfter?'<small class="discharge-deferred">По плану ХЛТ есть введения ХТ после последней фракции ЛТ. Проверь план до выписки.</small>':'')+
+    (course.dischargeReview?.decision==='no'?'<small class="discharge-deferred">Ранее выписка была отложена.</small>':'')+
+    '</span></label>';
+  }).join('')+'</div>';
+ updateDischargeButton();
  if(typeof dlg.showModal==='function')dlg.showModal();else dlg.setAttribute('open','');
 }
-function decideDischarge(decision){
- if(!dischargeCourseId)return;
- const result=dischargeDecisionDraft(state,dischargeCourseId,{
-   decision,today:localToday(),confirmFinal:el('discharge-final-confirm').checked
- });
+function confirmDischargeBatch(){
+ if(!dischargePendingIds.length)return;
+ if(localToday()!==dischargeDialogDay){
+  closeDischargeDialog();render();notice('Наступил новый день. Проверь обновлённый список.');return;
+ }
+ const inputs=[...el('discharge-info').querySelectorAll('[data-discharge-course]')];
+ const choices=inputs.map(input=>({courseId:input.dataset.dischargeCourse,discharge:input.checked}));
+ if(choices.length!==dischargePendingIds.length||
+  choices.some((choice,index)=>choice.courseId!==dischargePendingIds[index])){
+  notice('Список изменился. Открой выписку заново.');return;
+ }
+ const result=dischargeBatchDraft(state,choices,{today:dischargeDialogDay});
  if(result.error){notice(result.error);return;}
  state=result.state;save();
  closeDischargeDialog();
  render();
- notice(decision==='yes'?'Курс завершён. Решение о выписке сохранено.':'Выписка отложена. Курс остаётся активным.');
+ notice('Выписано: '+result.discharged+' · оставлено на лечении: '+result.deferred);
 }
 function maybeAskDischarge(){
  const today=localToday();
  if(promptCheckedOnDay!==today){dischargeSuppressed.clear();promptCheckedOnDay=today;}
- if(el('discharge-dialog').open||el('issue-dialog').open)return;
  if([...document.querySelectorAll('dialog')].some(d=>d.open))return;
  showDischargeDialog();
 }
@@ -425,13 +440,16 @@ el('issue-week-cancel').onclick=hideWeekPreview;
 el('issue-dialog-close').onclick=hideWeekPreview;
 el('issue-dialog').addEventListener('close',()=>{weekPending=null;});
 el('skip').onclick=()=>buttonClick('skip');
-el('discharge-final-confirm').onchange=e=>{el('discharge-yes').disabled=!e.target.checked;};
-el('discharge-yes').onclick=()=>decideDischarge('yes');
-el('discharge-no').onclick=()=>decideDischarge('no');
-el('discharge-later').onclick=()=>{if(dischargeCourseId)dischargeSuppressed.add(dischargeCourseId+'|'+localToday());closeDischargeDialog();maybeAskDischarge();};
+el('discharge-info').addEventListener('change',event=>{
+ if(event.target.matches('[data-discharge-course]'))updateDischargeButton();
+});
+el('discharge-confirm').onclick=confirmDischargeBatch;
+el('discharge-later').onclick=()=>{
+ for(const id of dischargePendingIds)dischargeSuppressed.add(id+'|'+dischargeDialogDay);
+ closeDischargeDialog();
+};
 el('discharge-dialog-close').onclick=el('discharge-later').onclick;
-el('discharge-dialog').addEventListener('close',()=>{dischargeCourseId=null;});
-el('discharge-dialog').addEventListener('cancel',e=>{e.preventDefault();el('discharge-later').click();});
+el('discharge-dialog').addEventListener('cancel',event=>{event.preventDefault();el('discharge-later').click();});
 window.addEventListener('focus',()=>{render();});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)render();});
 // When an open tab crosses midnight, update inferred session marks and final-day prompts.

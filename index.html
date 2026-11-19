@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#172b38">
 <meta name="description" content="ЛУЧ: демонстрационный календарь лучевой терапии.">
-<link rel="stylesheet" href="./style.css?v=1.30">
+<link rel="stylesheet" href="./style.css?v=1.31">
 <link rel="stylesheet" href="./catalog-ui.css?v=3">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" type="image/svg+xml" href="./icon.svg">
@@ -227,18 +227,16 @@
 </dialog>
 <dialog id="discharge-dialog" class="discharge-dialog" aria-labelledby="discharge-dialog-title">
  <div class="issue-dialog-header">
-  <h2 id="discharge-dialog-title">Последняя фракция · решение о выписке</h2>
+  <h2 id="discharge-dialog-title">Выписка пациентов</h2>
   <button type="button" id="discharge-dialog-close" class="issue-close" aria-label="Закрыть">×</button>
  </div>
  <div id="discharge-info" class="discharge-info"></div>
- <p class="safety-note">Дни, прошедшие по плану, лишь предполагаются выполненными. Программа не может установить факт лечения без проверки записей. Выписка оформляется только после твоего подтверждения. Если последний сеанс не состоялся, выбери «Нет» и отметь пропуск «Х» в календаре, чтобы пересчитать завершение курса.</p>
- <label class="discharge-confirm-label"><input id="discharge-final-confirm" type="checkbox"> Подтверждаю: последняя фракция действительно проведена, пропуски и записи о лечении проверены.</label>
+ <p class="safety-note">Нажимая «Подтвердить выписку», ты лично подтверждаешь, что последняя фракция каждого отмеченного пациента действительно проведена, а пропуски и записи о лечении проверены. Прошедшие по календарю дни сами по себе не подтверждают факт лечения. Для пациентов без проведённого сеанса сними галочку и отметь «Х» в календаре.</p>
  <div class="discharge-actions">
-  <button type="button" id="discharge-yes" class="primary" disabled>Да, выписываем</button>
-  <button type="button" id="discharge-no">Нет, не выписываем</button>
+  <button type="button" id="discharge-confirm" class="primary">Подтвердить выписку</button>
   <button type="button" id="discharge-later">Позже</button>
  </div>
 </dialog>
 <div role="status" aria-live="polite" id="toast" class="toast"></div>
-<script type="module" src="./app.mjs?v=1.36"></script>
+<script type="module" src="./app.mjs?v=1.37"></script>
 </body></html>

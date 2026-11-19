@@ -61,3 +61,24 @@ export function dischargeDecisionDraft(state,courseId,{decision,today=localToday
  });
  return {state:next,entry:updated,decision};
 }
+
+
+// Apply all decisions from one dialog as an atomic draft: any invalid course
+// rejects the whole batch, so a later error cannot leave half the list discharged.
+export function dischargeBatchDraft(state,choices,{today=localToday()}={}){
+ if(!Array.isArray(choices)||!choices.length)return {error:'Список пациентов для выписки пуст.'};
+ const ids=new Set();
+ let next=state;
+ for(const choice of choices){
+  if(!choice||typeof choice.courseId!=='string'||typeof choice.discharge!=='boolean')
+   return {error:'Некорректная отметка в списке выписки.'};
+  if(ids.has(choice.courseId))return {error:'В списке выписки повторяется один курс.'};
+  ids.add(choice.courseId);
+  const result=dischargeDecisionDraft(next,choice.courseId,{
+   today,decision:choice.discharge?'yes':'no',confirmFinal:choice.discharge
+  });
+  if(result.error)return {error:result.error};
+  next=result.state;
+ }
+ return {state:next,discharged:choices.filter(x=>x.discharge).length,deferred:choices.filter(x=>!x.discharge).length};
+}
