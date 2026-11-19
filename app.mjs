@@ -181,10 +181,10 @@ function renderStats(){
    +'<span class="today-task-text" title="'+esc(task.fullName)+'">'+esc(task.label)+'</span>'
    +call+'</li>';
  }).join('');
- el('stats').innerHTML='<div class="dashboard-active-compact" role="status" aria-label="Активных пациентов: '+activePatientCount(state)+'">'
-  +'<svg class="dashboard-active-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>'
-  +'<span class="dashboard-active-label">Активных:</span><strong class="dashboard-active-count">'+activePatientCount(state)+'</strong></div>'
-  +'<section class="today-tasks" aria-labelledby="today-tasks-title">'
+ const active=activePatientCount(state);
+ el('calendar-active-count').textContent=String(active);
+ el('calendar-add-patient').setAttribute('aria-label','Добавить пациента. Активных пациентов: '+active);
+ el('stats').innerHTML='<section class="today-tasks" aria-labelledby="today-tasks-title">'
   +'<div class="today-tasks-head"><div><h2 id="today-tasks-title">Задачи на сегодня</h2><small>'+esc(date)+'</small></div><span class="today-tasks-count">'+(tasks.length?pending+' не выполнено':'Нет задач')+'</span></div>'
   +(tasks.length?'<ul class="today-tasks-list">'+rows+'</ul>':'<p class="today-tasks-empty">На сегодня задач нет</p>')
   +'</section>';

@@ -786,11 +786,7 @@ body.calendar-range-moving .calendar tbody td.day{cursor:crosshair}
 .calendar .name .calendar-eln-unknown{background:#edf2f5;color:#647889;border-color:#d7e1e8}
 
 /* Overview: active patient count + today's persistent administrative checklist. */
-.stats{grid-template-columns:max-content minmax(0,360px);align-items:start;justify-content:start;gap:14px}
-.dashboard-active-compact{display:inline-flex;align-items:center;justify-self:start;align-self:start;gap:7px;min-height:42px;padding:9px 12px;border:1px solid #e2e9ee;border-radius:10px;background:#fff;white-space:nowrap}
-.dashboard-active-icon{flex:none;color:#6c8393}
-.dashboard-active-label{font-size:12px;font-weight:600;color:#617789}
-.dashboard-active-count{font-size:21px;line-height:1;font-weight:800;color:#203447;font-variant-numeric:tabular-nums}
+.stats{display:flex;align-items:flex-start;justify-content:flex-start;gap:0}
 .today-tasks{width:100%;max-width:360px;min-width:0;border:1px solid #e2e9ee;border-radius:14px;background:#fff;padding:15px 18px;box-shadow:0 3px 18px #11263806}
 .today-tasks-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:9px}
 .today-tasks-head h2{font-size:15px;font-weight:800;letter-spacing:-.2px;color:#284459;margin:0}
@@ -808,8 +804,7 @@ body.calendar-range-moving .calendar tbody td.day{cursor:crosshair}
 .today-task-call.is-unavailable{background:#f4f6f7;border-color:#e5ebef;color:#bdc8ce;cursor:default}
 .today-tasks-empty{margin:10px 0 3px;color:#8d9fa9;font-size:12px}
 @media(max-width:790px){
- .stats{grid-template-columns:minmax(0,1fr);gap:10px}
- .dashboard-active-compact{padding:8px 11px;min-height:40px}
+ .stats{display:block}
  .today-tasks{padding:12px 13px}
  .today-tasks-list{max-height:260px}
  .today-task-text{font-size:11px}
@@ -847,4 +842,16 @@ body.calendar-range-moving .calendar tbody td.day{cursor:crosshair}
 .calendar-cell-menu-icon svg{width:24px;height:24px}
 @media(max-width:700px){
  .calendar-cell-context-menu button{min-height:44px;font-size:13px}
+}
+
+/* Patient count is an integrated badge inside the existing Add patient icon.
+   It is visual only: tapping anywhere still opens the patient editor. */
+.filters #calendar-add-patient{margin-right:7px}
+.filters #calendar-add-patient .calendar-active-count{
+ position:absolute;right:-8px;bottom:-5px;z-index:1;
+ display:inline-flex;align-items:center;justify-content:center;
+ min-width:21px;height:21px;padding:0 4px;
+ border:2px solid #fff;border-radius:999px;
+ background:#345e71;color:#fff;font-size:10px;font-weight:800;
+ line-height:1;font-variant-numeric:tabular-nums;pointer-events:none;
 }
