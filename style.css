@@ -915,3 +915,21 @@ main{padding-top:16px}
  .calendar-toolbar-right .month-controls{width:100%;justify-content:space-between}
  .calendar-toolbar-right .actions{width:100%;justify-content:flex-end}
 }
+
+/* Adaptive patient names: 13-inch laptop widths retain surname + initials;
+   wide desktop viewports show the whole name without taller calendar rows.
+   Breakpoint is the CSS viewport, not OS or the monitor's physical diagonal. */
+.calendar .name .patient-name-short{display:inline}
+.calendar .name .patient-name-full{display:none}
+@media(min-width:1500px){
+ .calendar .name{min-width:320px;width:320px;max-width:320px;left:70px}
+ .calendar .name .patient-name-short{display:none}
+ .calendar .name .patient-name-full{display:inline}
+ /* Name grows by 165px from the 155px baseline. Keep every frozen
+    machine, phone and notes offset in sync, even when phone is collapsed. */
+ .calendar .machine{left:390px}
+ .calendar th.calendar-phone,.calendar td.calendar-phone{left:480px}
+ .calendar th.calendar-notes,.calendar td.calendar-notes{left:625px}
+ .calendar.calendar-phone-collapsed th.calendar-notes,
+ .calendar.calendar-phone-collapsed td.calendar-notes{left:518px}
+}
