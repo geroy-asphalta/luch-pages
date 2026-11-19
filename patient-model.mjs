@@ -105,6 +105,24 @@ export function updatePersonDraft(state,personId,data){
  log(s,'person-update',{patientId:personId,detail:'Изменены данные карточки'+(oldName!==person.name?' и имя':'')});
  return {state:s,entry:person};
 }
+// Edit only the shared patient note from the calendar. Never rewrite course
+// notes, contact fields, treatment records or scheduled events.
+export function updatePersonNotesDraft(state,personId,value,{expectedNotes}={}){
+ const current=(state.people||[]).find(person=>person.id===personId);
+ if(!current)return {error:'Пациент не найден. Обнови таблицу.'};
+ if(typeof value!=='string'||value.trim().length>500)
+  return {error:'Примечание должно содержать не более 500 символов.'};
+ const before=String(current.notes??'');
+ if(expectedNotes!==undefined&&before!==expectedNotes)
+  return {error:'Примечание было изменено на другом устройстве или в карточке. Обнови таблицу перед сохранением.'};
+ const nextNotes=value.trim();
+ if(before===nextNotes)return {state,entry:current,changed:false};
+ const next=copy(state);
+ const person=next.people.find(p=>p.id===personId);
+ person.notes=nextNotes;
+ log(next,'person-notes-update',{patientId:personId,detail:'Примечание пациента обновлено в таблице'});
+ return {state:next,entry:person,changed:true};
+}
 export function setPersonArchivedDraft(state,personId,archived){
  const s=copy(state),person=s.people.find(p=>p.id===personId);
  if(!person)return {error:'Пациент не найден.'};

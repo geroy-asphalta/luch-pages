@@ -14,6 +14,7 @@ import {labSingleButtonDraft} from './lab-batch-preview.mjs';
 import {labButtonIntent,issueButtonIntent,skipButtonIntent,calendarActionIcon} from './calendar-action-ui.mjs';
 import {scrollCalendarToWeek,calendarWindowDates,enableCalendarHorizontalWheel} from './calendar-viewport.mjs?v=8';
 import {calendarContact} from './calendar-contact.mjs';
+import {setupCalendarInlineNotes} from './calendar-note-inline.mjs';
 import {calendarElnIndicator} from './calendar-eln-indicator.mjs';
 import {compactCalendarPatientName} from './calendar-patient-name.mjs';
 import {notesColumnWidth} from './notes-column-width.mjs';
@@ -47,7 +48,7 @@ let phoneExpanded=initialPhoneExpanded(localStorage,window.matchMedia('(max-widt
 const el=id=>document.getElementById(id);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const visibleCourse=p=>['active','planned'].includes(p.status)&&!state.people.find(x=>x.id===p.personId)?.archived;
-let cloudUI=null;
+let cloudUI=null,inlineNotesUI=null;
 const save=()=>{localStorage.setItem(store,JSON.stringify(state));cloudUI?.localChanged();};
 function notice(message){const t=el('toast');t.textContent=message;t.classList.add('show');clearTimeout(notice.timer);notice.timer=setTimeout(()=>t.classList.remove('show'),2900);}
 const cellKey=(id,date)=>id+'|'+date;
@@ -193,6 +194,7 @@ function renderStats(){
 }
 
 function renderCalendar(){
+ inlineNotesUI?.beforeRender();
  // Preserve the user's horizontal position when a selection or plan re-renders the grid.
  const scroller=el('calendar').closest('.scroll'),previousLeft=scroller?.scrollLeft??0;
  const dates=calendarWindowDates(month),patients=visiblePatients();
@@ -226,7 +228,7 @@ function renderCalendar(){
      const cellContent=calendarMaintenanceCellContent({isMaintenance:c?.kind==='maintenance',hasTreatmentEvent:Boolean(lab||chemo),content:treatmentContent});
      return '<td class="'+cl+'" data-id="'+p.id+'" data-date="'+d+'" title="'+esc(title)+'">'+cellContent+(c?.delivered?'<span class="delivered-mark">✓</span>':elapsed?'<span class="elapsed-mark">✓</span>':'')+(transfer?'<span class="transfer-mark">↗</span>':'')+(lab?'<i class="lab-dot"></i>':'')+(c?.beforeMaintenance?'<span class="maintfinal-mark">до ТО</span>':'')+'</td>';
    }).join('');
-   return '<tr data-person-id="'+esc(p.personId)+'" data-course-id="'+(p.noCourse?'':esc(p.id))+'"'+(p.noCourse?' class="calendar-no-course-row"':'')+'><td class="sticky id">'+esc(p.personId)+'</td><td class="sticky name"><div class="calendar-patient-primary"><button type="button" class="patient-open" data-person-id="'+esc(p.personId)+'" title="'+esc(p.name)+'" aria-label="Открыть карточку пациента: '+esc(p.name)+'"><span class="patient-name-short" aria-hidden="true">'+esc(compactCalendarPatientName(p.name))+'</span><span class="patient-name-full" aria-hidden="true">'+esc(p.name)+'</span></button>'+(p.treatmentType==='ХЛТ'?'<span class="type-tag">ХЛТ</span>':'')+'</div>'+patientMeta+'</td><td class="sticky machine">'+(p.noCourse?'<span class="calendar-empty">—</span>':machineAt(p,state,until)+(p.machine!==machineAt(p,state,until)?'<small>с '+p.machine+'</small>':''))+'</td><td class="sticky calendar-phone" title="'+esc(contact.phone)+'"><span class="calendar-phone-value">'+phone+'</span><span class="calendar-phone-icon" aria-hidden="true">'+(contact.phone?'☎':'—')+'</span></td><td class="sticky calendar-notes">'+notes+'</td>'+tds+'<td class="calendar-tail" aria-hidden="true"></td></tr>';
+   return '<tr data-person-id="'+esc(p.personId)+'" data-course-id="'+(p.noCourse?'':esc(p.id))+'"'+(p.noCourse?' class="calendar-no-course-row"':'')+'><td class="sticky id">'+esc(p.personId)+'</td><td class="sticky name"><div class="calendar-patient-primary"><button type="button" class="patient-open" data-person-id="'+esc(p.personId)+'" title="'+esc(p.name)+'" aria-label="Открыть карточку пациента: '+esc(p.name)+'"><span class="patient-name-short" aria-hidden="true">'+esc(compactCalendarPatientName(p.name))+'</span><span class="patient-name-full" aria-hidden="true">'+esc(p.name)+'</span></button>'+(p.treatmentType==='ХЛТ'?'<span class="type-tag">ХЛТ</span>':'')+'</div>'+patientMeta+'</td><td class="sticky machine">'+(p.noCourse?'<span class="calendar-empty">—</span>':machineAt(p,state,until)+(p.machine!==machineAt(p,state,until)?'<small>с '+p.machine+'</small>':''))+'</td><td class="sticky calendar-phone" title="'+esc(contact.phone)+'"><span class="calendar-phone-value">'+phone+'</span><span class="calendar-phone-icon" aria-hidden="true">'+(contact.phone?'☎':'—')+'</span></td><td class="sticky calendar-notes"><button type="button" class="calendar-note-trigger" data-calendar-note-open title="'+esc(contact.notes||'Добавить примечание')+'" aria-label="Изменить примечание пациента: '+esc(p.name)+'">'+notes+'<span class="calendar-note-pencil" aria-hidden="true">✎</span></button></td>'+tds+'<td class="calendar-tail" aria-hidden="true"></td></tr>';
  }).join('');
  el('selected-count').textContent=selected.size?'Выбрано: '+selected.size:'Ничего не выбрано';
  el('clear-selected').classList.toggle('hidden',!selected.size);
@@ -243,6 +245,7 @@ function renderCalendar(){
   button.title=button.getAttribute('aria-label');
   button.innerHTML=phoneExpanded?'Телефон <span aria-hidden="true">−</span>':'<span aria-hidden="true">☎</span> <span class="sr-only">Телефон</span> <span aria-hidden="true">+</span>';
  };
+ inlineNotesUI?.afterRender();
 }
 function renderActionButtons(){
  const selection=selectionItems();
@@ -325,6 +328,9 @@ const patientUI=createPatientUI({getState:()=>state,commitState:next=>{state=nex
   }});
 const catalogUI=createCatalogUI({getState:()=>state,commitState:next=>{state=next;save();},renderApp:()=>render(),notice});
 const workdayUI=createWorkdayUI({getState:()=>state,commitState:next=>{state=next;save();},renderApp:()=>render(),notice});
+inlineNotesUI=setupCalendarInlineNotes({calendar:el('calendar'),getState:()=>state,
+ commitState:next=>{state=next;save();},renderApp:()=>render(),notice,
+ onClosed:()=>cloudUI?.checkRemote()});
 cloudUI=createFirebaseDemoSync({
  getState:()=>state,
  replaceState:(next,payload)=>{
@@ -333,7 +339,7 @@ cloudUI=createFirebaseDemoSync({
   selected.clear();anchor=null;
   hideWeekPreview();render();
  },
- canApplyRemote:()=>![...document.querySelectorAll('dialog')]
+ canApplyRemote:()=>!inlineNotesUI?.isEditing()&&![...document.querySelectorAll('dialog')]
   .some(d=>d.open&&d.id!=='cloud-dialog')
 });
 // The final-fraction question is grouped by day. A single explicit action
@@ -523,6 +529,7 @@ workdayUI.setup();
 el('reset').onclick=()=>{
  if(!confirm('Восстановить демонстрационные данные? Локальные изменения в этом браузере будут потеряны.'))return;
  if(!cloudUI.canReset())return;
+ inlineNotesUI?.abort();
  state=ensurePatientModel(createImportedDemoState());state=installImportedLabColors(state);state=installPhotoDemoRoster(state);state=installPhotoCourseAssignments(state);patientSort='order';selected.clear();hideWeekPreview();save();operations.reset();patientUI.reset();catalogUI.reset();workdayUI.reset();render();notice('Демонстрационные данные восстановлены');
 };
 cloudUI.setup();
