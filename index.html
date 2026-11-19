@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#172b38">
 <meta name="description" content="ЛУЧ: демонстрационный календарь лучевой терапии.">
-<link rel="stylesheet" href="./style.css?v=1.33">
+<link rel="stylesheet" href="./style.css?v=1.35">
 <link rel="stylesheet" href="./catalog-ui.css?v=3">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" type="image/svg+xml" href="./icon.svg">
@@ -33,20 +33,20 @@
  <div class="sidebar-note"><b>Прототип 1.0</b><p>Изменения сохраняются локально. Синхронизация доступна только после подключения тестового Firebase через ☁ и только для вымышленных данных.</p></div>
 </aside>
 <main>
-<div class="head">
- <div><div class="eyebrow">РАСПИСАНИЕ ПАЦИЕНТОВ</div><h1 id="title">Пациенты</h1><p>Расписание, техническое обслуживание и направления</p></div>
- <div class="month-controls"><button id="prev" aria-label="Предыдущий месяц">‹</button><b id="month"></b><button id="next" aria-label="Следующий месяц">›</button><button id="reset-month" title="Вернуться к текущей неделе">Сегодня</button></div>
-</div>
+<h1 id="title" class="sr-only">Пациенты</h1>
 <div class="stats" id="stats" data-panel="calendar"></div>
 <section data-panel="calendar" class="workspace">
 <div class="toolbar">
  <div class="filters"><button id="calendar-add-patient" type="button" class="action-with-icon" data-tooltip="Добавить пациента" aria-label="Добавить пациента">
   <span class="action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7.3" r="3.2"/><path d="M3.4 20v-2a5.6 5.6 0 0 1 11.2 0v2"/><path d="M18.5 10.5v8M14.5 14.5h8"/></svg></span><span class="calendar-active-count" id="calendar-active-count" aria-hidden="true">0</span>
  </button><select id="filter" aria-label="Установка"><option value="">Все установки</option></select><span class="count" id="selected-count">Выберите ячейки</span><button id="clear-selected" type="button" class="clear-selection hidden">Снять выделение</button></div>
- <div class="actions">
+ <div class="calendar-toolbar-right">
+  <div class="month-controls" role="group" aria-label="Навигация по месяцам календаря"><button id="prev" aria-label="Предыдущий месяц">‹</button><b id="month" aria-live="polite"></b><button id="next" aria-label="Следующий месяц">›</button><button id="reset-month" title="Вернуться к текущей неделе">Сегодня</button></div>
+<div class="actions">
   <button class="primary action-with-icon" id="assign" type="button" data-tooltip="Назначить анализ крови" aria-label="Назначить анализ крови"><span class="action-icon" aria-hidden="true">+</span></button>
   <button id="issue" type="button" class="action-with-icon" data-tooltip="Выдать направления за неделю" aria-label="Выдать направления за неделю"><span class="action-icon" aria-hidden="true">✓</span></button>
   <button id="skip" type="button" class="action-with-icon" data-tooltip="Пропустить сеанс — сначала выбери ячейки" aria-label="Пропустить сеанс"><span class="action-icon" aria-hidden="true">×</span></button>
+ </div>
  </div>
 </div>
 <div class="scroll"><table id="calendar" class="calendar"><thead></thead><tbody></tbody></table></div>

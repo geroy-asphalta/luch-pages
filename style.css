@@ -894,3 +894,24 @@ body.calendar-range-moving .calendar tbody td.day{cursor:crosshair}
   content:'!';position:absolute;right:4px;top:2px;font-size:11px;color:#ffc17d
  }
 }
+
+/* Compact patient workspace: put month selection beside calendar actions,
+   not in a separate oversized page heading. The accessible H1 stays hidden. */
+main{padding-top:16px}
+#stats{margin-bottom:12px}
+.workspace[data-panel="calendar"] .toolbar{padding:10px 12px}
+.calendar-toolbar-right{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin-left:auto}
+.calendar-toolbar-right .month-controls{flex:0 0 auto;width:auto;gap:5px;padding:4px;border-radius:10px}
+.calendar-toolbar-right .month-controls b{min-width:112px;font-size:11px}
+.calendar-toolbar-right .month-controls button{padding:7px 9px;font-size:11px}
+@media(max-width:900px){
+ .calendar-toolbar-right{width:100%;margin-left:0;justify-content:space-between}
+}
+@media(max-width:700px){
+ main{padding-top:10px}
+ #stats{margin-bottom:10px}
+ .workspace[data-panel="calendar"] .toolbar{padding:9px}
+ .calendar-toolbar-right{gap:8px}
+ .calendar-toolbar-right .month-controls{width:100%;justify-content:space-between}
+ .calendar-toolbar-right .actions{width:100%;justify-content:flex-end}
+}
