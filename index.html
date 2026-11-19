@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#172b38">
 <meta name="description" content="ЛУЧ: демонстрационный календарь лучевой терапии.">
-<link rel="stylesheet" href="./style.css?v=1.32">
+<link rel="stylesheet" href="./style.css?v=1.33">
 <link rel="stylesheet" href="./catalog-ui.css?v=3">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" type="image/svg+xml" href="./icon.svg">
@@ -16,7 +16,8 @@
 <header class="topbar">
  <div class="logo"><span class="mark">✳</span><span><b>ЛУЧ</b><small>Календарь отделения</small></span></div>
  <div class="demo">ДЕМО · ВЫМЫШЛЕННЫЕ ПАЦИЕНТЫ</div>
- <button id="reset" title="Восстановить демо">↺ <span class="long">Сбросить демо</span></button>
+ <button id="cloud-open" type="button" aria-label="Настройки синхронизации" title="Синхронизация вымышленных данных">☁ Синхронизация</button>
+  <button id="reset" title="Восстановить демо">↺ <span class="long">Сбросить демо</span></button>
 </header>
 <div class="layout">
 <aside class="sidebar">
@@ -29,7 +30,7 @@
  <button class="nav" data-view="breakdowns"><span>⚠</span><b>Поломки аппаратов</b></button>
  <button class="nav" data-view="transfers"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle" focusable="false"><path d="M4 7h16m-4-4 4 4-4 4M20 17H4m4-4-4 4 4 4"/></svg></span><b>Переводы пациентов</b></button>
  <button class="nav" data-view="journal"><span aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle" focusable="false"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg></span><b>История действий</b></button>
- <div class="sidebar-note"><b>Прототип 1.0</b><p>Все изменения пока сохраняются только в этом браузере. Синхронизация устройств ещё не подключена.</p></div>
+ <div class="sidebar-note"><b>Прототип 1.0</b><p>Изменения сохраняются локально. Синхронизация доступна только после подключения тестового Firebase через ☁ и только для вымышленных данных.</p></div>
 </aside>
 <main>
 <div class="head">
@@ -62,7 +63,7 @@
  </div>
  <div class="patient-card-scroll">
  <section class="patient-card-content">
- <p class="patient-warning">Только вымышленные данные. Это демонстрационный реестр, не медицинская информационная система. Данные хранятся только в этом браузере.</p>
+ <p class="patient-warning">Только вымышленные данные. Это демонстрационный реестр, не медицинская информационная система. Данные сохраняются локально; при явном подключении демонстрационная база может синхронизироваться с Firebase.</p>
  <div class="patients-register hidden" id="patient-card-register">
   <div class="section-title"><h2>Все пациенты и архив</h2><button type="button" class="primary patient-new" id="patient-new">+ Добавить пациента</button></div>
   <div class="register-toolbar">
@@ -237,6 +238,35 @@
   <button type="button" id="discharge-later">Позже</button>
  </div>
 </dialog>
+<dialog id="cloud-dialog" class="discharge-dialog cloud-dialog" aria-labelledby="cloud-title">
+ <div class="issue-dialog-header">
+  <h2 id="cloud-title">☁ Синхронизация ЛУЧ (только демо)</h2>
+  <button type="button" id="cloud-close" class="issue-close" aria-label="Закрыть">×</button>
+ </div>
+ <p class="safety-note">Запрещено загружать реальные персональные и медицинские данные. Подключение добровольное. До подключения изменения остаются в браузере. Используй один и тот же тестовый аккаунт Firebase на всех устройствах.</p>
+ <p id="cloud-mode" class="cloud-mode">Не подключено</p>
+ <p id="cloud-status" class="cloud-status" role="status" aria-live="polite">Синхронизация выключена.</p>
+ <div class="cloud-fields">
+  <label>Публичная конфигурация Firebase Web app
+   <textarea id="cloud-config" rows="4" spellcheck="false" placeholder='{"apiKey":"…","authDomain":"…","projectId":"…","appId":"…"}'></textarea></label>
+  <label>E-mail тестового аккаунта
+   <input type="email" id="cloud-email" autocomplete="username" placeholder="test@example.com"></label>
+  <label>Пароль (не хранится в ЛУЧ)
+   <input type="password" id="cloud-password" autocomplete="current-password"></label>
+ </div>
+ <div class="discharge-actions">
+  <button type="button" id="cloud-login" class="primary">Подключить</button>
+  <button type="button" id="cloud-signout" disabled>Выйти</button>
+ </div>
+ <label class="cloud-synthetic"><input type="checkbox" id="cloud-synthetic"> Подтверждаю: здесь только вымышленные или надёжно обезличенные учебные записи, нет реальных пациентов.</label>
+ <div class="discharge-actions cloud-data-actions">
+  <button type="button" id="cloud-first-upload" hidden>Отправить мою тестовую таблицу в пустое облако</button>
+  <button type="button" id="cloud-accept" hidden>Принять облачную версию</button>
+  <button type="button" id="cloud-retry" hidden>Повторить отправку</button>
+  <button type="button" id="cloud-export">Скачать локальную копию JSON</button>
+ </div>
+ <p class="cloud-explain">На втором устройстве подключись под тем же тестовым аккаунтом и нажми «Принять облачную версию». После этого изменения начнут приходить автоматически. Одновременные несовместимые правки не объединяются: при конфликте запись блокируется, локальная копия сохраняется.</p>
+</dialog>
 <div role="status" aria-live="polite" id="toast" class="toast"></div>
-<script type="module" src="./app.mjs?v=1.40"></script>
+<script type="module" src="./app.mjs?v=1.41"></script>
 </body></html>

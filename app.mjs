@@ -28,6 +28,7 @@ import {installPhotoDemoRoster} from './demo-photo-roster.mjs';
 import {installPhotoCourseAssignments} from './demo-photo-course-assignments.mjs';
 import {calendarRosterRows} from './calendar-roster-rows.mjs';
 import {installImportedLabColors} from './demo-lab-colors.mjs?v=1';
+import {createFirebaseDemoSync} from './firebase-demo-state-ui.mjs';
 
 const store='luch-demo-v1';
 let state;
@@ -46,7 +47,8 @@ let phoneExpanded=initialPhoneExpanded(localStorage,window.matchMedia('(max-widt
 const el=id=>document.getElementById(id);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const visibleCourse=p=>['active','planned'].includes(p.status)&&!state.people.find(x=>x.id===p.personId)?.archived;
-const save=()=>{localStorage.setItem(store,JSON.stringify(state));};
+let cloudUI=null;
+const save=()=>{localStorage.setItem(store,JSON.stringify(state));cloudUI?.localChanged();};
 function notice(message){const t=el('toast');t.textContent=message;t.classList.add('show');clearTimeout(notice.timer);notice.timer=setTimeout(()=>t.classList.remove('show'),2900);}
 const cellKey=(id,date)=>id+'|'+date;
 const selectionItems=()=>[...selected].map(x=>{const [patientId,date]=x.split('|');return {patientId,date};});
@@ -316,6 +318,17 @@ const cardDrawer=setupPatientCardDrawer({
 const patientUI=createPatientUI({getState:()=>state,commitState:next=>{state=next;save();},renderApp:()=>render(),notice,onDischargeRequest:courseId=>showDischargeDialog(courseId),onOpenCard:()=>cardDrawer.open(),getSort:()=>patientSort,onSortChange:next=>{patientSort=next;render();}});
 const catalogUI=createCatalogUI({getState:()=>state,commitState:next=>{state=next;save();},renderApp:()=>render(),notice});
 const workdayUI=createWorkdayUI({getState:()=>state,commitState:next=>{state=next;save();},renderApp:()=>render(),notice});
+cloudUI=createFirebaseDemoSync({
+ getState:()=>state,
+ replaceState:(next,payload)=>{
+  state=next;
+  localStorage.setItem(store,payload);
+  selected.clear();anchor=null;
+  hideWeekPreview();render();
+ },
+ canApplyRemote:()=>![...document.querySelectorAll('dialog')]
+  .some(d=>d.open&&d.id!=='cloud-dialog')
+});
 // The final-fraction question is grouped by day. A single explicit action
 // records every choice together; postponing only suppresses this tab's prompts.
 const dischargeSuppressed=new Set();
@@ -502,7 +515,9 @@ catalogUI.setup();
 workdayUI.setup();
 el('reset').onclick=()=>{
  if(!confirm('Восстановить демонстрационные данные? Локальные изменения в этом браузере будут потеряны.'))return;
+ if(!cloudUI.canReset())return;
  state=ensurePatientModel(createImportedDemoState());state=installImportedLabColors(state);state=installPhotoDemoRoster(state);state=installPhotoCourseAssignments(state);patientSort='order';selected.clear();hideWeekPreview();save();operations.reset();patientUI.reset();catalogUI.reset();workdayUI.reset();render();notice('Демонстрационные данные восстановлены');
 };
+cloudUI.setup();
 render();
 scrollCalendarToWeek(el('calendar'),weekBounds(localToday())?.start);

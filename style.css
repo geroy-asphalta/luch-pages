@@ -855,3 +855,42 @@ body.calendar-range-moving .calendar tbody td.day{cursor:crosshair}
  background:#345e71;color:#fff;font-size:10px;font-weight:800;
  line-height:1;font-variant-numeric:tabular-nums;pointer-events:none;
 }
+
+
+/* Optional test-only Firestore synchronization. Layout works on iPhone. */
+.topbar #cloud-open{white-space:nowrap;max-width:100%;font-size:12px}
+.cloud-dialog{width:min(680px,calc(100vw - 22px));max-height:90vh}
+.cloud-dialog .cloud-fields{display:grid;gap:10px;margin-top:14px}
+.cloud-dialog .cloud-fields label{display:grid;gap:5px;font-size:12px;font-weight:700;color:#416175}
+.cloud-dialog .cloud-fields input,.cloud-dialog .cloud-fields textarea{
+ box-sizing:border-box;width:100%;max-width:100%;padding:10px 12px;font:inherit;font-size:13px;
+ color:#203a4b;background:#fff;border:1px solid #bacbd4;border-radius:8px
+}
+.cloud-dialog .cloud-fields textarea{resize:vertical;min-height:92px;font-family:ui-monospace,monospace;font-size:11px}
+.cloud-dialog .cloud-mode{font-weight:700;font-size:12px;margin:10px 0;color:#4a6678}
+.cloud-dialog .cloud-status{min-height:36px;padding:12px;background:#f0f5f7;border-radius:8px;line-height:1.5;font-size:12px;white-space:pre-wrap}
+.cloud-dialog .cloud-synthetic{display:flex;align-items:flex-start;gap:10px;font-size:12px;line-height:1.5;margin:14px 0}
+.cloud-dialog .cloud-synthetic input{flex:none;margin-top:2px;accent-color:#347c99}
+.cloud-dialog .cloud-data-actions{border-top:1px solid #e1eaf0;padding-top:12px}
+.cloud-dialog .cloud-data-actions [hidden]{display:none!important}
+.cloud-dialog .cloud-explain{font-size:12px;line-height:1.6;color:#627c8c;margin-top:12px}
+@media(max-width:650px){
+ .topbar #cloud-open{font-size:11px}
+ .cloud-dialog .discharge-actions button{width:100%;flex:1 1 100%}
+}
+
+/* Keep cloud status reachable on narrow phones without crowding the header. */
+.topbar #reset{margin-left:0}
+.topbar #cloud-open{margin-left:auto;position:relative}
+@media(max-width:700px){
+ .topbar #cloud-open{font-size:0!important;padding:8px 11px;min-width:40px;min-height:39px}
+ .topbar #cloud-open::before{content:'☁';font-size:18px}
+ .topbar #cloud-open[data-cloud-status="synced"]::after{
+  content:'';position:absolute;width:7px;height:7px;right:5px;top:5px;
+  border:1px solid #172b38;border-radius:50%;background:#43be89
+ }
+ .topbar #cloud-open[data-cloud-status="conflict"]::after,
+ .topbar #cloud-open[data-cloud-status="unsent"]::after{
+  content:'!';position:absolute;right:4px;top:2px;font-size:11px;color:#ffc17d
+ }
+}
