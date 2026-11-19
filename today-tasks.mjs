@@ -77,12 +77,67 @@ export function todayTasks(state,today){
  }));
 }
 
+// One catalog entry per task; daily history stores IDs only. This avoids
+// repeatedly embedding the same HLT call in every day's Firebase snapshot.
+const historyDay=(state,date)=>{
+ const entries=state.todayTaskHistory?.[date]||[];
+ return entries.map(item=>typeof item==='string'?state.todayTaskCatalog?.[item]:item)
+  .filter(Boolean);
+};
+const storedId=item=>typeof item==='string'?item:item?.id;
+const storedTask=task=>Object.fromEntries(Object.entries(task)
+ .filter(([key])=>key!=='done'));
+
+export function captureTodayTaskHistoryDraft(state,date){
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(String(date||'')))return {state,changed:false};
+ const candidates=todayTaskCandidates(state,date);
+ const existing=state.todayTaskHistory?.[date]||[];
+ const known=new Set(existing.map(storedId));
+ const added=candidates.filter(task=>!known.has(task.id));
+ if(!added.length&&Array.isArray(state.todayTaskHistory?.[date]))return {state,changed:false};
+ const catalog={...(state.todayTaskCatalog||{})};
+ for(const task of added)catalog[task.id]=storedTask(task);
+ const history={...(state.todayTaskHistory||{}),
+  [date]:[...existing,...added.map(task=>task.id)]};
+ return {state:{...state,todayTaskHistory:history,todayTaskCatalog:catalog},changed:true};
+}
+
+// Historical snapshots are authoritative where they exist. Prior to adoption,
+// reconstruct what is still calculable from current scheduling data and warn the UI.
+export function tasksForDate(state,date,today=date){
+ const snapshot=Array.isArray(state.todayTaskHistory?.[date]);
+ const history=snapshot?historyDay(state,date):[];
+ const candidates=todayTaskCandidates(state,date);
+ const checks=state.todayTaskChecks||{};
+ let base;
+ if(date===today){
+  const ids=new Set(candidates.map(task=>task.id));
+  base=[...candidates,...history.filter(task=>!ids.has(task.id)&&
+   Object.prototype.hasOwnProperty.call(checks,task.id))];
+ }else base=snapshot?history:candidates;
+ return {tasks:base.map(task=>({...task,
+  done:Object.prototype.hasOwnProperty.call(checks,task.id)
+ })),snapshot};
+}
+
 export function toggleTodayTaskDraft(state,id,today){
- const current=todayTaskCandidates(state,today).find(task=>task.id===id);
+ const current=[...todayTaskCandidates(state,today),...historyDay(state,today)]
+  .find(task=>task.id===id);
  if(!current)return {state,changed:false,error:'Задача больше не актуальна. Обнови список.'};
  const checks={...(state.todayTaskChecks||{})};
  const completed=Object.prototype.hasOwnProperty.call(checks,id);
  if(completed)delete checks[id];
  else checks[id]=today;
- return {state:{...state,todayTaskChecks:checks},changed:true,done:!completed};
+ // Save a task snapshot along with the check. This works for a historical
+ // reminder whose current patient/course is already archived.
+ const captured=captureTodayTaskHistoryDraft(state,today);
+ const history={...(captured.state.todayTaskHistory||{})};
+ const previous=history[today]||[];
+ const catalog={...(captured.state.todayTaskCatalog||{})};
+ if(!previous.some(item=>storedId(item)===current.id)){
+  history[today]=[...previous,current.id];
+  catalog[current.id]=storedTask(current);
+ }
+ return {state:{...captured.state,todayTaskChecks:checks,
+  todayTaskHistory:history,todayTaskCatalog:catalog},changed:true,done:!completed};
 }

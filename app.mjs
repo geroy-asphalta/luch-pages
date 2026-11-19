@@ -7,7 +7,7 @@ import {createPatientUI} from './patient-ui.mjs?v=5';
 import {createCatalogUI} from './catalog-ui.mjs';
 import {currentCtvName} from './ctv-display.mjs';
 import {courseProgress,localToday,dischargeCandidates,dischargeBatchDraft} from './course-progress.mjs?v=2';
-import {activePatientCount,todayTasks,toggleTodayTaskDraft} from './today-tasks.mjs?v=2';
+import {activePatientCount,todayTasks,toggleTodayTaskDraft,tasksForDate,captureTodayTaskHistoryDraft} from './today-tasks.mjs?v=3';
 import {orderedPersonIds,comparePatientEntries,reorderPatientDraft} from './patient-order.mjs';
 import {setupPatientReordering} from './patient-drag.mjs';
 import {labSingleButtonDraft} from './lab-batch-preview.mjs';
@@ -50,8 +50,9 @@ let phoneExpanded=initialPhoneExpanded(localStorage,window.matchMedia('(max-widt
 const el=id=>document.getElementById(id);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const visibleCourse=p=>['active','planned'].includes(p.status)&&!state.people.find(x=>x.id===p.personId)?.archived;
-let cloudUI=null,inlineNotesUI=null;
-const save=()=>{localStorage.setItem(store,JSON.stringify(state));cloudUI?.localChanged();};
+let cloudUI=null,inlineNotesUI=null,applyingRemoteState=false;
+let taskPanelOpen=localStorage.getItem('luch-task-panel-expanded')!=='false',taskShowCompleted=false,taskViewDate=localToday(),taskLastToday=localToday();
+const save=()=>{state=captureTodayTaskHistoryDraft(state,localToday()).state;localStorage.setItem(store,JSON.stringify(state));cloudUI?.localChanged();};
 function notice(message){const t=el('toast');t.textContent=message;t.classList.add('show');clearTimeout(notice.timer);notice.timer=setTimeout(()=>t.classList.remove('show'),2900);}
 const cellKey=(id,date)=>id+'|'+date;
 const selectionItems=()=>[...selected].map(x=>{const [patientId,date]=x.split('|');return {patientId,date};});
@@ -175,9 +176,25 @@ function visiblePatients(){
   .sort((a,b)=>comparePatientEntries({...a,name:names.get(a.personId)||a.name},{...b,name:names.get(b.personId)||b.name},patientSort,positions));
 }
 function renderStats(){
- const tasks=todayTasks(state,localToday()),pending=tasks.filter(t=>!t.done).length;
- const date=new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'long'}).format(new Date(localToday()+'T12:00:00'));
- const rows=tasks.map(task=>{
+ const today=localToday();
+ if(taskLastToday!==today){
+  if(taskViewDate===taskLastToday)taskViewDate=today;
+  taskLastToday=today;
+ }
+ if(taskViewDate>today)taskViewDate=today;
+ // Store today's tasks even if no user clicks them. A past day with no saved
+ // snapshot can only be reconstructed from current course and lab records.
+ const captured=applyingRemoteState?{state,changed:false}:captureTodayTaskHistoryDraft(state,today);
+ if(captured.changed){
+  state=captured.state;
+  save(); // propagate the new daily snapshot through opt-in demo sync
+ }
+ const {tasks,snapshot}=tasksForDate(state,taskViewDate,today);
+ const pendingTasks=tasks.filter(task=>!task.done),completedTasks=tasks.filter(task=>task.done);
+ const pending=pendingTasks.length;
+ const date=new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'long',year:'numeric'})
+  .format(new Date(taskViewDate+'T12:00:00'));
+ const taskRow=task=>{
   const call=task.kind==='hlt-call'?(task.phoneHref
    ?'<a class="today-task-call" href="tel:'+esc(task.phoneHref)+'" title="Позвонить: '+esc(task.fullName)+'" aria-label="Позвонить: '+esc(task.fullName)+'"><span aria-hidden="true">☎</span></a>'
    :'<span class="today-task-call is-unavailable" role="img" aria-label="Номер телефона не указан" title="Номер телефона не указан">☎</span>'):'';
@@ -185,14 +202,36 @@ function renderStats(){
    +'<button type="button" class="today-task-check" data-today-task-id="'+esc(task.id)+'" aria-pressed="'+task.done+'" aria-label="'+esc((task.done?'Снять отметку выполнения: ':'Отметить выполненной: ')+task.label)+'"><span aria-hidden="true">'+(task.done?'✓':'')+'</span></button>'
    +'<span class="today-task-text" title="'+esc(task.fullName)+'">'+esc(task.label)+'</span>'
    +call+'</li>';
- }).join('');
+ };
  const active=activePatientCount(state);
  el('calendar-active-count').textContent=String(active);
  el('calendar-add-patient').setAttribute('aria-label','Добавить пациента. Активных пациентов: '+active);
+ const completedCount=completedTasks.length;
+ const header='<div class="today-tasks-head">'
+  +'<button type="button" class="today-tasks-toggle" data-task-collapse aria-controls="today-tasks-body" aria-expanded="'+taskPanelOpen+'">'
+  +'<span class="today-tasks-chevron" aria-hidden="true">'+(taskPanelOpen?'▾':'▸')+'</span>'
+  +'<span class="today-tasks-title-group"><span id="today-tasks-title">'+(taskViewDate===today?'Задачи на сегодня':'Задачи за день')+'</span><small>'+esc(date)+'</small></span></button>'
+  +'<span class="today-tasks-count">'+(tasks.length?(pending?pending+' не выполнено':'Все выполнено'):'Нет задач')+'</span></div>';
+ const nav='<div class="today-tasks-nav" aria-label="Выбор даты задач">'
+  +'<button type="button" data-task-shift="-1" aria-label="Предыдущий день" title="Предыдущий день">‹</button>'
+  +'<input type="date" data-task-date-picker value="'+taskViewDate+'" max="'+today+'" aria-label="Дата задач">'
+  +'<button type="button" data-task-shift="1" '+(taskViewDate>=today?'disabled':'')+' aria-label="Следующий день" title="Следующий день">›</button>'
+  +'<button type="button" class="today-tasks-back" data-task-today '+(taskViewDate===today?'disabled':'')+'>Сегодня</button>'
+  +'</div>';
+ const currentRows=pendingTasks.map(taskRow).join('');
+ const completedRows=completedTasks.map(taskRow).join('');
+ const doneButton=completedCount?'<button type="button" class="today-tasks-completed-toggle" data-task-completed aria-expanded="'+taskShowCompleted+'">'
+  +(taskShowCompleted?'Скрыть выполненные':'Показать выполненные')+' ('+completedCount+')'
+  +' <span aria-hidden="true">'+(taskShowCompleted?'▴':'▾')+'</span></button>':'';
+ const body='<div id="today-tasks-body" class="today-tasks-body">'+nav
+  +(taskViewDate!==today&&!snapshot?'<p class="today-tasks-history-note">Для этой даты нет сохранённого снимка. Показаны задачи, которые удалось восстановить по текущему расписанию.</p>':'')
+  +(pending?'<ul class="today-tasks-list">'+currentRows+'</ul>':
+    '<p class="today-tasks-empty">'+(tasks.length?'Нет невыполненных задач':'На выбранную дату задач нет')+'</p>')
+  +doneButton
+  +(taskShowCompleted&&completedCount?'<ul class="today-tasks-list today-tasks-completed-list" aria-label="Выполненные задачи">'+completedRows+'</ul>':'')
+  +'</div>';
  el('stats').innerHTML='<section class="today-tasks" aria-labelledby="today-tasks-title">'
-  +'<div class="today-tasks-head"><div><h2 id="today-tasks-title">Задачи на сегодня</h2><small>'+esc(date)+'</small></div><span class="today-tasks-count">'+(tasks.length?pending+' не выполнено':'Нет задач')+'</span></div>'
-  +(tasks.length?'<ul class="today-tasks-list">'+rows+'</ul>':'<p class="today-tasks-empty">На сегодня задач нет</p>')
-  +'</section>';
+  +header+(taskPanelOpen?body:'<div id="today-tasks-body" class="today-tasks-body hidden"></div>')+'</section>';
 }
 
 function renderCalendar(){
@@ -336,10 +375,13 @@ inlineNotesUI=setupCalendarInlineNotes({calendar:el('calendar'),getState:()=>sta
 cloudUI=createFirebaseDemoSync({
  getState:()=>state,
  replaceState:(next,payload)=>{
-  state=next;
-  localStorage.setItem(store,payload);
-  selected.clear();anchor=null;
-  hideWeekPreview();render();
+  applyingRemoteState=true;
+  try{
+   state=next;
+   localStorage.setItem(store,payload);
+   selected.clear();anchor=null;
+   hideWeekPreview();render();
+  }finally{applyingRemoteState=false;}
  },
  canApplyRemote:()=>!inlineNotesUI?.isEditing()&&![...document.querySelectorAll('dialog')]
   .some(d=>d.open&&d.id!=='cloud-dialog')
@@ -439,8 +481,11 @@ function showCurrentWeek(){
 function render(){
  // Keep the stored course status synchronized on day rollover and after edits,
  // using the first actual planned fraction rather than the raw entered start.
- const sync=syncCourseStartStatusesDraft(state,localToday());
- if(sync.changed){state=sync.state;save();}
+ // Never echo a freshly downloaded Firebase revision back to the server.
+ if(!applyingRemoteState){
+  const sync=syncCourseStartStatusesDraft(state,localToday());
+  if(sync.changed){state=sync.state;save();}
+ }
  const [y,m]=month.split('-');el('month').textContent=new Intl.DateTimeFormat('ru-RU',{month:'long',year:'numeric'}).format(new Date(Date.UTC(Number(y),Number(m)-1,1)));
  renderStats();renderCalendar();renderActionButtons();renderPatients();catalogUI.render();workdayUI.render();renderMaintenance();operations.renderBreakdowns();operations.renderTransfers();renderJournal();setView(view);maybeAskDischarge();
 }
@@ -448,11 +493,33 @@ MACHINES.forEach(m=>{
  const o=document.createElement('option');o.value=m;o.textContent=m;el('filter').append(o.cloneNode(true));el('maint-machine').append(o);
 });
 el('stats').addEventListener('click',event=>{
+ const collapse=event.target.closest('[data-task-collapse]');
+ if(collapse){taskPanelOpen=!taskPanelOpen;localStorage.setItem('luch-task-panel-expanded',String(taskPanelOpen));renderStats();return;}
+ const showDone=event.target.closest('[data-task-completed]');
+ if(showDone){taskShowCompleted=!taskShowCompleted;renderStats();return;}
+ const back=event.target.closest('[data-task-today]');
+ if(back){taskViewDate=localToday();taskShowCompleted=false;renderStats();return;}
+ const shift=event.target.closest('[data-task-shift]');
+ if(shift){
+  const date=addDays(taskViewDate,Number(shift.dataset.taskShift));
+  if(date<=localToday()){
+   taskViewDate=date;taskShowCompleted=false;renderStats();
+  }
+  return;
+ }
  const button=event.target.closest('button[data-today-task-id]');
  if(!button)return;
- const outcome=toggleTodayTaskDraft(state,button.dataset.todayTaskId,localToday());
+ const outcome=toggleTodayTaskDraft(state,button.dataset.todayTaskId,taskViewDate);
  if(!outcome.changed){notice(outcome.error);renderStats();return;}
  state=outcome.state;save();renderStats();
+});
+el('stats').addEventListener('change',event=>{
+ if(!event.target.matches('[data-task-date-picker]'))return;
+ const date=event.target.value;
+ if(/^\d{4}-\d{2}-\d{2}$/.test(date)&&date<=localToday()){
+  taskViewDate=date;taskShowCompleted=false;
+ }else notice('Можно открыть только сегодняшние и прошедшие даты.');
+ renderStats();
 });
 el('filter').onchange=e=>{hideWeekPreview();filter=e.target.value;selected.clear();render();};
 el('calendar-add-patient').onclick=()=>patientUI.createNew();

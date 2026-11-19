@@ -973,3 +973,35 @@ main{padding-top:16px}
  .calendar-note-form-actions button{min-height:38px}
  .calendar-note-shortcut{display:none}
 }
+
+
+/* Collapsible task history: date navigation and a separately expandable
+   completed list keep the everyday widget compact. */
+.today-tasks-head{gap:8px}
+.today-tasks-toggle{display:flex;align-items:center;gap:7px;min-width:0;
+ border:0;background:transparent;color:#284459;padding:3px 0;text-align:left;
+ font-size:14px;font-weight:800;cursor:pointer}
+.today-tasks-toggle:hover,.today-tasks-toggle:focus-visible{color:#277b99;outline:2px solid #a9d0df;border-radius:5px}
+.today-tasks-title-group{display:flex;flex-direction:column;gap:2px;min-width:0}
+.today-tasks-title-group small{font-size:10px;font-weight:450;color:#869aa6}
+.today-tasks-chevron{font-size:15px;color:#638093}
+.today-tasks-body{display:flex;flex-direction:column;gap:7px}
+.today-tasks-nav{display:flex;align-items:center;gap:5px;margin:2px 0 7px;flex-wrap:wrap}
+.today-tasks-nav button{border:1px solid #dbe5ed;background:#fff;border-radius:7px;
+ min-height:31px;padding:4px 8px;color:#4e7186;font-size:12px;font-weight:700}
+.today-tasks-nav input{flex:1 1 115px;min-width:0;width:130px;max-width:150px;
+ border:1px solid #dbe5ed;border-radius:7px;background:#fff;padding:6px 5px;
+ color:#395a6c;font:inherit;font-size:11px;min-height:31px}
+.today-tasks-nav button:disabled{opacity:.4;cursor:default}
+.today-tasks-nav button:not(:disabled):hover{background:#edf6f9}
+.today-tasks-nav .today-tasks-back{font-size:10px;padding:4px 7px}
+.today-tasks-completed-toggle{align-self:flex-start;background:transparent;border:0;
+ padding:8px 2px 4px;color:#3c738e;font-size:11px;font-weight:750;cursor:pointer}
+.today-tasks-completed-toggle:hover,.today-tasks-completed-toggle:focus-visible{text-decoration:underline;outline-offset:2px}
+.today-tasks-completed-list{padding-top:7px;border-top:1px solid #e3edf1}
+.today-tasks-history-note{font-size:10px;line-height:1.4;color:#8a7680;
+ background:#fbf6f7;border-radius:7px;padding:8px;margin:0}
+@media(max-width:790px){
+ .today-tasks-nav{gap:4px}
+ .today-tasks-nav input{flex:1;min-width:112px}
+}
