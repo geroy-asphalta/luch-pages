@@ -33,7 +33,7 @@ import {calendarRosterRows} from './calendar-roster-rows.mjs';
 import {syncCourseStartStatusesDraft} from './course-start-status.mjs';
 import {installImportedLabColors} from './demo-lab-colors.mjs?v=1';
 import {createFirebaseDemoSync} from './firebase-demo-state-ui.mjs';
-import {setupDischargeTextReportUI} from './discharge-text-ui.mjs';
+import {setupDischargeTextReportUI} from './discharge-text-ui.mjs?v=2';
 
 const store='luch-demo-v1';
 let state;

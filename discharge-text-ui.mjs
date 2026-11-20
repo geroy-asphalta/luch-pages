@@ -17,14 +17,12 @@ export function setupDischargeTextReportUI({
  const output=el('discharge-text-output');
  const summary=el('discharge-text-summary');
  const copyButton=el('discharge-text-copy');
- const selectButton=el('discharge-text-select');
  let selectedWeek='',generated='';
  function render(){
   const result=dischargeTextReport(getState(),{weekStart:selectedWeek});
   generated=result.text||'';
   output.value=generated;
   copyButton.disabled=!generated;
-  selectButton.disabled=!generated;
   if(result.error){
    summary.textContent=result.error;
    weekLabel.textContent='Выбери неделю';
@@ -73,12 +71,10 @@ export function setupDischargeTextReportUI({
  }
  el('discharge-text-open').addEventListener('click',open);
  el('discharge-text-close').addEventListener('click',close);
- el('discharge-text-done').addEventListener('click',close);
  el('discharge-text-prev').addEventListener('click',()=>setWeek(addDays(selectedWeek,-7)));
  el('discharge-text-next').addEventListener('click',()=>setWeek(addDays(selectedWeek,7)));
  el('discharge-text-default').addEventListener('click',()=>setWeek(nextDischargeWeekStart(getToday())));
  dateInput.addEventListener('change',()=>setWeek(dateInput.value));
- selectButton.addEventListener('click',selectAll);
  copyButton.addEventListener('click',copy);
  dialog.addEventListener('cancel',event=>{event.preventDefault();close();});
  return {open,render,close};
