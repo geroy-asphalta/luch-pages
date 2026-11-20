@@ -23,10 +23,12 @@ export function setupPatientCardDrawer({dialog,closeButton,toggleButton,register
   dialog.classList.remove('motion-closing');
  }
  function finishClose(){
-  clearClosing();
-  if(!isOpen())return;
+  if(!isOpen()){clearClosing();return;}
+  // Close the native modal BEFORE removing the exit class. Otherwise [open]
+  // momentarily reactivates the entrance animation and causes a visible snap.
   if(typeof dialog.close==='function')dialog.close();
   else{dialog.removeAttribute('open');restoreFocus();}
+  clearClosing();
  }
  function open(){
   if(dialog.classList.contains('motion-closing')){

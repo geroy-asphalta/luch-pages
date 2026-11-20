@@ -1262,7 +1262,7 @@ main{padding-top:16px}
 }
 @keyframes luch-card-exit{
  from{opacity:1;transform:translateX(0)}
- to{opacity:.88;transform:translateX(24px)}
+ to{opacity:.92;transform:translateX(16px)}
 }
 @keyframes luch-backdrop-enter{
  from{background:rgba(18,35,47,0)}
@@ -1276,14 +1276,14 @@ main{padding-top:16px}
  animation:luch-card-enter var(--luch-motion-drawer) var(--luch-motion-ease) both
 }
 .patient-card-drawer[open].motion-closing{
- animation:luch-card-exit var(--luch-motion-drawer) ease-in both;
+ animation:luch-card-exit var(--luch-motion-drawer) cubic-bezier(.4,0,.2,1) both;
  pointer-events:none
 }
 .patient-card-drawer[open]:not(.motion-closing)::backdrop{
  animation:luch-backdrop-enter var(--luch-motion-drawer) ease-out both
 }
 .patient-card-drawer[open].motion-closing::backdrop{
- animation:luch-backdrop-exit var(--luch-motion-drawer) ease-in both
+ animation:luch-backdrop-exit var(--luch-motion-drawer) cubic-bezier(.4,0,.2,1) both
 }
 /* 2. Task list is a floating element, so opacity/translation do not push
    calendar rows. Visibility + inert prevent interaction while hidden. */
