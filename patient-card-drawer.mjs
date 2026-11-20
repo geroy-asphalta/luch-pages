@@ -49,7 +49,7 @@ export function setupPatientCardDrawer({dialog,closeButton,toggleButton,register
   if(reducedMotion()){finishClose();return;}
   dialog.classList.add('motion-closing');
   // A fallback also completes close if the browser has no CSS animation support.
-  closeTimer=setTimeout(finishClose,290);
+  closeTimer=setTimeout(finishClose,310);
  }
  closeButton.addEventListener('click',close);
  toggleButton.addEventListener('click',()=>showRegister(

@@ -25,7 +25,7 @@ import {calendarMaintenanceCellContent} from './calendar-maintenance-icon.mjs';
 import {setupCalendarRangeSelection,calendarClickSelection} from './calendar-range-select.mjs?v=2';
 import {setupCalendarCellContextMenu} from './calendar-cell-context-menu.mjs?v=4';
 import {setupChemoChangeUI} from './chemo-change-ui.mjs?v=2';
-import {setupPatientCardDrawer} from './patient-card-drawer.mjs?v=2';
+import {setupPatientCardDrawer} from './patient-card-drawer.mjs?v=3';
 import {createImportedDemoState,installImportedDemoRoster} from './demo-roster.mjs?v=5';
 import {installPhotoDemoRoster} from './demo-photo-roster.mjs';
 import {installPhotoCourseAssignments} from './demo-photo-course-assignments.mjs';
