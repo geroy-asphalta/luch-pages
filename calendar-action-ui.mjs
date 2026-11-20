@@ -1,5 +1,6 @@
-// Read-only UI state for the calendar's two appointment/referral buttons.
+// Read-only UI state for the calendar's appointment/referral buttons.
 import {labAt} from './planner.mjs';
+import {bloodTubeIcon} from './calendar-event-icons.mjs?v=2';
 
 function eligibleCells(state,selection){
  const active=new Set((state.patients||[]).filter(p=>
@@ -56,6 +57,8 @@ export function skipButtonIntent(state,selection){
 }
 
 const base='viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" focusable="false" aria-hidden="true"';
+// The same pink lab test tube is drawn in date cells and in the toolbar.
+const toolbarTubeDrawing=bloodTubeIcon.replace(/^<svg[^>]*>/,'').replace(/<\/svg>$/,'');
 const badge=(mode)=>{
  if(mode==='locked')return '<circle cx="18.5" cy="18" r="4.6" fill="#fff" stroke="#7D858D"/><path d="M16.9 17.4v-1a1.6 1.6 0 0 1 3.2 0v1M16.7 17.4h3.6v3h-3.6z" stroke="#7D858D" fill="#fff"/>';
  const color=mode==='remove'||mode==='undo'?'#C74F57':'#288A5E';
@@ -83,6 +86,8 @@ export function calendarActionIcon(which,mode){
  if(which==='issue'){
   return '<svg '+base+'><path d="M6 3h9l4 4v7M6 3v16a2 2 0 0 0 2 2h6M15 3v4h4M9 10h6M9 13h6M9 16h4" />'+badge(mode)+'</svg>';
  }
- // One shared clipboard with a pen: the corner badge alone changes.
- return '<svg '+base+'><path d="M8 4H5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h9M16 4h2a2 2 0 0 1 2 2v6M9 3.5a2 2 0 0 1 4 0h1.5v3h-7v-3H9ZM7 11h4M7 14.5h4M7 18h4M12.5 13.5l4.5-4.5 2 2-4.5 4.5-2.4.4z" />'+badge(mode)+'</svg>';
+ // Same tube shape and colors as the blood-test calendar cells.
+ // A small corner badge retains the existing add, remove and locked meanings.
+ // The scaled drawing fits 24px without changing date-cell pictograms.
+ return '<svg '+base+'><g transform="translate(2 0.5) scale(0.5 0.53)">'+toolbarTubeDrawing+'</g>'+badge(mode)+'</svg>';
 }

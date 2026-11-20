@@ -11,7 +11,7 @@ import {activePatientCount,todayTasks,toggleTodayTaskDraft,tasksForDate,captureT
 import {orderedPersonIds,comparePatientEntries,reorderPatientDraft} from './patient-order.mjs';
 import {setupPatientReordering} from './patient-drag.mjs';
 import {labSingleButtonDraft} from './lab-batch-preview.mjs';
-import {labButtonIntent,issueButtonIntent,skipButtonIntent,calendarActionIcon} from './calendar-action-ui.mjs';
+import {labButtonIntent,issueButtonIntent,skipButtonIntent,calendarActionIcon} from './calendar-action-ui.mjs?v=2';
 import {scrollCalendarToWeek,calendarWindowDates,enableCalendarHorizontalWheel} from './calendar-viewport.mjs?v=8';
 import {calendarContact} from './calendar-contact.mjs';
 import {setupCalendarInlineNotes} from './calendar-note-inline.mjs';
