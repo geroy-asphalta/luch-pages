@@ -30,7 +30,14 @@ export function todayTaskCandidates(state,today){
     label:'Сделай выписку — '+name,phoneHref:null
    });
   }
-  if(course.treatmentType==='ХЛТ'){
+  // The call-and-schedule reminder is a setup task, not a daily reminder
+  // for a course whose chemotherapy is already in the live calendar.
+  // Use actual infusion events (not the firstDate template), so a manually
+  // moved weekly series immediately suppresses the obsolete setup reminder.
+  const chemoScheduled=(state.events||[]).some(event=>
+   event.patientId===course.id&&event.type==='chemo'&&
+   ['planned','administered','given'].includes(event.status));
+  if(course.treatmentType==='ХЛТ'&&!chemoScheduled){
    const digits=phoneDigitsRU(person?.phone||'');
    results.push({
     id:'hlt-call:'+course.id,kind:'hlt-call',courseId:course.id,
@@ -111,9 +118,10 @@ export function tasksForDate(state,date,today=date){
  const checks=state.todayTaskChecks||{};
  let base;
  if(date===today){
-  const ids=new Set(candidates.map(task=>task.id));
-  base=[...candidates,...history.filter(task=>!ids.has(task.id)&&
-   Object.prototype.hasOwnProperty.call(checks,task.id))];
+  // Today's list is LIVE: once a course, infusion or blood-date changes,
+  // neither stale pending nor stale checked snapshots belong here.
+  // Snapshots and checks remain untouched for browsing prior dates.
+  base=candidates;
  }else base=snapshot?history:candidates;
  return {tasks:base.map(task=>({...task,
   done:Object.prototype.hasOwnProperty.call(checks,task.id)

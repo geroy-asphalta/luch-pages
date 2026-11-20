@@ -7,7 +7,7 @@ import {createPatientUI} from './patient-ui.mjs?v=8';
 import {createCatalogUI} from './catalog-ui.mjs';
 import {currentCtvName} from './ctv-display.mjs';
 import {courseProgress,localToday,dischargeCandidates,dischargeBatchDraft} from './course-progress.mjs?v=2';
-import {activePatientCount,todayTasks,toggleTodayTaskDraft,tasksForDate,captureTodayTaskHistoryDraft} from './today-tasks.mjs?v=3';
+import {activePatientCount,todayTasks,toggleTodayTaskDraft,tasksForDate,captureTodayTaskHistoryDraft} from './today-tasks.mjs?v=4';
 import {orderedPersonIds,comparePatientEntries,reorderPatientDraft} from './patient-order.mjs';
 import {setupPatientReordering} from './patient-drag.mjs';
 import {labSingleButtonDraft} from './lab-batch-preview.mjs';
