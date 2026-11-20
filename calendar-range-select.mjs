@@ -15,6 +15,16 @@ export function calendarSelectionRectangle(patients,dates,from,to,base=[]){
  return result;
 }
 
+// A repeated tap/click removes the already-selected cell instead of selecting
+// it again. Plain clicks on a NEW cell still replace the old selection;
+// Ctrl/Cmd and touch preserve multi-selection behavior.
+export function calendarClickSelection(current,key,{additive=false}={}){
+ const next=new Set(additive||current.has(key)?current:[]);
+ if(next.has(key))next.delete(key);
+ else next.add(key);
+ return next;
+}
+
 export function setupCalendarRangeSelection({calendar,getPatients,getDates,getSelected,onPreview,onCommit}){
  let pending=null,active=null,preview=null,cellIndex=null,frame=0,suppressClickUntil=0;
  const scroll=()=>calendar.closest('.scroll')||calendar.parentElement;

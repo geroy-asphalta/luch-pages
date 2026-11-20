@@ -22,7 +22,7 @@ import {initialPhoneExpanded,savePhoneExpanded} from './calendar-phone-prefs.mjs
 import {calendarTreatmentCellContent} from './calendar-event-icons.mjs?v=2';
 import {chemoAdministrationState,chemoAdministrationSummary,chemoAdministrationDraft} from './chemo-administration.mjs';
 import {calendarMaintenanceCellContent} from './calendar-maintenance-icon.mjs';
-import {setupCalendarRangeSelection} from './calendar-range-select.mjs';
+import {setupCalendarRangeSelection,calendarClickSelection} from './calendar-range-select.mjs?v=2';
 import {setupCalendarCellContextMenu} from './calendar-cell-context-menu.mjs?v=3';
 import {setupChemoChangeUI} from './chemo-change-ui.mjs?v=2';
 import {setupPatientCardDrawer} from './patient-card-drawer.mjs';
@@ -155,12 +155,15 @@ function selectCell(id,date,event){
      for(let i=Math.min(a,b);i<=Math.max(a,b);i++)
        for(let j=Math.min(da,db);j<=Math.max(da,db);j++)selected.add(cellKey(patients[i].id,allDates[j]));
    }
- }else if(event.metaKey||event.ctrlKey||window.matchMedia('(pointer: coarse)').matches){
-   selected.has(key)?selected.delete(key):selected.add(key);
  }else{
-   selected.clear();selected.add(key);
+   selected=calendarClickSelection(selected,key,{
+     additive:event.metaKey||event.ctrlKey||window.matchMedia('(pointer: coarse)').matches
+   });
  }
- anchor=key;render();
+ // An empty selection should have no shift-range anchor. If one of several
+ // selected cells was removed, keep the anchor on a cell that remains.
+ anchor=selected.size?(selected.has(key)?key:[...selected].at(-1)):null;
+ render();
 }
 function previewCalendarRange(keys){
  el('selected-count').textContent=keys.size?'Выбрано: '+keys.size:'Ничего не выбрано';
