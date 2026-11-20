@@ -1,0 +1,238 @@
+/* ЛУЧ Glass — an additive presentation layer. The original calendar grid,
+   widths, status semantics and native drawer motion are never overridden. */
+:root{
+ --glass-control:rgba(248,251,253,.88);
+ --glass-control-hover:rgba(255,255,255,.96);
+ --glass-floating:rgba(250,253,255,.96);
+ --glass-top:rgba(255,255,255,.53);
+ --glass-stroke:rgba(80,114,136,.26);
+ --glass-stroke-hover:rgba(70,135,170,.5);
+ --glass-shadow:0 6px 19px rgba(28,55,70,.12),inset 0 1px 0 rgba(255,255,255,.75);
+ --glass-shadow-hover:0 8px 22px rgba(28,55,70,.18),inset 0 1px 0 rgba(255,255,255,.86);
+ --glass-nav-bg:rgba(215,240,226,.82);
+ --glass-nav-border:rgba(82,165,126,.24);
+ --glass-nav-shadow:0 4px 13px rgba(31,98,67,.08),inset 0 1px 0 rgba(255,255,255,.62);
+ --glass-focus:#3b99c2;
+ --glass-check-bg:#dff4e8;
+ --glass-check-fg:#207b57;
+ --glass-ease:cubic-bezier(.22,1,.36,1)
+}
+html[data-theme="dark"]{
+ --glass-control:rgba(43,63,77,.88);
+ --glass-control-hover:rgba(55,80,96,.96);
+ --glass-floating:rgba(31,47,59,.96);
+ --glass-top:rgba(255,255,255,.16);
+ --glass-stroke:rgba(166,207,228,.25);
+ --glass-stroke-hover:rgba(160,214,235,.47);
+ --glass-shadow:0 7px 19px rgba(0,0,0,.31),inset 0 1px 0 rgba(255,255,255,.13);
+ --glass-shadow-hover:0 9px 25px rgba(0,0,0,.43),inset 0 1px 0 rgba(255,255,255,.23);
+ --glass-nav-bg:rgba(45,95,78,.8);
+ --glass-nav-border:rgba(119,216,170,.3);
+ --glass-nav-shadow:0 5px 16px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.12);
+ --glass-focus:#85d6ef;
+ --glass-check-bg:#285b49;
+ --glass-check-fg:#baf4d6
+}
+/* Keep workspace height and calendar density unchanged. */
+.workspace{border-radius:18px;box-shadow:0 5px 24px rgba(27,51,65,.085)}
+html[data-theme="dark"] .workspace{box-shadow:0 7px 25px rgba(0,0,0,.2)}
+.workspace .toolbar{background:linear-gradient(160deg,var(--glass-top),transparent 80%)}
+.workspace .toolbar :is(button,select){border-radius:11px}
+.month-controls{border-radius:15px}
+.month-controls button{border-radius:10px}
+.patient-card-drawer{border-radius:20px 0 0 20px}
+.patient-card-top{background-image:linear-gradient(160deg,var(--glass-top),transparent 90%)}
+.patient-card-top-actions button{border-radius:11px}
+.course-card{border-radius:15px}
+:is(.discharge-text-dialog,.issue-dialog,.chemo-change-dialog,.catalog-inspector){border-radius:18px}
+:is(.discharge-text-dialog,.issue-dialog,.chemo-change-dialog) :is(button,input,select,textarea){border-radius:11px}
+@media(max-width:700px){
+ .patient-card-drawer{border-radius:0}
+ .workspace{border-radius:15px}
+}
+/* Controls are glass, but calendar cells and coloured clinical statuses are NOT. */
+.filters button.action-with-icon,
+.actions button.action-with-icon,
+.month-controls,
+.month-controls button,
+#stats .today-tasks-toggle,
+.topbar #theme-toggle,
+.topbar #cloud-open,
+.discharge-text-copy-button{
+ background-color:var(--glass-control);
+ border-color:var(--glass-stroke);
+ box-shadow:var(--glass-shadow);
+}
+.topbar #theme-toggle,.topbar #cloud-open{
+ background-color:rgba(255,255,255,.08);
+ color:#d9edf5;
+}
+html[data-theme="dark"] .topbar #theme-toggle,
+html[data-theme="dark"] .topbar #cloud-open{background-color:rgba(255,255,255,.07)}
+#stats .today-tasks-toggle{border-radius:12px}
+:is(.filters button.action-with-icon,.actions button.action-with-icon,
+ .month-controls button,#stats .today-tasks-toggle,
+ .topbar #theme-toggle,.topbar #cloud-open,
+ .discharge-text-copy-button){
+ transition:background-color 150ms ease,border-color 150ms ease,
+            box-shadow 150ms ease,transform 150ms var(--glass-ease);
+}
+@media(hover:hover) and (pointer:fine){
+ :is(.filters button.action-with-icon,.actions button.action-with-icon,
+  .month-controls button,#stats .today-tasks-toggle,
+  .topbar #theme-toggle,.topbar #cloud-open,
+  .discharge-text-copy-button):hover:not(:disabled){
+  background-color:var(--glass-control-hover);
+  border-color:var(--glass-stroke-hover);
+  box-shadow:var(--glass-shadow-hover);
+  transform:translateY(-1px)
+ }
+ .topbar :is(#theme-toggle,#cloud-open):hover:not(:disabled){
+  background-color:rgba(255,255,255,.14)
+ }
+}
+:is(.filters button.action-with-icon,.actions button.action-with-icon,
+ .month-controls button,#stats .today-tasks-toggle,
+ .topbar #theme-toggle,.topbar #cloud-open,
+ .discharge-text-copy-button):active:not(:disabled){
+ transform:scale(.98);box-shadow:inset 0 1px 4px rgba(20,41,56,.13)
+}
+:is(.filters button.action-with-icon,.actions button.action-with-icon,
+ .month-controls button,#stats .today-tasks-toggle,
+ .topbar #theme-toggle,.topbar #cloud-open,
+ .discharge-text-copy-button):focus-visible{
+ outline:2px solid var(--glass-focus);outline-offset:3px
+}
+/* Keep the medically neutral blue primary lab-action button clearly legible:
+   its white icon must never sit on the translucent light glass surface. */
+.actions button.action-with-icon.primary{
+ background-color:#347c99;border-color:#4a91af;color:#fff;
+ box-shadow:0 5px 14px rgba(39,99,129,.21),inset 0 1px 0 rgba(255,255,255,.25)
+}
+html[data-theme="dark"] .actions button.action-with-icon.primary{
+ background-color:#286281;border-color:#4887a7;color:#f0f9ff
+}
+@media(hover:hover) and (pointer:fine){
+ .actions button.action-with-icon.primary:hover:not(:disabled){
+  background-color:#2c7592;box-shadow:0 7px 18px rgba(35,95,123,.3),
+   inset 0 1px 0 rgba(255,255,255,.33)
+ }
+ html[data-theme="dark"] .actions button.action-with-icon.primary:hover:not(:disabled){
+  background-color:#337a99
+ }
+}
+/* One shared active navigation highlight moves between EXISTING buttons.
+   If JS is unavailable, original .nav.active background remains intact. */
+.sidebar{position:relative}
+.sidebar .nav{position:relative;z-index:1;border-radius:12px;
+ transition:color 220ms ease,background-color 220ms ease}
+.sidebar .glass-nav-indicator{
+ position:absolute;z-index:0;top:0;left:0;
+ width:0;height:0;pointer-events:none;
+ background:var(--glass-nav-bg);
+ border:1px solid var(--glass-nav-border);
+ border-radius:13px;box-shadow:var(--glass-nav-shadow);
+ transition:transform 220ms var(--glass-ease),width 220ms var(--glass-ease),
+            height 220ms var(--glass-ease),border-radius 220ms var(--glass-ease)
+}
+.sidebar.glass-nav-ready .nav.active{background:transparent}
+html[data-theme="dark"] .sidebar.glass-nav-ready .nav.active{background:transparent}
+.sidebar.glass-nav-ready .nav:hover:not(.active){background:rgba(120,160,180,.11)}
+/* Lightweight floating materials: intentional, limited blur cost. */
+.theme-menu,#today-tasks-popover,.calendar-cell-context-menu{
+ border:1px solid var(--glass-stroke);
+ background:var(--glass-floating);
+ border-radius:16px;
+ box-shadow:0 14px 38px rgba(14,37,52,.23),inset 0 1px 0 var(--glass-top)
+}
+html[data-theme="dark"] :is(.theme-menu,#today-tasks-popover,.calendar-cell-context-menu){
+ background:var(--glass-floating);
+ border-color:var(--glass-stroke);
+ box-shadow:0 16px 42px rgba(0,0,0,.5),inset 0 1px 0 var(--glass-top)
+}
+.calendar-cell-context-menu button{border-radius:10px}
+.theme-menu button{border-radius:10px}
+@supports ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+ .theme-menu,#today-tasks-popover,.calendar-cell-context-menu{
+  -webkit-backdrop-filter:blur(14px) saturate(1.17);
+  backdrop-filter:blur(14px) saturate(1.17)
+ }
+}
+/* Existing task popover is already animated on entry/exit. Preserve its
+   transform and visibility transitions; enrich only its surface and corners. */
+@keyframes glass-menu-arrive{
+ from{opacity:0;transform:translateY(6px) scale(.985)}
+ to{opacity:1;transform:translateY(0) scale(1)}
+}
+.theme-menu:not([hidden]),
+.calendar-cell-context-menu:not(.hidden){
+ transform-origin:top center;
+ animation:glass-menu-arrive 200ms var(--glass-ease) both
+}
+/* The badge is recreated by the existing calendar renderer. Only its actual
+   numeric changes get this class; no perpetual pulsing of urgent work. */
+@keyframes glass-badge-once{
+ 0%{transform:scale(1);filter:brightness(1)}
+ 45%{transform:scale(1.14);filter:brightness(1.12)}
+ 100%{transform:scale(1);filter:brightness(1)}
+}
+#stats .today-tasks-count.glass-badge-change{
+ animation:glass-badge-once 180ms var(--glass-ease) both
+}
+/* Confirmation check belongs to the EXISTING toast. It is added only after
+   successful copy/save; rejected operations never receive a check. */
+.toast.glass-toast-success{display:flex;align-items:center;gap:8px}
+.toast.glass-toast-success::before{
+ content:"✓";display:grid;place-items:center;flex:none;
+ width:21px;height:21px;border-radius:50%;
+ background:var(--glass-check-bg);color:var(--glass-check-fg);
+ font-size:13px;font-weight:900;
+ animation:glass-check-arrive 200ms var(--glass-ease) both
+}
+@keyframes glass-check-arrive{
+ from{opacity:0;transform:scale(.7)}
+ to{opacity:1;transform:scale(1)}
+}
+/* Theme change: selectively animate CHROME, not thousands of table cells or
+   semantic colours of lab / chemotherapy / maintenance / final fractions. */
+.topbar,.sidebar,.workspace,.patient-card-top,
+.theme-menu,.calendar-cell-context-menu,#today-tasks-popover,
+.month-controls,.month-controls button{
+ transition-property:background-color,border-color,color,box-shadow;
+ transition-duration:240ms;transition-timing-function:ease
+}
+.sidebar .glass-nav-indicator{transition-duration:220ms}
+#today-tasks-popover{
+ transition-property:opacity,transform,visibility,background-color,border-color,box-shadow;
+ transition-duration:var(--luch-motion-tasks,180ms),var(--luch-motion-tasks,180ms),
+ 0s,240ms,240ms,240ms;
+ transition-delay:0s,0s,var(--luch-motion-tasks,180ms),0s,0s,0s
+}
+#today-tasks-popover.motion-open{
+ transition-delay:0s,0s,0s,0s,0s,0s
+}
+/* Readable, opaque fallback when users request greater contrast or less glass. */
+@media(prefers-reduced-transparency:reduce),(forced-colors:active),(prefers-contrast:more){
+ :root{--glass-control:#f5f9fb;--glass-control-hover:#eef5f8;
+ --glass-floating:#fff;--glass-top:transparent}
+ html[data-theme="dark"]{--glass-control:#283949;--glass-control-hover:#324759;
+ --glass-floating:#202e3a;--glass-top:transparent}
+ .theme-menu,#today-tasks-popover,.calendar-cell-context-menu{
+  -webkit-backdrop-filter:none!important;backdrop-filter:none!important
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ .topbar,.sidebar,.workspace,.patient-card-top,.theme-menu,
+ .calendar-cell-context-menu,#today-tasks-popover,.month-controls,
+ .month-controls button,.sidebar .nav,.sidebar .glass-nav-indicator,
+ .filters button.action-with-icon,.actions button.action-with-icon,
+ #stats .today-tasks-toggle,.topbar #theme-toggle,.topbar #cloud-open,
+ .discharge-text-copy-button{transition:none!important}
+ .theme-menu:not([hidden]),.calendar-cell-context-menu:not(.hidden),
+ #stats .today-tasks-count.glass-badge-change,
+ .toast.glass-toast-success::before{animation:none!important}
+ :is(.filters button.action-with-icon,.actions button.action-with-icon,
+  .month-controls button,#stats .today-tasks-toggle,
+  .topbar #theme-toggle,.topbar #cloud-open,
+  .discharge-text-copy-button):is(:hover,:active){transform:none!important}
+}

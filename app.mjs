@@ -35,8 +35,10 @@ import {installImportedLabColors} from './demo-lab-colors.mjs?v=1';
 import {createFirebaseDemoSync} from './firebase-demo-state-ui.mjs';
 import {setupDischargeTextReportUI} from './discharge-text-ui.mjs?v=2';
 import {setupThemeUI} from './theme-ui.mjs';
+import {setupGlassUI,isGlassSuccessNotice} from './glass-ui.mjs';
 
 setupThemeUI();
+const glassUI=setupGlassUI();
 
 const store='luch-demo-v1';
 let state;
@@ -59,7 +61,7 @@ const visibleCourse=p=>['active','planned'].includes(p.status)&&!state.people.fi
 let cloudUI=null,inlineNotesUI=null,applyingRemoteState=false;
 let taskPanelOpen=false,taskShowCompleted=false,taskViewDate=localToday(),taskLastToday=localToday();
 const save=()=>{state=captureTodayTaskHistoryDraft(state,localToday()).state;localStorage.setItem(store,JSON.stringify(state));cloudUI?.localChanged();};
-function notice(message){const t=el('toast');t.textContent=message;t.classList.add('show');clearTimeout(notice.timer);notice.timer=setTimeout(()=>t.classList.remove('show'),2900);}
+function notice(message){const t=el('toast');t.textContent=message;t.classList.toggle('glass-toast-success',isGlassSuccessNotice(message));t.classList.add('show');clearTimeout(notice.timer);notice.timer=setTimeout(()=>t.classList.remove('show'),2900);}
 setupDischargeTextReportUI({getState:()=>state,notice});
 const cellKey=(id,date)=>id+'|'+date;
 const selectionItems=()=>[...selected].map(x=>{const [patientId,date]=x.split('|');return {patientId,date};});
@@ -269,6 +271,7 @@ function renderStats(){
   +(taskShowCompleted&&completedCount?'<ul class="today-tasks-list today-tasks-completed-list" aria-label="Выполненные задачи">'+completedRows+'</ul>':'')
   +'</div>';
  el('stats').innerHTML='<section class="today-tasks" aria-labelledby="today-tasks-title">'+header+'</section>';
+ glassUI.updateTaskBadge(todayPending);
  const popup=el('today-tasks-popover');
  const previousScroll=popup.scrollTop;
  if(taskPanelOpen){
@@ -532,6 +535,7 @@ function setView(next){
  setTodayTasksPopoverVisible(next==='calendar'&&taskPanelOpen);
  if(next==='calendar')positionTodayTasksPopover();
  document.querySelectorAll('.nav').forEach(x=>x.classList.toggle('active',x.dataset.view===next));
+ glassUI.syncNavigation();
  document.querySelectorAll('[data-panel]').forEach(x=>x.classList.toggle('hidden',x.dataset.panel!==next));
  el('title').textContent=({calendar:'Пациенты','ctv-catalog':'Справочник CTV',workdays:'Рабочие дни и праздники',maintenance:'Техническое обслуживание',journal:'История действий',breakdowns:'Поломки аппаратов',transfers:'Переводы пациентов'})[next];
 }
