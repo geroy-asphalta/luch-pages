@@ -33,6 +33,8 @@ export function chemoChangeDraft(state,{eventId,kind,targetDate='',reason=''}={}
  if(note.length>300)return {error:'Причина изменения ХТ не должна превышать 300 символов.'};
  if(kind==='restore'?initial.status!=='cancelled':initial.status!=='planned')
   return {error:'Статус введения изменился. Обнови календарь.'};
+ if(['given','not-given'].includes(initial.administrationOutcome))
+  return {error:'Перед изменением плана ХТ сначала сними ручную отметку о проведении или пропуске.'};
  const index=initial.chemoIndex,count=Number(course.chemo?.count);
  if(!Number.isInteger(index)||!Number.isInteger(count)||index<0||index>=count)
   return {error:'Не удалось определить номер введения ХТ в курсе.'};
@@ -58,6 +60,8 @@ if(kind==='restore'&&(!validDate(date)||!isWorkingDay(state,date)))
    if(!infusion)return {error:'Не найдена капельница №'+(i+1)+'. Проверь целостность плана ХТ.'};
    if(!['planned','cancelled'].includes(infusion.status))
     return {error:'Введение ХТ №'+(i+1)+' уже имеет фактический статус. Менять его дату нельзя.'};
+   if(['given','not-given'].includes(infusion.administrationOutcome))
+    return {error:'Введение ХТ №'+(i+1)+' имеет ручную отметку о проведении или пропуске. Сначала сними её.'};
    const nominalDate=addDays(date,(i-index)*7);
    const nextDate=effectiveChemoDate(state,nominalDate);
    if(!nextDate)return {error:'Не удалось найти рабочий день для ХТ №'+(i+1)+'.'};
@@ -196,7 +200,8 @@ export function reconcileChemoWorkdayDraft(state){
  for(const infusion of events.filter(isInfusion)){
   const course=byCourse.get(infusion.patientId);
   if(!eligible(course,state)||!validDate(infusion.nominalDate))continue;
-  if(!['planned','cancelled'].includes(infusion.status))continue; // factual history is immutable
+  if(!['planned','cancelled'].includes(infusion.status)||
+    ['given','not-given'].includes(infusion.administrationOutcome))continue; // factual history is immutable
   const newDate=effectiveChemoDate(state,infusion.nominalDate);
   if(!newDate)return {error:'Не найден рабочий день для капельницы ХТ №'+(infusion.chemoIndex+1)+'.'};
   if(newDate!==infusion.date)changes.push({event:infusion,oldDate:infusion.date,newDate});

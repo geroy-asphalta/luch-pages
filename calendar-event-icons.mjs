@@ -20,13 +20,22 @@ export const chemoInfusionIcon='<svg class="calendar-event-icon calendar-event-i
  '<path d="M27 25h4M27 29h4M22 36v3q0 2 2 2" stroke="#13869F" stroke-width="1.7" stroke-linecap="round"/>'+
  '</svg>';
 
+// Explicitly missed or cancelled chemo changes ONLY the IV-bag SVG colors.
+// Cell backgrounds, blood icons and fraction labels are handled independently.
+export const chemoInfusionMissedIcon=chemoInfusionIcon
+ .replace('calendar-event-icon--chemo"','calendar-event-icon--chemo calendar-event-icon--chemo-missed"')
+ .replaceAll('#13869F','#B72F46')
+ .replaceAll('#F1FBFE','#FFF0F2')
+ .replaceAll('#F4FCFE','#FFF7F8')
+ .replaceAll('#A5DDEB','#E35E72');
+
 /**
  * Large icons take priority over a fraction number only for event days.
  * Non-event cells keep their previous label; "issued" referrals still show the tube.
  */
-export function calendarTreatmentCellContent({label='',isSession=false,labStatus=null,chemoPlanned=false}={}){
+export function calendarTreatmentCellContent({label='',isSession=false,labStatus=null,chemoPlanned=false,chemoNotGiven=false}={}){
  if(!labStatus&&!chemoPlanned)return escapeHtml(label);
- const icons=(labStatus?bloodTubeIcon:'')+(chemoPlanned?chemoInfusionIcon:'');
+ const icons=(labStatus?bloodTubeIcon:'')+(chemoPlanned?(chemoNotGiven?chemoInfusionMissedIcon:chemoInfusionIcon):'');
  const both=labStatus&&chemoPlanned?' calendar-treatment-events--both':'';
  const fraction=isSession&&label!==''?'<span class="calendar-fraction-small">'+escapeHtml(label)+'</span>':'';
  const statusLabel=!isSession&&label!==''?'<span class="calendar-event-status-label">'+escapeHtml(label)+'</span>':'';

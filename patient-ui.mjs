@@ -8,6 +8,7 @@ import {currentCtvName} from './ctv-display.mjs';
 import {notesColumnWidth} from './notes-column-width.mjs';
 import {courseProgress,localToday} from './course-progress.mjs';
 import {isBreastDiagnosis,firstRadiationFraction,weeklyChemoDates,chemoEventsFor,chemoWarningsFor,bloodDateBeforeChemo} from './chemo-schedule.mjs';
+import {chemoAdministrationState,chemoAdministrationSummary} from './chemo-administration.mjs';
 import {COURSE_STATUSES,TREATMENT_TYPES,coursesFor,createPersonDraft,updatePersonDraft,setPersonArchivedDraft,createCourseDraft,updateCourseDraft,setCourseArchivedDraft,previewCourse,formatPhoneRU,phoneDigitsRU,ELN_VALUES} from './patient-model.mjs';
 import {setupEarlyDischargeUI} from './patient-early-ui.mjs';
 import {EARLY_DISCHARGE_REASONS} from './patient-early-discharge.mjs';
@@ -177,6 +178,7 @@ function chemoCourseMarkup(state,course){
  if(!chemo?.count)return '<p class="course-hint">ХЛТ · расписание введений ещё не задано.</p>';
  if(!chemo.firstDate)return '<p class="course-hint">ХЛТ · '+chemo.count+' введений. Ожидается дата начала ЛТ для первого ХТ.</p>';
  const dates=weeklyChemoDates(chemo.firstDate,chemo.count);
+ const summary=chemoAdministrationSummary(state,course.id,localToday());
  const list=dates.map((baseDate,i)=>{
    const infusion=(state.events||[]).find(e=>e.patientId===course.id&&e.type==='chemo'&&e.source==='hlt'&&e.chemoIndex===i);
    const date=infusion?.date||baseDate;
@@ -187,9 +189,21 @@ function chemoCourseMarkup(state,course){
    const holidayInfo=infusion?.nominalDate&&infusion.nominalDate!==date?
     ' · по 7-дневной схеме '+datestr(infusion.nominalDate)+' (перенос на рабочий день)':'';
    const status=(infusion?.status==='cancelled'?' · отменено':infusion?.originalDate&&infusion.originalDate!==date?' · перенесено с '+datestr(infusion.originalDate):'')+holidayInfo;
-   return '<div class="hlt-plan-item"><b>Кровь '+datestr(labDate)+' → ХТ '+(i+1)+' · '+datestr(date)+esc(status)+'</b><span>Направление: '+esc(label)+'</span></div>';
+   const outcome=chemoAdministrationState(infusion,localToday());
+   const deliveryLabel={
+    confirmed:'Проведена (подтверждено вручную)',
+    assumed:'Учтена по календарю — факт не подтверждён',
+    'not-given':'ХТ не проводилась',
+    cancelled:'Запланированное введение отменено',
+    planned:'Ожидается по плану'
+   }[outcome]||'Статус требует проверки';
+   return '<div class="hlt-plan-item"><b>Кровь '+datestr(labDate)+' → ХТ '+(i+1)+' · '+datestr(date)+esc(status)+'</b><span>Направление: '+esc(label)+'</span><span class="hlt-administration-status'+(outcome==='not-given'||outcome==='cancelled'?' hlt-admin-missed':'')+'">'+esc(deliveryLabel)+'</span></div>';
  }).join('');
- return '<details class="hlt-plan"><summary>ХЛТ · '+chemo.count+' введений · первое '+datestr(chemo.firstDate)+'</summary>'+
+ return '<details class="hlt-plan"><summary>ХЛТ · учтено '+summary.counted+' / '+summary.total+' введений · первое '+datestr(chemo.firstDate)+'</summary>'+
+   '<p class="hlt-administration-summary">Подтверждено вручную: '+summary.confirmed+
+   '; учтено по календарю без подтверждения: '+summary.assumed+
+   '; не проводилось: '+summary.notGiven+'; отменено по плану: '+summary.cancelled+
+   '. Даты сами по себе не подтверждают фактическое проведение ХТ.</p>'+
    '<div class="hlt-plan-grid">'+list+'</div>'+ 
    (chemoWarningsFor(state,course).length?'<div class="hlt-alert">'+chemoWarningsFor(state,course).map(w=>'<p>'+esc(w)+'</p>').join('')+'</div>':'')+'</details>';
 }

@@ -67,7 +67,7 @@ export function applyHltPlanDraft(draft,course,previous,data){
  if(!isHlt(course)){
    for(const event of oldEvents){
      if(event.type==='lab'&&event.status==='issued')return {error:'Сначала проверь и отмени уже выданное направление на кровь ('+event.date+'), затем отключай ХЛТ.'};
-     if(event.type==='chemo'&&event.status!=='planned'&&event.status!=='cancelled')return {error:'Сначала проверь фактически проведённое введение ХТ ('+event.date+').'};
+     if(event.type==='chemo'&&(event.status!=='planned'&&event.status!=='cancelled'||['given','not-given'].includes(event.administrationOutcome)))return {error:'Сначала проверь фактическую отметку введения ХТ ('+event.date+') и сними её перед изменением схемы.'};
    }
    draft.events=draft.events.filter(e=>!oldEvents.includes(e));
    course.chemo=null;
@@ -75,7 +75,7 @@ export function applyHltPlanDraft(draft,course,previous,data){
  }
  // Keep individual manual decisions on routine edits; protect them from
  // a global change of count, mode, or first date.
- const individuallyChanged=oldEvents.some(e=>e.type==='chemo'&&e.manualChange);
+ const individuallyChanged=oldEvents.some(e=>e.type==='chemo'&&(e.manualChange||['given','not-given'].includes(e.administrationOutcome)));
  const count=Number(data.chemoCount);
  if(!Number.isInteger(count)||count<1||count>52)return {error:'Укажи количество введений ХТ: от 1 до 52.'};
  const mode=isBreastDiagnosis(course.diagnosis)?'manual':'first-fraction';

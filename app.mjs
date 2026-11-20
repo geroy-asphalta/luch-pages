@@ -3,7 +3,7 @@ import {isWorkingDay,effectiveDay,effectiveDayLabel} from './work-calendar.mjs';
 import {createWorkdayUI} from './workday-ui.mjs?v=2';
 import {createOperationalUI} from './operations-ui.mjs';
 import {ensurePatientModel} from './patient-model.mjs';
-import {createPatientUI} from './patient-ui.mjs?v=7';
+import {createPatientUI} from './patient-ui.mjs?v=8';
 import {createCatalogUI} from './catalog-ui.mjs';
 import {currentCtvName} from './ctv-display.mjs';
 import {courseProgress,localToday,dischargeCandidates,dischargeBatchDraft} from './course-progress.mjs?v=2';
@@ -19,10 +19,11 @@ import {calendarElnIndicator} from './calendar-eln-indicator.mjs';
 import {compactCalendarPatientName} from './calendar-patient-name.mjs';
 import {notesColumnWidth} from './notes-column-width.mjs';
 import {initialPhoneExpanded,savePhoneExpanded} from './calendar-phone-prefs.mjs';
-import {calendarTreatmentCellContent} from './calendar-event-icons.mjs';
+import {calendarTreatmentCellContent} from './calendar-event-icons.mjs?v=2';
+import {chemoAdministrationState,chemoAdministrationSummary,chemoAdministrationDraft} from './chemo-administration.mjs';
 import {calendarMaintenanceCellContent} from './calendar-maintenance-icon.mjs';
 import {setupCalendarRangeSelection} from './calendar-range-select.mjs';
-import {setupCalendarCellContextMenu} from './calendar-cell-context-menu.mjs?v=2';
+import {setupCalendarCellContextMenu} from './calendar-cell-context-menu.mjs?v=3';
 import {setupChemoChangeUI} from './chemo-change-ui.mjs?v=2';
 import {setupPatientCardDrawer} from './patient-card-drawer.mjs';
 import {createImportedDemoState,installImportedDemoRoster} from './demo-roster.mjs?v=5';
@@ -258,21 +259,35 @@ function renderCalendar(){
    const plan=p.noCourse?new Map():schedule(p,state,until),contact=calendarContact(state,p);
    const phone=contact.phone?esc(contact.phone):'<span class="calendar-empty">—</span>';
    const ctvDisplay=p.noCourse?'':currentCtvName(state,p);
-   const patientMeta='<small class="calendar-patient-meta">'+(p.noCourse?'<span>Без курса</span>':ctvDisplay?'<span class="calendar-patient-ctv" title="'+esc(ctvDisplay)+'">'+esc(ctvDisplay)+'</span>':'')+calendarElnIndicator(contact.eln)+'</small>';
+   const chemoCounter=p.treatmentType==='ХЛТ'&&p.chemo?.count?chemoAdministrationSummary(state,p.id,localToday()):null;
+   const chemoCounterMarkup=chemoCounter?'<span class="calendar-chemo-counter" title="Учтено ХТ: '+chemoCounter.counted+' из '+chemoCounter.total+
+    ' · вручную подтверждено: '+chemoCounter.confirmed+
+    ' · учтено только по календарю: '+chemoCounter.assumed+
+    ' · не проводилась: '+chemoCounter.notGiven+' · отменено по плану: '+chemoCounter.cancelled+
+    '">ХТ '+chemoCounter.counted+'/'+chemoCounter.total+'</span>':'';
+   const patientMeta='<small class="calendar-patient-meta">'+(p.noCourse?'<span>Без курса</span>':ctvDisplay?'<span class="calendar-patient-ctv" title="'+esc(ctvDisplay)+'">'+esc(ctvDisplay)+'</span>':'')+calendarElnIndicator(contact.eln)+chemoCounterMarkup+'</small>';
    const notes=contact.notes?'<span class="calendar-note-value" title="'+esc(contact.notes)+'">'+esc(contact.notes)+'</span>':'<span class="calendar-empty">—</span>';
    const tds=dates.map(d=>{
      if(p.noCourse)return '<td class="calendar-no-course-day" title="Курс лечения пока не назначен"></td>';
-     const c=plan.get(d),elapsed=c?.kind==='session'&&d<localToday()&&!c.delivered,lab=labAt(state,p.id,d),sourceLab=state.events.find(e=>e.patientId===p.id&&e.date===d&&e.type==='lab'&&e.status!=='cancelled'&&e.source==='talbichka-cell-color'),chemo=state.events.some(e=>e.patientId===p.id&&e.date===d&&e.type==='chemo'&&e.status==='planned'),key=cellKey(p.id,d);
+     const c=plan.get(d),elapsed=c?.kind==='session'&&d<localToday()&&!c.delivered,lab=labAt(state,p.id,d),sourceLab=state.events.find(e=>e.patientId===p.id&&e.date===d&&e.type==='lab'&&e.status!=='cancelled'&&e.source==='talbichka-cell-color'),chemo=state.events.some(e=>e.patientId===p.id&&e.date===d&&e.type==='chemo'&&['planned','administered','given'].includes(e.status)),key=cellKey(p.id,d);
      const chemoEvent=state.events.find(e=>e.patientId===p.id&&e.date===d&&e.type==='chemo'&&e.source==='hlt');
      const chemoCancelled=chemoEvent?.status==='cancelled';
+     const chemoOutcome=chemoAdministrationState(chemoEvent,localToday());
+     const chemoMissed=chemoOutcome==='not-given'||chemoCancelled;
+     const chemoDescription={
+      assumed:' · ХТ учтена по прошедшему дню, факт не подтверждён',
+      confirmed:' · проведение ХТ подтверждено вручную',
+      'not-given':' · ХТ не проводилась (ручная отметка)',
+      planned:' · ХТ запланирована'
+     }[chemoOutcome]||'';
      const working=isWorkingDay(state,d),weekend=isWeekend(d)&&!working;
      const cl=['day',!working?'off':'',weekend?'weekend-day':'',effectiveDay(state,d)?.holiday?'holiday-day':'',c?.kind||'',c?.final?'final':'',c?.beforeMaintenance?'maintenance-final':'',c?.delivered?'delivered':'',elapsed?'elapsed':'',lab==='todo'?'lab':lab==='issued'?'issued':'',chemo?'chemo-day':'',lab||chemo?'has-treatment-event':'',lab?'has-lab-event':'',chemo?'has-chemo-event':'',chemoCancelled?'chemo-cancelled':'',selected.has(key)?'selected':''].join(' ');
      const label=c?.label||'';
      const transfer=(state.transfers||[]).find(t=>t.patientId===p.id&&t.date===d);
-     const title=p.name+' · '+p.courseName+' · '+pretty(d)+' · '+machineAt(p,state,d)+(c?.kind==='breakdown'?' · АППАРАТ НЕ РАБОТАЕТ':'')+(c?.delivered?' · проведён до поломки':'')+(elapsed?' · прошедший по расписанию сеанс (предположительно выполнен, факт не подтверждён)':'')+(transfer?' · перевод на '+transfer.to:'')+(c?.kind==='maintenance'?' · ТО':c?.kind==='skip'?' · пропуск':c?.kind==='session'?' · сеанс '+c.n:'')+(lab==='todo'?' · кровь назначена':lab==='issued'?' · направление выдано':'')+(sourceLab?' · отметка по цвету из «Талбички» — статус направления требуется подтвердить':'')+(chemo?' · запланировано введение ХТ':'')+(chemoCancelled?' · введение ХТ отменено':'')+(chemoEvent?.originalDate&&chemoEvent.originalDate!==d?' · капельница перенесена с '+chemoEvent.originalDate:'')+(chemoEvent?.nominalDate&&chemoEvent.nominalDate!==d?' · по схеме '+chemoEvent.nominalDate+', перенос на ближайший рабочий день':'')+(c?.beforeMaintenance?' · последняя фракция утром до ТО (план, не факт проведения)':'')+(effectiveDay(state,d)?' · '+effectiveDayLabel(state,d):'');
-     const treatmentContent=calendarTreatmentCellContent({label:c?.kind==='maintenance'?'':label,isSession:c?.kind==='session',labStatus:lab,chemoPlanned:chemo});
-     const cellContent=calendarMaintenanceCellContent({isMaintenance:c?.kind==='maintenance',hasTreatmentEvent:Boolean(lab||chemo),content:treatmentContent});
-     return '<td class="'+cl+'" data-id="'+p.id+'" data-date="'+d+'" title="'+esc(title)+'">'+cellContent+(chemoCancelled?'<span class="chemo-cancel-mark" aria-label="Отменённая капельница" title="Введение ХТ отменено">⊘</span>':'')+(c?.delivered?'<span class="delivered-mark">✓</span>':elapsed?'<span class="elapsed-mark">✓</span>':'')+(transfer?'<span class="transfer-mark">↗</span>':'')+(lab?'<i class="lab-dot"></i>':'')+(c?.beforeMaintenance?'<span class="maintfinal-mark">до ТО</span>':'')+'</td>';
+     const title=p.name+' · '+p.courseName+' · '+pretty(d)+' · '+machineAt(p,state,d)+(c?.kind==='breakdown'?' · АППАРАТ НЕ РАБОТАЕТ':'')+(c?.delivered?' · проведён до поломки':'')+(elapsed?' · прошедший по расписанию сеанс (предположительно выполнен, факт не подтверждён)':'')+(transfer?' · перевод на '+transfer.to:'')+(c?.kind==='maintenance'?' · ТО':c?.kind==='skip'?' · пропуск':c?.kind==='session'?' · сеанс '+c.n:'')+(lab==='todo'?' · кровь назначена':lab==='issued'?' · направление выдано':'')+(sourceLab?' · отметка по цвету из «Талбички» — статус направления требуется подтвердить':'')+(chemo?' · запланировано введение ХТ':'')+chemoDescription+(chemoCancelled?' · введение ХТ отменено':'')+(chemoEvent?.originalDate&&chemoEvent.originalDate!==d?' · капельница перенесена с '+chemoEvent.originalDate:'')+(chemoEvent?.nominalDate&&chemoEvent.nominalDate!==d?' · по схеме '+chemoEvent.nominalDate+', перенос на ближайший рабочий день':'')+(c?.beforeMaintenance?' · последняя фракция утром до ТО (план, не факт проведения)':'')+(effectiveDay(state,d)?' · '+effectiveDayLabel(state,d):'');
+     const treatmentContent=calendarTreatmentCellContent({label:c?.kind==='maintenance'?'':label,isSession:c?.kind==='session',labStatus:lab,chemoPlanned:chemo||chemoCancelled,chemoNotGiven:chemoMissed});
+     const cellContent=calendarMaintenanceCellContent({isMaintenance:c?.kind==='maintenance',hasTreatmentEvent:Boolean(lab||chemo||chemoCancelled),content:treatmentContent});
+     return '<td class="'+cl+'" data-id="'+p.id+'" data-date="'+d+'" title="'+esc(title)+'">'+cellContent+(c?.delivered?'<span class="delivered-mark">✓</span>':elapsed?'<span class="elapsed-mark">✓</span>':'')+(transfer?'<span class="transfer-mark">↗</span>':'')+(lab?'<i class="lab-dot"></i>':'')+(c?.beforeMaintenance?'<span class="maintfinal-mark">до ТО</span>':'')+'</td>';
    }).join('');
    return '<tr data-person-id="'+esc(p.personId)+'" data-course-id="'+(p.noCourse?'':esc(p.id))+'"'+(p.noCourse?' class="calendar-no-course-row"':'')+'><td class="sticky id">'+esc(p.personId)+'</td><td class="sticky name"><div class="calendar-patient-primary"><button type="button" class="patient-open" data-person-id="'+esc(p.personId)+'" title="'+esc(p.name)+'" aria-label="Открыть карточку пациента: '+esc(p.name)+'"><span class="patient-name-short" aria-hidden="true">'+esc(compactCalendarPatientName(p.name))+'</span><span class="patient-name-full" aria-hidden="true">'+esc(p.name)+'</span></button>'+(p.treatmentType==='ХЛТ'?'<span class="type-tag">ХЛТ</span>':'')+'</div>'+patientMeta+'</td><td class="sticky machine">'+(p.noCourse?'<span class="calendar-empty">—</span>':machineAt(p,state,until)+(p.machine!==machineAt(p,state,until)?'<small>с '+p.machine+'</small>':''))+'</td><td class="sticky calendar-phone" title="'+esc(contact.phone)+'"><span class="calendar-phone-value">'+phone+'</span><span class="calendar-phone-icon" aria-hidden="true">'+(contact.phone?'☎':'—')+'</span></td><td class="sticky calendar-notes"><button type="button" class="calendar-note-trigger" data-calendar-note-open title="'+esc(contact.notes||'Добавить примечание')+'" aria-label="Изменить примечание пациента: '+esc(p.name)+'">'+notes+'</button></td>'+tds+'<td class="calendar-tail" aria-hidden="true"></td></tr>';
  }).join('');
@@ -468,7 +483,7 @@ function maybeAskDischarge(){
 function renderJournal(){
  const arr=state.audit.slice().reverse();
  el('journal-list').innerHTML=arr.length?arr.map(a=>
- '<div class="list-item"><span><b>'+esc(a.patientId||a.machine||'Оборудование')+'</b> · '+esc(a.day||'')+' · '+({lab:'Кровь назначена','lab-assign':'Кровь назначена','lab-remove':'Назначение крови снято',issue:'Направление выдано','issue-undo':'Отмена выдачи направления',skip:'Пропуск',unskip:'Отмена пропуска',breakdown:'Поломка','breakdown-update':'Обновлено восстановление', 'breakdown-remove':'Отмена поломки',transfer:'Перевод аппарата','transfer-remove':'Отмена перевода','chemo-move':'Перенос капельницы','chemo-cancel':'Отмена капельницы','chemo-restore':'Восстановление капельницы','chemo-calendar-adjust':'Корректировка ХТ по рабочему календарю','person-create':'Новый пациент','person-update':'Изменена карточка','person-archive':'Пациент в архиве','person-restore':'Пациент восстановлен','course-create':'Новый курс','course-update':'Изменён курс','course-archive':'Курс в архиве','course-restore':'Курс восстановлен','course-discharge':'Подтверждена выписка','course-start-auto':'Статус по первой фракции','course-discharge-early':'Досрочно завершён курс','course-discharge-deferred':'Выписка отложена','ctv-create':'Добавлена схема CTV','ctv-update':'Изменена схема CTV','ctv-hide':'CTV скрыт','ctv-show':'CTV восстановлен','ctv-reset':'CTV сброшен к исходному','chemo-plan':'План введений ХТ','calendar-day':'Рабочий календарь: дата изменена','calendar-day-remove':'Рабочий календарь: исключение удалено','patient-reorder':'Изменён порядок пациентов','patient-photo-roster':'Обновлён демонстрационный список','patient-photo-course':'Добавлены плановые курсы по снимку','maintenance-final':'Последняя фракция до ТО запланирована','maintenance-final-remove':'Исключение последней фракции до ТО снято','hlt-lab-align':'Дата анализа перед ХТ исправлена'}[a.kind]||a.kind)+(a.detail?' · '+esc(a.detail):'')+'</span><small>'+new Date(a.date).toLocaleString('ru-RU')+'</small></div>'
+ '<div class="list-item"><span><b>'+esc(a.patientId||a.machine||'Оборудование')+'</b> · '+esc(a.day||'')+' · '+({lab:'Кровь назначена','lab-assign':'Кровь назначена','lab-remove':'Назначение крови снято',issue:'Направление выдано','issue-undo':'Отмена выдачи направления',skip:'Пропуск',unskip:'Отмена пропуска',breakdown:'Поломка','breakdown-update':'Обновлено восстановление', 'breakdown-remove':'Отмена поломки',transfer:'Перевод аппарата','transfer-remove':'Отмена перевода','chemo-move':'Перенос капельницы','chemo-cancel':'Отмена капельницы','chemo-restore':'Восстановление капельницы','chemo-calendar-adjust':'Корректировка ХТ по рабочему календарю','chemo-administration-not-given':'ХТ не проводилась','chemo-administration-given':'Проведение ХТ подтверждено','chemo-administration-reset':'Снята ручная отметка ХТ','person-create':'Новый пациент','person-update':'Изменена карточка','person-archive':'Пациент в архиве','person-restore':'Пациент восстановлен','course-create':'Новый курс','course-update':'Изменён курс','course-archive':'Курс в архиве','course-restore':'Курс восстановлен','course-discharge':'Подтверждена выписка','course-start-auto':'Статус по первой фракции','course-discharge-early':'Досрочно завершён курс','course-discharge-deferred':'Выписка отложена','ctv-create':'Добавлена схема CTV','ctv-update':'Изменена схема CTV','ctv-hide':'CTV скрыт','ctv-show':'CTV восстановлен','ctv-reset':'CTV сброшен к исходному','chemo-plan':'План введений ХТ','calendar-day':'Рабочий календарь: дата изменена','calendar-day-remove':'Рабочий календарь: исключение удалено','patient-reorder':'Изменён порядок пациентов','patient-photo-roster':'Обновлён демонстрационный список','patient-photo-course':'Добавлены плановые курсы по снимку','maintenance-final':'Последняя фракция до ТО запланирована','maintenance-final-remove':'Исключение последней фракции до ТО снято','hlt-lab-align':'Дата анализа перед ХТ исправлена'}[a.kind]||a.kind)+(a.detail?' · '+esc(a.detail):'')+'</span><small>'+new Date(a.date).toLocaleString('ru-RU')+'</small></div>'
  ).join(''):'<div class="empty">Пока изменений нет — попробуй назначить анализы на календаре.</div>';
 }
 function setView(next){
@@ -593,6 +608,15 @@ setupCalendarCellContextMenu({
   if(which==='skip')buttonClick('skip');
   else if(which==='lab')applyLabAction();
   else if(which==='issue')issueWeekClick();
+  else if(['chemo-not-given','chemo-given','chemo-outcome-reset'].includes(which)){
+   const event=(state.events||[]).find(e=>e.patientId===cell?.patientId&&e.date===cell?.date&&e.type==='chemo'&&e.source==='hlt');
+   const decision={'chemo-not-given':'not-given','chemo-given':'given','chemo-outcome-reset':'reset'}[which];
+   const updated=chemoAdministrationDraft(state,{eventId:event?.id,decision},localToday());
+   if(!updated.changed){notice(updated.error||'ХТ не изменена');return;}
+   state=updated.state;save();render();
+   notice(decision==='not-given'?'ХТ не проводилась — капельница выделена красным':
+    decision==='given'?'ХТ проведена — подтверждено вручную':'Ручная отметка ХТ снята');
+  }
   else if(which.startsWith('chemo-'))chemoChangeUI.open(cell,which);
  }
 });

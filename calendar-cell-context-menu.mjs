@@ -2,6 +2,8 @@
 // as the toolbar; the controller never mutates treatment or laboratory data.
 import {labButtonIntent,issueButtonIntent,skipButtonIntent,calendarActionIcon} from './calendar-action-ui.mjs';
 import {chemoEventAt} from './chemo-change.mjs?v=2';
+import {chemoAdministrationState} from './chemo-administration.mjs';
+import {localToday} from './course-progress.mjs';
 
 const cellKey=cell=>cell.patientId+'|'+cell.date;
 const fromKeys=keys=>[...keys].map(key=>{
@@ -19,7 +21,7 @@ export function calendarCellContextSelection(selected,cell){
  return selected?.has(key)?new Set(selected):new Set([key]);
 }
 
-export function calendarCellContextActions(state,cells,clickedCell=null){
+export function calendarCellContextActions(state,cells,clickedCell=null,today=localToday()){
  const skip=skipButtonIntent(state,cells);
  const lab=labButtonIntent(state,cells);
  const issue=issueButtonIntent(state,cells);
@@ -27,16 +29,24 @@ export function calendarCellContextActions(state,cells,clickedCell=null){
  const course=infusion&&(state.patients||[]).find(c=>c.id===infusion.patientId);
  const active=course&&['active','planned'].includes(course.status)&&course.treatmentType==='ХЛТ'&&
   !(state.people||[]).some(p=>p.id===course.personId&&p.archived);
+ const historical=infusion?.status==='planned'&&infusion.date<=today;
+ const outcome=chemoAdministrationState(infusion,today);
+ const manuallyMarked=infusion&&['not-given','given'].includes(infusion.administrationOutcome);
+ const deliveryActions=active&&historical?[
+  ...(outcome!=='not-given'?[{id:'chemo-not-given',label:'ХТ не проводилась',title:'Пометить введение как не проведённое: только капельница станет красной',disabled:false,icon:'✕'}]:[]),
+  ...(outcome!=='confirmed'?[{id:'chemo-given',label:outcome==='not-given'?'ХТ всё-таки проведена':'Подтвердить проведение ХТ',title:'Ручное подтверждение фактического проведения',disabled:false,icon:'✓'}]:[]),
+  ...(manuallyMarked?[{id:'chemo-outcome-reset',label:'Снять ручную отметку ХТ',title:'Вернуться к автоматическому учёту по прошедшей дате',disabled:false,icon:'↶'}]:[])
+ ]:[];
  const chemoActions=active?(infusion.status==='cancelled'?
   [{id:'chemo-restore',label:'Восстановить капельницу…',title:'Восстановить плановое введение с подтверждением',disabled:false,icon:'↶'}]:[
-   {id:'chemo-move',label:'Перенести капельницу и следующие…',title:'Сдвинуть выбранное и все последующие введения с интервалом 7 дней',disabled:false,icon:'↗'},
-   {id:'chemo-cancel',label:'Отменить капельницу…',title:'Отменить выбранное введение; остальные даты не меняются',disabled:false,icon:'⊘'}
+   {id:'chemo-move',label:'Перенести капельницу и следующие…',title:manuallyMarked?'Сначала сними ручную отметку о проведении или пропуске':'Перенести выбранное и последующие введения с шагом 7 дней',disabled:Boolean(manuallyMarked),icon:'↗'},
+   {id:'chemo-cancel',label:'Отменить капельницу…',title:manuallyMarked?'Сначала сними ручную отметку о проведении или пропуске':'Отменить запланированное введение; остальные даты не меняются',disabled:Boolean(manuallyMarked),icon:'⊘'}
   ]):[];
  return [
   {id:'skip',label:skip.label,title:skip.title,disabled:!cells.length||(lab.disabled&&issue.disabled),icon:calendarActionIcon('skip',skip.mode)},
   {id:'lab',label:lab.label,title:lab.title,disabled:lab.disabled,icon:calendarActionIcon('lab',lab.mode)},
   {id:'issue',label:issue.label,title:issue.title,disabled:issue.disabled,icon:calendarActionIcon('issue',issue.mode)},
-  ...chemoActions
+  ...chemoActions,...deliveryActions
  ];
 }
 
@@ -84,7 +94,8 @@ export function setupCalendarCellContextMenu({
   const button=event.target?.closest?.('button[data-calendar-cell-action]');
   if(!opened||!button||button.disabled)return;
   const which=button.dataset.calendarCellAction;
-  if(!['skip','lab','issue','chemo-move','chemo-cancel','chemo-restore'].includes(which))return;
+  if(!['skip','lab','issue','chemo-move','chemo-cancel','chemo-restore',
+   'chemo-not-given','chemo-given','chemo-outcome-reset'].includes(which))return;
   const clicked=targetCell;
   close();
   onAction(which,clicked); // Use the existing toolbar operation against the same selection.
