@@ -3,7 +3,7 @@ import {isWorkingDay,effectiveDay,effectiveDayLabel} from './work-calendar.mjs';
 import {createWorkdayUI} from './workday-ui.mjs?v=2';
 import {createOperationalUI} from './operations-ui.mjs';
 import {ensurePatientModel} from './patient-model.mjs';
-import {createPatientUI} from './patient-ui.mjs?v=9';
+import {createPatientUI} from './patient-ui.mjs?v=10';
 import {createCatalogUI} from './catalog-ui.mjs';
 import {currentCtvName} from './ctv-display.mjs';
 import {courseProgress,localToday,radiationSessionCompletion,dischargeCandidates,dischargeBatchDraft} from './course-progress.mjs?v=3';

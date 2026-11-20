@@ -7,6 +7,7 @@ import {registerRows,registerStats} from './patient-register.mjs?v=3';
 import {currentCtvName} from './ctv-display.mjs';
 import {notesColumnWidth} from './notes-column-width.mjs';
 import {courseProgress,localToday} from './course-progress.mjs';
+import {courseCardProgress} from './course-card-progress.mjs';
 import {isBreastDiagnosis,firstRadiationFraction,weeklyChemoDates,chemoEventsFor,chemoWarningsFor,bloodDateBeforeChemo} from './chemo-schedule.mjs';
 import {chemoAdministrationState,chemoAdministrationSummary} from './chemo-administration.mjs';
 import {COURSE_STATUSES,TREATMENT_TYPES,coursesFor,createPersonDraft,updatePersonDraft,setPersonArchivedDraft,createCourseDraft,updateCourseDraft,setCourseArchivedDraft,previewCourse,formatPhoneRU,phoneDigitsRU,ELN_VALUES} from './patient-model.mjs';
@@ -171,6 +172,37 @@ function wireChemo(form,course,getState){
  form.elements.chemoReanchor.addEventListener('change',update);
  count.addEventListener('input',()=>{countAutomaticallySet=Boolean(count.value)});
  return {update};
+}
+// Narrow, two-tone progress bars: dark = confirmed; pale = elapsed on the calendar.
+function courseProgressRow(label,metric,{factOnly=false}={}){
+ const value=factOnly?metric.confirmed:metric.counted;
+ const caption=factOnly?
+   (metric.total?'Подтверждено вручную: '+metric.confirmed+' · по датам: '+metric.inferred:'План введений пока не задан'):
+   'Подтверждено: '+metric.confirmed+' · по календарю: '+metric.inferred;
+ const percent=n=>Number(n).toFixed(2)+'%';
+ return '<div class="course-progress-item">'+
+   '<div class="course-progress-label"><span>'+esc(label)+'</span><strong>'+value+' / '+metric.total+'</strong></div>'+
+   '<div class="course-progress-track" role="progressbar" aria-label="'+esc(label+(factOnly?' (подтверждённые введения)':' (учёт по календарю)'))+
+   '" aria-valuemin="0" aria-valuemax="'+metric.total+'" aria-valuenow="'+value+'">'+
+   '<span class="course-progress-confirmed" style="width:'+percent(metric.confirmedPercent)+'"></span>'+
+   '<span class="course-progress-inferred" style="width:'+percent(metric.inferredPercent)+'"></span></div>'+
+   '<div class="course-progress-caption">'+esc(caption)+'</div></div>';
+}
+function courseProgressMarkup(state,course){
+ const metrics=courseCardProgress(state,course,localToday());
+ const early=course.earlyDischarge;
+ const info=early?
+   '<div class="course-progress-closure">Досрочно завершён '+esc(datestr(early.date))+
+   ' · '+esc(EARLY_DISCHARGE_REASONS[early.reason]||'Другая причина')+
+   (early.comment?' · '+esc(early.comment):'')+'</div>':
+   course.dischargeReview?.decision==='yes'?
+     '<div class="course-progress-closure">Выписка подтверждена</div>':
+     course.dischargeReview?.decision==='no'?
+       '<div class="course-progress-closure">Выписка отложена</div>':'';
+ return '<div class="course-progress-bars" aria-label="Прогресс лечения">'+
+   courseProgressRow('Сеансы ЛТ',metrics.lt)+
+   (metrics.chemo?courseProgressRow('Капельницы ХТ',metrics.chemo,{factOnly:true}):'')+
+   info+'</div>';
 }
 function chemoCourseMarkup(state,course){
  if(course.treatmentType!=='ХЛТ')return '';
@@ -374,19 +406,10 @@ export function createPatientUI({getState,commitState,renderApp,notice,onDischar
     '<button type="button" data-p-action="archive">'+(p.archived?'Восстановить':'В архив')+'</button></div></div>'+
     '<div class="patient-info"><span><b>ЭЛН:</b> '+elnBadge(p.eln)+'</span><span><b>Телефон:</b> '+esc(p.phone||'—')+'</span><span class="full"><b>Примечание:</b> '+esc(p.notes||'—')+'</span></div>';
    el('patient-detail').innerHTML=(personEditing?personInlineForm(p):patientOverview)+
-    '<div class="patient-courses-title"><h3>Курсы / этапы лечения</h3><button type="button" data-p-action="add-course" '+(p.archived?'disabled':'')+'>+ Новый курс</button></div>'+
+    '<div class="patient-courses-title"><h3>Схема лечения</h3><button type="button" data-p-action="add-course" '+(p.archived?'disabled':'')+'>+ Новый курс</button></div>'+
     (cs.length?cs.map(c=>
-       '<div class="course-card"><div class="course-heading"><div><b>'+esc(c.courseName)+'</b><small>'+esc(c.id)+'</small></div><span class="course-type">'+esc(c.treatmentType||'ЛТ')+'</span><span class="course-status">'+esc(stat(c))+'</span></div>'+
-       '<div class="course-progress-note">'+(()=>{
-         const progress=courseProgress(getState(),c,localToday());
-         return c.earlyDischarge?
-           '<b>Досрочно завершён '+esc(datestr(c.earlyDischarge.date))+'.</b> '+c.earlyDischarge.elapsedByCalendar+' из '+c.earlyDischarge.totalAtDecision+' плановых фракций по датам. Причина: '+esc(EARLY_DISCHARGE_REASONS[c.earlyDischarge.reason]||'Другая')+
-           (c.earlyDischarge.comment?' · '+esc(c.earlyDischarge.comment):'')+
-           '. <span>Не является подтверждением фактического проведения фракций.</span>':
-         '<b>ЛТ выполнено:</b> '+progress.completed+' из '+progress.total+' фракций (по календарю: '+progress.calendarCompleted+', подтверждено отдельно: '+progress.explicit+')'+ 
-           (c.dischargeReview?.decision==='yes'?' · выписка подтверждена':c.dischargeReview?.decision==='no'?' · выписка отложена':'')+
-           '. <span>Автоматический учёт не заменяет подтверждения фактического проведения.</span>';
-       })()+'</div>'+
+       '<div class="course-card"><div class="course-heading"><div><b>'+esc(c.courseName)+'</b></div><span class="course-type">'+esc(c.treatmentType||'ЛТ')+'</span><span class="course-status">'+esc(stat(c))+'</span></div>'+
+       courseProgressMarkup(getState(),c)+
        '<div class="course-facts"><span><b>Ds:</b> '+esc(c.diagnosis||'—')+'</span><span><b>CTV:</b> '+esc(currentCtvName(getState(),c)||'—')+(c.boost?' · Буст':'')+'</span><span><b>Аппарат:</b> '+esc(c.machine)+'</span><span><b>Начало:</b> '+(c.start?datestr(c.start):'пока неизвестно')+'</span><span><b>Фракций:</b> '+c.total+'</span><span><b>РОД:</b> '+(fieldText(c,'rod')?esc(fieldText(c,'rod'))+' Гр':'не указана')+'</span><span><b>СОД:</b> '+(fieldText(c,'sod')?esc(fieldText(c,'sod'))+' Гр':'не указана')+'</span></div>'+ 
        (zoneSummary(c).length?'<div class="course-zone-details">'+zoneSummary(c).map(z=>'<span>'+esc(z.label)+': '+(z.rod==null?'—':asDoseText(z.rod))+' / '+(z.sod==null?'—':asDoseText(z.sod))+' Гр (РОД / СОД)</span>').join('')+'</div>':'')+
        chemoCourseMarkup(getState(),c)+
@@ -404,7 +427,7 @@ export function createPatientUI({getState,commitState,renderApp,notice,onDischar
  function personForm(p){
    const eln=p?.eln||'';
    return '<h3>'+(p?'Редактирование пациента':'Новый пациент')+'</h3><form id="patient-person-form" class="patient-form">'+
-    '<label>ФИО (только вымышленные данные) <input name="name" value="'+esc(p?.name||'')+'" required maxlength="100"></label>'+
+    '<label>ФИО <input name="name" value="'+esc(p?.name||'')+'" required maxlength="100"></label>'+
     '<label>ЭЛН <select name="eln" class="eln-select '+elnClass(eln)+'">'+opts([['','Не выбрано'],['Да','Да'],['Нет','Нет']],eln)+'</select></label>'+
     '<label>Телефон <input name="phone" type="tel" inputmode="tel" autocomplete="off" placeholder="+7 (999) 123-45-67" value="'+esc(formatPhoneRU(p?.phone||''))+'" maxlength="18"></label>'+
     '<label class="wide">Примечания <textarea name="notes" maxlength="500" rows="3">'+esc(p?.notes||'')+'</textarea></label>'+
@@ -416,7 +439,7 @@ export function createPatientUI({getState,commitState,renderApp,notice,onDischar
    // Edit the existing summary area, never create a second form below courses.
    return '<form id="patient-person-form" class="patient-detail-inline-form" aria-label="Редактирование данных пациента">'+
     '<div class="patient-header"><div class="patient-inline-name">'+
-    '<label>ФИО (только вымышленные данные)<input name="name" value="'+esc(p.name)+'" required maxlength="100"></label>'+
+    '<label>ФИО <input name="name" value="'+esc(p.name)+'" required maxlength="100"></label>'+
     '<p>'+esc(p.id)+' '+(p.archived?'· В архиве':'· Карточка активна')+'</p></div>'+
     '<div class="patient-header-actions"><button type="submit" class="primary">Сохранить</button>'+
     '<button type="button" id="patient-edit-cancel">Отмена</button></div></div>'+

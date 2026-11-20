@@ -377,8 +377,27 @@ main{padding:32px 29px;flex:1;min-width:0}.head{display:flex;justify-content:spa
 .calendar .day.final .elapsed-mark{color:#22825e}
 .legend .dot.elapsed{background:#edf5fa;border-color:#95bbc9}
 .reg-progress{width:110px;min-width:110px;text-align:center;font-variant-numeric:tabular-nums;font-weight:750;color:#476f82}
-.course-progress-note{font-size:11px;line-height:1.5;padding:10px 12px;background:#f1f8fa;border:1px solid #dfeaf0;color:#3b667a;border-radius:8px;margin-top:12px}
-.course-progress-note span{color:#758d9a}
+/* Compact LT and chemotherapy progress, with distinct inferred vs confirmed portions. */
+.course-progress-bars{display:grid;gap:12px;margin:13px 0 4px}
+.course-progress-item{display:grid;gap:5px;min-width:0}
+.course-progress-label{display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+  color:#36566a;font-size:12px;font-weight:750}
+.course-progress-label strong{font-size:13px;white-space:nowrap;font-variant-numeric:tabular-nums;color:#234f58}
+.course-progress-track{display:flex;overflow:hidden;width:100%;height:10px;border-radius:999px;background:#edf2f5}
+.course-progress-confirmed,.course-progress-inferred{height:100%;flex:none;transition:width .2s ease}
+.course-progress-confirmed{background:#328a70}
+.course-progress-inferred{background:#afdccc}
+.course-progress-item:nth-child(2) .course-progress-confirmed{background:#347fa9}
+.course-progress-item:nth-child(2) .course-progress-inferred{background:#b6d8eb}
+.course-progress-caption{font-size:10px;line-height:1.35;color:#7a8e9c}
+.course-progress-closure{font-size:11px;color:#6b7280;line-height:1.4;margin-top:2px}
+@media(max-width:700px){
+ .course-progress-bars{gap:11px}
+ .course-progress-track{height:9px}
+ .course-progress-label{font-size:11px}
+ .course-progress-label strong{font-size:12px}
+}
+
 .course-actions .course-discharge{background:#e6f2ea;border-color:#b8dfca;color:#26784d}
 .discharge-dialog{width:min(590px,calc(100vw - 26px));max-width:none;max-height:85vh;overflow:auto;border:1px solid #d4e3e9;border-radius:15px;padding:20px 22px;background:white;color:#29465a;box-shadow:0 25px 70px #0d243d44}
 .discharge-dialog::backdrop{background:#102d3f80}
