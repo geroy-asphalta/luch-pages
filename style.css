@@ -1370,3 +1370,41 @@ main{padding-top:16px}
  .patient-card-content button:active:not(:disabled),
  .discharge-text-copy-button:active:not(:disabled){transform:none!important}
 }
+/* Three-mode theme control is presentation-only, next to cloud sync. */
+.topbar{position:relative}
+.theme-switcher{position:relative;flex:none;margin-left:0;z-index:100}
+.topbar .theme-switcher button{margin-left:0}
+.topbar #theme-toggle{
+ display:grid;place-items:center;width:40px;height:40px;padding:0;
+ border:1px solid #526575;border-radius:10px;background:transparent;
+ color:#cfdfec;cursor:pointer
+}
+.topbar #theme-toggle:hover,.topbar #theme-toggle[aria-expanded="true"]{
+ background:#294453;border-color:#64859b;color:#fff
+}
+.topbar #theme-toggle:focus-visible{outline:2px solid #8bbacf;outline-offset:2px}
+.theme-icon{display:block}
+#theme-toggle .theme-icon-sun{display:none}
+#theme-toggle[data-current-theme="dark"] .theme-icon-sun{display:block}
+#theme-toggle[data-current-theme="dark"] .theme-icon-moon{display:none}
+.theme-menu{
+ position:absolute;right:0;top:calc(100% + 9px);
+ display:grid;gap:4px;min-width:176px;padding:7px;
+ border:1px solid #d9e5ec;border-radius:12px;
+ background:#fff;box-shadow:0 12px 32px #0d223633;z-index:110
+}
+.theme-menu[hidden]{display:none!important}
+.theme-menu button{
+ display:flex;align-items:center;gap:9px;
+ width:100%;border:0;border-radius:8px;padding:10px 12px;
+ text-align:left;font-size:12px;font-weight:650;line-height:1.3;
+ color:#415d70;background:transparent;white-space:nowrap
+}
+.theme-menu button span{width:17px;font-size:16px;text-align:center}
+.theme-menu button:hover,.theme-menu button[aria-pressed="true"]{background:#e9f3f7;color:#225775}
+.theme-menu button[aria-pressed="true"]::after{content:"✓";margin-left:auto;color:#23825e}
+.theme-menu button:focus-visible{outline:2px solid #4c9bc0;outline-offset:-2px}
+@media(max-width:700px){
+ .topbar #theme-toggle{width:36px;height:36px}
+ .theme-menu{right:-43px;min-width:165px}
+}

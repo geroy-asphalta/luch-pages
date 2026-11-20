@@ -5,8 +5,21 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#172b38">
 <meta name="description" content="ЛУЧ: демонстрационный календарь лучевой терапии.">
-<link rel="stylesheet" href="./style.css?v=1.55">
+<script>
+/* Apply saved presentation preference before CSS loads; keep it out of patient sync. */
+(function(){
+ var pref='light';
+ try{pref=localStorage.getItem('luch-theme-preference')||'light'}catch(e){}
+ if(pref!=='light'&&pref!=='dark'&&pref!=='system')pref='light';
+ var dark=pref==='dark'||(pref==='system'&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);
+ document.documentElement.dataset.theme=dark?'dark':'light';
+ document.documentElement.style.colorScheme=dark?'dark':'light';
+ if(dark)document.querySelector('meta[name="theme-color"]').setAttribute('content','#111a23');
+})();
+</script>
+<link rel="stylesheet" href="./style.css?v=1.56">
 <link rel="stylesheet" href="./catalog-ui.css?v=3">
+<link rel="stylesheet" href="./theme-dark.css?v=1">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" type="image/svg+xml" href="./icon.svg">
 <title>ЛУЧ · Календарь</title>
@@ -17,6 +30,17 @@
  <div class="logo"><span class="mark">✳</span><span><b>ЛУЧ</b><small>Календарь отделения</small></span></div>
  <div class="demo"><span>ДЕМО</span><span class="topbar-demo-extra"> · ВЫМЫШЛЕННЫЕ ПАЦИЕНТЫ</span></div>
  <button id="cloud-open" type="button" aria-label="Настройки синхронизации" title="Синхронизация вымышленных данных"><span aria-hidden="true">☁</span> <span class="topbar-cloud-label">Синхронизация</span></button>
+ <div class="theme-switcher">
+  <button type="button" id="theme-toggle" aria-haspopup="true" aria-expanded="false" aria-controls="theme-menu" aria-label="Тема оформления" title="Тема оформления">
+   <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 15.6A8.5 8.5 0 0 1 8.4 4 8.5 8.5 0 1 0 20 15.6Z"/></svg>
+   <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"/></svg>
+  </button>
+  <div id="theme-menu" class="theme-menu" role="group" aria-label="Выбор оформления ЛУЧ" hidden>
+   <button type="button" data-theme-preference="light" aria-pressed="true"><span aria-hidden="true">☀</span> Светлая</button>
+   <button type="button" data-theme-preference="dark" aria-pressed="false"><span aria-hidden="true">☾</span> Тёмная</button>
+   <button type="button" data-theme-preference="system" aria-pressed="false"><span aria-hidden="true">◐</span> Системная</button>
+  </div>
+ </div>
   <button id="reset" title="Восстановить демо">↺ <span class="long">Сбросить демо</span></button>
 </header>
 <div class="layout">
@@ -329,5 +353,5 @@
  <p class="cloud-explain">На втором устройстве подключись под тем же тестовым аккаунтом и нажми «Принять облачную версию». После этого изменения начнут приходить автоматически. Одновременные несовместимые правки не объединяются: при конфликте запись блокируется, локальная копия сохраняется.</p>
 </dialog>
 <div role="status" aria-live="polite" id="toast" class="toast"></div>
-<script type="module" src="./app.mjs?v=1.67"></script>
+<script type="module" src="./app.mjs?v=1.68"></script>
 </body></html>

@@ -1,0 +1,196 @@
+/* Hand-verified dark tokens and semantic exceptions.
+   Generated theme-dark.css includes these rules after derived component colors.
+   All rules are scoped: the original light appearance stays untouched. */
+html[data-theme="dark"]{
+ --luch-bg:#151d26;
+ --luch-surface:#202c38;
+ --luch-raised:#273746;
+ --luch-hover:#324656;
+ --luch-text:#eaf2f7;
+ --luch-muted:#b3c6d2;
+ --luch-border:#3d5060;
+ --luch-teal:#7fdcc9;
+ --luch-blue:#a3d5ef;
+ --luch-copper:#e9b68d;
+ color-scheme:dark;
+ background:var(--luch-bg);color:var(--luch-text)
+}
+html[data-theme="dark"] body{background:var(--luch-bg);color:var(--luch-text)}
+html[data-theme="dark"] .topbar{background:#111a23;color:#ecf5f9}
+html[data-theme="dark"] .topbar button{color:#d4e6f1}
+html[data-theme="dark"] .sidebar{background:#1b2733;border-color:var(--luch-border)}
+html[data-theme="dark"] .workspace,
+html[data-theme="dark"] .stat,
+html[data-theme="dark"] .patient-card-drawer{
+ background:var(--luch-surface);color:var(--luch-text);
+ border-color:var(--luch-border)
+}
+html[data-theme="dark"] .workspace{box-shadow:0 3px 22px #00000036}
+html[data-theme="dark"] .sidebar .nav{color:#bbccda}
+html[data-theme="dark"] .sidebar .nav:hover{background:#2b3c4a}
+html[data-theme="dark"] .sidebar .nav.active{
+ background:#254738;color:#8ee6bf
+}
+html[data-theme="dark"] .sidebar-heading,
+html[data-theme="dark"] .count,
+html[data-theme="dark"] .head p,
+html[data-theme="dark"] .sidebar-note{color:var(--luch-muted)}
+html[data-theme="dark"] .sidebar-note{background:#293b49}
+html[data-theme="dark"] a,
+html[data-theme="dark"] a:visited{color:var(--luch-blue)}
+html[data-theme="dark"] a:hover{color:#d3efff}
+html[data-theme="dark"] :is(input,select,textarea){
+ background-color:#1b2835;color:var(--luch-text);
+ border-color:#486176;caret-color:#a9ddf0
+}
+html[data-theme="dark"] :is(input,select,textarea)::placeholder{color:#94abbd;opacity:1}
+html[data-theme="dark"] :is(input,select,textarea):disabled{
+ background-color:#24313c;color:#a0b1c0;opacity:.77
+}
+html[data-theme="dark"] :is(input,select,textarea):focus-visible{
+ outline-color:#80c9e6;border-color:#80c9e6
+}
+html[data-theme="dark"] input[type="checkbox"],
+html[data-theme="dark"] input[type="radio"]{accent-color:#70d0b7}
+html[data-theme="dark"] button:focus-visible{outline-color:#8ad1e8}
+html[data-theme="dark"] ::selection{background:#3b6979;color:#fff}
+/* Calendar surfaces, sticky headings, grid and semantic patient states. */
+html[data-theme="dark"] .calendar th,
+html[data-theme="dark"] .calendar th.sticky{background:#293946;color:#b9ccd9}
+html[data-theme="dark"] .calendar th.off{background:#25323e;color:#9ab0bf}
+html[data-theme="dark"] .calendar .sticky{background:var(--luch-surface)}
+html[data-theme="dark"] .calendar tbody td.sticky{color:#eaf2f7}
+html[data-theme="dark"] .calendar :is(th,td){border-color:#354a5b}
+html[data-theme="dark"] .calendar .day.session{background:#202c38;color:#d3e5ee}
+html[data-theme="dark"] .calendar .day.off{background:#25333f;color:#9fb3c2}
+html[data-theme="dark"] .calendar .day.skip{background:#3a444f;color:#f1f5f9}
+html[data-theme="dark"] .calendar .day.final,
+html[data-theme="dark"] .calendar .day.session.final{
+ background:#285642;color:#c1f4d8
+}
+html[data-theme="dark"] .calendar .day.session.final.elapsed{background:#286e4e;color:#effff7}
+html[data-theme="dark"] .calendar .day.maintenance{background:#654632;color:#ffe0ba}
+html[data-theme="dark"] .calendar .day.breakdown{background:#663c36;color:#ffcec4}
+html[data-theme="dark"] .calendar .day.lab{background:#573345;color:#f4b7d2}
+html[data-theme="dark"] .calendar .day.issued{background:#793951;color:#fff3f8}
+html[data-theme="dark"] .calendar .day.delivered{background:#285740;color:#d1f8e3}
+html[data-theme="dark"] .calendar td.day.has-lab-event:not(.issued):not(.final):not(.skip):not(.maintenance):not(.breakdown):not(.delivered){background:#513346}
+html[data-theme="dark"] .calendar td.day.has-chemo-event:not(.has-lab-event):not(.issued):not(.final):not(.skip):not(.maintenance):not(.breakdown):not(.delivered){background:#2b4a62}
+html[data-theme="dark"] .calendar td.day.has-lab-event.has-chemo-event:not(.issued):not(.final):not(.skip):not(.maintenance):not(.breakdown):not(.delivered){background:#503d60}
+html[data-theme="dark"] .calendar .day.maintenance-final{background:#345c48;color:#d4f8e7}
+html[data-theme="dark"] .calendar .day.selected,
+html[data-theme="dark"] .calendar tbody td.day.selected{outline-color:#70c7ea}
+html[data-theme="dark"] .calendar .day:hover{box-shadow:inset 0 0 0 2px #7babc6}
+html[data-theme="dark"] .calendar .day.selected:hover{box-shadow:inset 0 0 0 1px #acdff4}
+html[data-theme="dark"] .calendar .calendar-event-icon--chemo-missed{color:#ff9baf}
+html[data-theme="dark"] .calendar .calendar-patient-primary .patient-open{color:#edf5f9}
+html[data-theme="dark"] .calendar .patient-name-surname{color:#eaf2f7}
+html[data-theme="dark"] .calendar .patient-name-remainder{color:#bdcdd9}
+html[data-theme="dark"] .calendar .name .calendar-patient-ctv{color:#b4c5d1}
+html[data-theme="dark"] .calendar .type-tag{
+ background:#2f5161;color:#c9eafa;border-color:#50839d
+}
+html[data-theme="dark"] .calendar .calendar-eln-yes{background:#54313b;color:#ffc9cd;border-color:#98535d}
+html[data-theme="dark"] .calendar .calendar-eln-no{background:#264936;color:#b4f1cd;border-color:#498761}
+html[data-theme="dark"] .calendar .calendar-eln-unknown{background:#334452;color:#c4d2db;border-color:#607484}
+/* Navigation, actionable controls and all popovers stay on dark surfaces. */
+html[data-theme="dark"] .month-controls,
+html[data-theme="dark"] .month-controls button,
+html[data-theme="dark"] .toolbar :is(select,button:not(.primary)){
+ background:#263746;color:#d9e8f0;border-color:#455f71
+}
+html[data-theme="dark"] .toolbar button.primary{background:#286281;color:#f0f9ff;border-color:#4887a7}
+html[data-theme="dark"] .toolbar button:hover:not(:disabled),
+html[data-theme="dark"] .month-controls button:hover{background:#345064;border-color:#7092a6}
+html[data-theme="dark"] #today-tasks-popover{
+ background:#202e3a;color:#e6f0f5;border-color:#506b7d;
+ box-shadow:0 16px 40px #00000077
+}
+html[data-theme="dark"] #stats .today-tasks-toggle{
+ background:#2a3a48;color:#e5f3f9;border-color:#4b687a
+}
+html[data-theme="dark"] #stats .today-tasks-count{background:#354959;color:#d3e1e9}
+html[data-theme="dark"] #stats .today-tasks-count.has-pending{
+ color:#ffb8c4;background:#51303d;border-color:#9b5263
+}
+html[data-theme="dark"] #today-tasks-popover .today-tasks-popover-head{color:#e5eff5}
+html[data-theme="dark"] #today-tasks-popover .today-tasks-popover-count{
+ background:#304655;color:#cbdde8
+}
+html[data-theme="dark"] .today-task.is-done .today-task-check{
+ background:#327e5f;color:#e8fff4
+}
+html[data-theme="dark"] .today-task.is-done .today-task-text{color:#a9bfcc}
+html[data-theme="dark"] .today-task-call{color:#a9dcf0}
+html[data-theme="dark"] .today-tasks-nav button,
+html[data-theme="dark"] .today-tasks-completed-toggle{
+ background:#2d4050;border-color:#4b6577;color:#d5e7f1
+}
+html[data-theme="dark"] .toast{
+ background:#304959;color:#ecf6fa;box-shadow:0 10px 30px #00000080
+}
+html[data-theme="dark"] .theme-menu{
+ background:#22323f;border-color:#4b6578;box-shadow:0 14px 36px #00000088
+}
+html[data-theme="dark"] .theme-menu button{color:#deebf3;background:transparent}
+html[data-theme="dark"] .theme-menu button:hover,
+html[data-theme="dark"] .theme-menu button[aria-pressed="true"]{
+ background:#355264;color:#ecf8ff
+}
+html[data-theme="dark"] .theme-menu button[aria-pressed="true"]::after{color:#8ee8c1}
+html[data-theme="dark"] .topbar #theme-toggle{color:#cde6ef;border-color:#51697b}
+html[data-theme="dark"] .topbar #theme-toggle:hover{background:#294b58}
+/* Patient card: forms, progress, sheet and overlay. */
+html[data-theme="dark"] .patient-card-drawer{background:#202c38;color:#eaf2f7}
+html[data-theme="dark"] .patient-card-drawer::backdrop{background:rgba(0,0,0,.65)}
+html[data-theme="dark"] .patient-card-top{background:#263746;border-color:#3c5262}
+html[data-theme="dark"] .patient-card-top h2{color:#f0f5f8}
+html[data-theme="dark"] .patient-card-top-actions button{
+ background:#2b3e4e;color:#ddebf3;border-color:#526a7b
+}
+html[data-theme="dark"] .patient-card-top-actions button:hover{background:#3a5264}
+html[data-theme="dark"] .patient-card-content .patient-main{background:#202c38}
+html[data-theme="dark"] .patient-header,
+html[data-theme="dark"] .patient-courses-title{border-color:#3c5262}
+html[data-theme="dark"] .course-card{
+ background:#263644;color:#e8f2f7;border-color:#466073
+}
+html[data-theme="dark"] .course-progress-track{background:#162632}
+html[data-theme="dark"] .course-progress-confirmed{background:#3fae8a}
+html[data-theme="dark"] .course-progress-inferred{background:#356f5b}
+html[data-theme="dark"] .course-progress-item:nth-child(2) .course-progress-confirmed{background:#5aa8d0}
+html[data-theme="dark"] .course-progress-item:nth-child(2) .course-progress-inferred{background:#446a87}
+html[data-theme="dark"] .course-progress-label{color:#dcebf3}
+html[data-theme="dark"] .course-progress-label strong{color:#eaf5fa}
+html[data-theme="dark"] .course-progress-caption,
+html[data-theme="dark"] .course-progress-closure{color:#aec3cf}
+html[data-theme="dark"] .course-facts,
+html[data-theme="dark"] .patient-info{color:#c7d8e2}
+html[data-theme="dark"] .patient-warning,
+html[data-theme="dark"] .hlt-alert{color:#f0cfaa;background:#493729;border-color:#876047}
+/* All dialog/modal variants use the same graphite shell. Native form controls
+   use color-scheme:dark, including date pickers on macOS/Windows/iPhone. */
+html[data-theme="dark"] :is(dialog,.dialog,.modal,.issue-dialog,.discharge-dialog,
+ .discharge-text-dialog,.chemo-change-dialog,.workday-dialog,.catalog-inspector){
+ background-color:#202e3a;color:#e8f1f6;border-color:#42586a
+}
+html[data-theme="dark"] :is(dialog,.dialog,.modal)::backdrop{background:rgba(0,0,0,.62)}
+html[data-theme="dark"] :is(dialog,.dialog,.modal) button:not(.primary){
+ border-color:#4b6376;color:#dceaf2
+}
+html[data-theme="dark"] :is(.data-table,.patient-register-table) th{background:#293b49;color:#c2d3de}
+html[data-theme="dark"] :is(.data-table,.patient-register-table) td{border-color:#3d5161;color:#e4edf2}
+html[data-theme="dark"] .patient-register-table tbody tr:hover{background:#304455}
+html[data-theme="dark"] .catalog-group-header{color:#e7f0f6}
+html[data-theme="dark"] .catalog-group-header:hover{background:#304455}
+html[data-theme="dark"] .catalog-inspector{background:#2b3c49}
+html[data-theme="dark"] .catalog-entry.catalog-entry-active{background:#2c5160;color:#c6eafb}
+/* Keep semantic calendar colors stable, and never animate background color
+   changes into a misleading clinical status. */
+html[data-theme="dark"] .calendar tbody td.day{
+ transition:outline-color var(--luch-motion-fast,120ms) ease,
+            box-shadow var(--luch-motion-fast,120ms) ease
+}
+@media(prefers-reduced-motion:reduce){
+ html[data-theme="dark"] .calendar tbody td.day{transition:none!important}
+}
