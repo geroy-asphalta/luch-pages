@@ -173,6 +173,41 @@ function wireChemo(form,course,getState){
  count.addEventListener('input',()=>{countAutomaticallySet=Boolean(count.value)});
  return {update};
 }
+// Keep the previous visible percentages when the patient card is redrawn.
+// This animates actual changes without inventing or modifying treatment data.
+function previousCourseBarWidths(root){
+ const previous=new Map();
+ root.querySelectorAll?.('.course-progress-bars[data-course-id]').forEach(group=>{
+  previous.set(group.dataset.courseId,[...group.querySelectorAll('.course-progress-track')]
+   .map(track=>[...track.children].map(segment=>segment.style.width)));
+ });
+ return previous;
+}
+function animateCourseBarUpdates(root,previous){
+ if(!previous.size||typeof requestAnimationFrame!=='function'||
+    (typeof window!=='undefined'&&window.matchMedia?.('(prefers-reduced-motion: reduce)').matches))return;
+ const updates=[];
+ root.querySelectorAll('.course-progress-bars[data-course-id]').forEach(group=>{
+  const oldTracks=previous.get(group.dataset.courseId);
+  if(!oldTracks)return;
+  [...group.querySelectorAll('.course-progress-track')].forEach((track,index)=>{
+   const old=oldTracks[index];
+   if(!old)return;
+   [...track.children].forEach((segment,i)=>{
+    if(old[i]===undefined||old[i]===segment.style.width)return;
+    const target=segment.style.width;
+    segment.style.width=old[i];
+    updates.push({segment,target});
+   });
+  });
+ });
+ if(!updates.length)return;
+ // Commit the start values, then let CSS transition to the updated numbers.
+ void root.offsetWidth;
+ requestAnimationFrame(()=>{
+  for(const {segment,target} of updates)if(segment.isConnected)segment.style.width=target;
+ });
+}
 // LT retains separate verified/calendar colours; HT uses one automatic count.
 function courseProgressRow(label,metric,{chemo=false}={}){
  const value=metric.counted;
@@ -202,7 +237,7 @@ function courseProgressMarkup(state,course){
      '<div class="course-progress-closure">Выписка подтверждена</div>':
      course.dischargeReview?.decision==='no'?
        '<div class="course-progress-closure">Выписка отложена</div>':'';
- return '<div class="course-progress-bars" aria-label="Прогресс лечения">'+
+ return '<div class="course-progress-bars" data-course-id="'+esc(course.id)+'" aria-label="Прогресс лечения">'+
    courseProgressRow('Сеансы ЛТ',metrics.lt)+
    (metrics.chemo?courseProgressRow('Капельницы ХТ',metrics.chemo,{chemo:true}):'')+
    info+'</div>';
@@ -407,7 +442,9 @@ export function createPatientUI({getState,commitState,renderApp,notice,onDischar
     '<button type="button" data-p-action="edit">Изменить данные</button>'+
     '<button type="button" data-p-action="archive">'+(p.archived?'Восстановить':'В архив')+'</button></div></div>'+
     '<div class="patient-info"><span><b>ЭЛН:</b> '+elnBadge(p.eln)+'</span><span><b>Телефон:</b> '+esc(p.phone||'—')+'</span><span class="full"><b>Примечание:</b> '+esc(p.notes||'—')+'</span></div>';
-   el('patient-detail').innerHTML=(personEditing?personInlineForm(p):patientOverview)+
+   const detailRoot=el('patient-detail');
+   const previousWidths=previousCourseBarWidths(detailRoot);
+   detailRoot.innerHTML=(personEditing?personInlineForm(p):patientOverview)+
     '<div class="patient-courses-title"><h3>Схема лечения</h3><button type="button" data-p-action="add-course" '+(p.archived?'disabled':'')+'>+ Новый курс</button></div>'+
     (cs.length?cs.map(c=>
        '<div class="course-card"><div class="course-heading"><div><b>'+esc(c.courseName)+'</b></div><span class="course-type">'+esc(c.treatmentType||'ЛТ')+'</span><span class="course-status">'+esc(stat(c))+'</span></div>'+
@@ -420,6 +457,7 @@ export function createPatientUI({getState,commitState,renderApp,notice,onDischar
        '<button type="button" class="course-discharge" data-c-action="discharge" data-course-id="'+esc(c.id)+'">Решить вопрос о выписке</button>':'')+
        '<button type="button" data-c-action="archive" data-course-id="'+esc(c.id)+'">'+(c.status==='archived'?'Восстановить курс':'Архивировать курс')+'</button></div></div>'
       ).join(''):'<div class="patient-empty">У этого пациента пока нет курсов. Нажми «Новый курс», чтобы добавить первый.</div>');
+   animateCourseBarUpdates(detailRoot,previousWidths);
  }
  function render(){
    el('patient-sort').value=getSort();

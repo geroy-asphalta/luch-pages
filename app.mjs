@@ -3,7 +3,7 @@ import {isWorkingDay,effectiveDay,effectiveDayLabel} from './work-calendar.mjs';
 import {createWorkdayUI} from './workday-ui.mjs?v=2';
 import {createOperationalUI} from './operations-ui.mjs';
 import {ensurePatientModel} from './patient-model.mjs';
-import {createPatientUI} from './patient-ui.mjs?v=11';
+import {createPatientUI} from './patient-ui.mjs?v=12';
 import {createCatalogUI} from './catalog-ui.mjs';
 import {currentCtvName} from './ctv-display.mjs';
 import {courseProgress,localToday,radiationSessionCompletion,dischargeCandidates,dischargeBatchDraft} from './course-progress.mjs?v=3';
@@ -25,7 +25,7 @@ import {calendarMaintenanceCellContent} from './calendar-maintenance-icon.mjs';
 import {setupCalendarRangeSelection,calendarClickSelection} from './calendar-range-select.mjs?v=2';
 import {setupCalendarCellContextMenu} from './calendar-cell-context-menu.mjs?v=4';
 import {setupChemoChangeUI} from './chemo-change-ui.mjs?v=2';
-import {setupPatientCardDrawer} from './patient-card-drawer.mjs';
+import {setupPatientCardDrawer} from './patient-card-drawer.mjs?v=2';
 import {createImportedDemoState,installImportedDemoRoster} from './demo-roster.mjs?v=5';
 import {installPhotoDemoRoster} from './demo-photo-roster.mjs';
 import {installPhotoCourseAssignments} from './demo-photo-course-assignments.mjs';
@@ -183,11 +183,20 @@ function visiblePatients(){
   .sort((a,b)=>comparePatientEntries({...a,name:names.get(a.personId)||a.name},{...b,name:names.get(b.personId)||b.name},patientSort,positions));
 }
 // Position the single task list outside the clipped calendar workspace.
+// Keep the popup mounted while its 180ms fade-out runs. A hidden popup
+// is inert for mouse, touch and keyboard; no extra task list is created.
+function setTodayTasksPopoverVisible(visible){
+ const popup=el('today-tasks-popover');
+ popup.classList.remove('hidden'); // only used as the initial no-flash state
+ popup.classList.toggle('motion-open',visible);
+ popup.inert=!visible;
+ popup.setAttribute('aria-hidden',String(!visible));
+}
 function positionTodayTasksPopover(){
  if(!taskPanelOpen||view!=='calendar')return;
  const trigger=el('stats').querySelector('[data-task-collapse]');
  const popup=el('today-tasks-popover');
- if(!trigger||popup.classList.contains('hidden'))return;
+ if(!trigger||!popup.classList.contains('motion-open'))return;
  const rect=trigger.getBoundingClientRect(),padding=10;
  const width=Math.min(360,Math.max(0,window.innerWidth-2*padding));
  const left=Math.max(padding,Math.min(rect.left+(rect.width-width)/2,window.innerWidth-width-padding));
@@ -259,11 +268,11 @@ function renderStats(){
  el('stats').innerHTML='<section class="today-tasks" aria-labelledby="today-tasks-title">'+header+'</section>';
  const popup=el('today-tasks-popover');
  const previousScroll=popup.scrollTop;
- popup.innerHTML=taskPanelOpen
-  ?'<div class="today-tasks-popover-head"><strong>'+(taskViewDate===today?'Задачи на сегодня':'Задачи за день')+'</strong><small>'+esc(date)+'</small>'
-    +'<span class="today-tasks-popover-count">'+(tasks.length?(pending?pending+' не выполнено':'Все выполнено'):'Нет задач')+'</span></div>'+body
-  :'';
- popup.classList.toggle('hidden',!taskPanelOpen||view!=='calendar');
+ if(taskPanelOpen){
+  popup.innerHTML='<div class="today-tasks-popover-head"><strong>'+(taskViewDate===today?'Задачи на сегодня':'Задачи за день')+'</strong><small>'+esc(date)+'</small>'
+   +'<span class="today-tasks-popover-count">'+(tasks.length?(pending?pending+' не выполнено':'Все выполнено'):'Нет задач')+'</span></div>'+body;
+ }
+ setTodayTasksPopoverVisible(taskPanelOpen&&view==='calendar');
  if(taskPanelOpen){popup.scrollTop=previousScroll;positionTodayTasksPopover();}
 
 }
@@ -517,7 +526,7 @@ function setView(next){
   taskPanelOpen=false;
   el('stats').querySelector('[data-task-collapse]')?.setAttribute('aria-expanded','false');
  }
- el('today-tasks-popover').classList.toggle('hidden',next!=='calendar'||!taskPanelOpen);
+ setTodayTasksPopoverVisible(next==='calendar'&&taskPanelOpen);
  if(next==='calendar')positionTodayTasksPopover();
  document.querySelectorAll('.nav').forEach(x=>x.classList.toggle('active',x.dataset.view===next));
  document.querySelectorAll('[data-panel]').forEach(x=>x.classList.toggle('hidden',x.dataset.panel!==next));

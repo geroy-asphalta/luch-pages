@@ -1242,3 +1242,128 @@ main{padding-top:16px}
  #today-tasks-popover{padding:12px}
  #today-tasks-popover .today-tasks-list{max-height:38vh}
 }
+
+/* LUCH motion system · option B. Deliberately no animation of clinical cell
+   background/status colors, calendar dimensions or scheduled procedures.
+   Motion uses compositor-friendly opacity/transform wherever possible. */
+:root{
+ --luch-motion-fast:120ms;
+ --luch-motion-toast:200ms;
+ --luch-motion-tasks:180ms;
+ --luch-motion-drawer:240ms;
+ --luch-motion-progress:300ms;
+ --luch-motion-ease:cubic-bezier(.22,1,.36,1);
+}
+/* 1. Patient card: one entrance/exit for its native <dialog>, with the native
+   focus trap intact until the exit finishes. */
+@keyframes luch-card-enter{
+ from{opacity:.88;transform:translateX(24px)}
+ to{opacity:1;transform:translateX(0)}
+}
+@keyframes luch-card-exit{
+ from{opacity:1;transform:translateX(0)}
+ to{opacity:.88;transform:translateX(24px)}
+}
+@keyframes luch-backdrop-enter{
+ from{background:rgba(18,35,47,0)}
+ to{background:rgba(18,35,47,.40)}
+}
+@keyframes luch-backdrop-exit{
+ from{background:rgba(18,35,47,.40)}
+ to{background:rgba(18,35,47,0)}
+}
+.patient-card-drawer[open]:not(.motion-closing){
+ animation:luch-card-enter var(--luch-motion-drawer) var(--luch-motion-ease) both
+}
+.patient-card-drawer[open].motion-closing{
+ animation:luch-card-exit var(--luch-motion-drawer) ease-in both;
+ pointer-events:none
+}
+.patient-card-drawer[open]:not(.motion-closing)::backdrop{
+ animation:luch-backdrop-enter var(--luch-motion-drawer) ease-out both
+}
+.patient-card-drawer[open].motion-closing::backdrop{
+ animation:luch-backdrop-exit var(--luch-motion-drawer) ease-in both
+}
+/* 2. Task list is a floating element, so opacity/translation do not push
+   calendar rows. Visibility + inert prevent interaction while hidden. */
+#today-tasks-popover{
+ opacity:0;visibility:hidden;pointer-events:none;
+ transform:translateY(-7px);
+ transition:opacity var(--luch-motion-tasks) var(--luch-motion-ease),
+            transform var(--luch-motion-tasks) var(--luch-motion-ease),
+            visibility 0s linear var(--luch-motion-tasks)
+}
+#today-tasks-popover.motion-open{
+ opacity:1;visibility:visible;pointer-events:auto;transform:translateY(0);
+ transition:opacity var(--luch-motion-tasks) var(--luch-motion-ease),
+            transform var(--luch-motion-tasks) var(--luch-motion-ease),
+            visibility 0s
+}
+@keyframes luch-task-check-enter{
+ from{opacity:.65;transform:scale(.96)}
+ to{opacity:1;transform:scale(1)}
+}
+.today-task.is-done .today-task-check{
+ animation:luch-task-check-enter var(--luch-motion-fast) ease-out both
+}
+/* 3. Only calendar selection outlines and hover inset shadows transition.
+   Procedure and maintenance colors remain fixed and semantic. */
+.calendar tbody td.day{
+ outline:2px solid transparent;outline-offset:-2px;
+ transition:outline-color var(--luch-motion-fast) ease,
+            box-shadow var(--luch-motion-fast) ease
+}
+/* 4. Press feedback never changes button dimensions or toolbar geometry. */
+.actions button.action-with-icon,
+.filters button.action-with-icon,
+.month-controls button,
+#stats .today-tasks-toggle,
+.patient-card-top-actions button,
+.patient-card-content button,
+.discharge-text-copy-button{
+ transition:background-color var(--luch-motion-fast) ease,
+            border-color var(--luch-motion-fast) ease,
+            box-shadow var(--luch-motion-fast) ease,
+            transform var(--luch-motion-fast) ease
+}
+.actions button.action-with-icon:active:not(:disabled),
+.filters button.action-with-icon:active:not(:disabled),
+.month-controls button:active:not(:disabled),
+#stats .today-tasks-toggle:active:not(:disabled),
+.patient-card-top-actions button:active:not(:disabled),
+.patient-card-content button:active:not(:disabled),
+.discharge-text-copy-button:active:not(:disabled){
+ transform:scale(.975)
+}
+/* 5. Toast uses explicit opacity and translation, not transition:all. */
+.toast{transition:opacity var(--luch-motion-toast) ease,
+                  transform var(--luch-motion-toast) var(--luch-motion-ease)}
+/* 6. Real progress changes use previous percentages supplied by patient-ui.
+   Explicit and calendar-inferred segments keep their original colors. */
+.course-progress-confirmed,.course-progress-inferred{
+ transition:width var(--luch-motion-progress) var(--luch-motion-ease)
+}
+/* System accessibility setting takes priority over every animation. */
+@media(prefers-reduced-motion:reduce){
+ .patient-card-drawer[open],.patient-card-drawer[open]::backdrop,
+ .today-task.is-done .today-task-check{animation:none!important}
+ #today-tasks-popover{
+  transition:none!important;transform:none!important
+ }
+ .calendar tbody td.day,
+ .actions button.action-with-icon,.filters button.action-with-icon,
+ .month-controls button,#stats .today-tasks-toggle,
+ .patient-card-top-actions button,.patient-card-content button,
+ .discharge-text-copy-button,.toast,
+ .course-progress-confirmed,.course-progress-inferred{
+  transition:none!important
+ }
+ .actions button.action-with-icon:active:not(:disabled),
+ .filters button.action-with-icon:active:not(:disabled),
+ .month-controls button:active:not(:disabled),
+ #stats .today-tasks-toggle:active:not(:disabled),
+ .patient-card-top-actions button:active:not(:disabled),
+ .patient-card-content button:active:not(:disabled),
+ .discharge-text-copy-button:active:not(:disabled){transform:none!important}
+}
