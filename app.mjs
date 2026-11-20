@@ -3,7 +3,7 @@ import {isWorkingDay,effectiveDay,effectiveDayLabel} from './work-calendar.mjs';
 import {createWorkdayUI} from './workday-ui.mjs?v=2';
 import {createOperationalUI} from './operations-ui.mjs';
 import {ensurePatientModel} from './patient-model.mjs';
-import {createPatientUI} from './patient-ui.mjs?v=6';
+import {createPatientUI} from './patient-ui.mjs?v=7';
 import {createCatalogUI} from './catalog-ui.mjs';
 import {currentCtvName} from './ctv-display.mjs';
 import {courseProgress,localToday,dischargeCandidates,dischargeBatchDraft} from './course-progress.mjs?v=2';
@@ -32,6 +32,7 @@ import {calendarRosterRows} from './calendar-roster-rows.mjs';
 import {syncCourseStartStatusesDraft} from './course-start-status.mjs';
 import {installImportedLabColors} from './demo-lab-colors.mjs?v=1';
 import {createFirebaseDemoSync} from './firebase-demo-state-ui.mjs';
+import {setupDischargeTextReportUI} from './discharge-text-ui.mjs';
 
 const store='luch-demo-v1';
 let state;
@@ -55,6 +56,7 @@ let cloudUI=null,inlineNotesUI=null,applyingRemoteState=false;
 let taskPanelOpen=localStorage.getItem('luch-task-panel-expanded')!=='false',taskShowCompleted=false,taskViewDate=localToday(),taskLastToday=localToday();
 const save=()=>{state=captureTodayTaskHistoryDraft(state,localToday()).state;localStorage.setItem(store,JSON.stringify(state));cloudUI?.localChanged();};
 function notice(message){const t=el('toast');t.textContent=message;t.classList.add('show');clearTimeout(notice.timer);notice.timer=setTimeout(()=>t.classList.remove('show'),2900);}
+setupDischargeTextReportUI({getState:()=>state,getMonth:()=>month,notice});
 const cellKey=(id,date)=>id+'|'+date;
 const selectionItems=()=>[...selected].map(x=>{const [patientId,date]=x.split('|');return {patientId,date};});
 function buttonClick(kind){

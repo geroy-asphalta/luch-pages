@@ -24,7 +24,9 @@ export function createFirebaseDemoSync({getState,replaceState,canApplyRemote}){
  const localPayload=()=>encodeDemoState(getState());
  const canApply=()=>canApplyRemote();
  function badge(value){
-  $('cloud-open').textContent='☁ '+value;
+  const button=$('cloud-open'),label=button.querySelector('.topbar-cloud-label');
+  if(label)label.textContent=value; // keep mobile cloud icon and hide only its label
+  else button.textContent='☁ '+value;
   $('cloud-open').setAttribute('aria-label','Синхронизация: '+value);
   $('cloud-open').dataset.cloudStatus=mode;
  }

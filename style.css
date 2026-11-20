@@ -1032,6 +1032,59 @@ main{padding-top:16px}
  .today-tasks-nav input{flex:1;min-width:112px}
 }
 
+
+/* A small text-report action in the existing dark topbar. Existing sync and
+   reset buttons keep their familiar shape; labels collapse on narrow screens. */
+.topbar{gap:clamp(8px,1.5vw,22px)}
+.topbar .demo{margin-right:auto;white-space:nowrap}
+.topbar #discharge-text-open,.topbar #cloud-open,.topbar #reset{margin-left:0;flex:none}
+.topbar #discharge-text-open{
+ display:inline-flex;align-items:center;justify-content:center;gap:8px;
+ min-height:38px;padding:8px 12px;white-space:nowrap;font-weight:700;
+ border:1px solid #526575;border-radius:10px;background:transparent;color:#cfdfec
+}
+.topbar #discharge-text-open:hover,.topbar #discharge-text-open:focus-visible{
+ background:#294353;color:#fff;border-color:#7797a9
+}
+.topbar #discharge-text-open svg{flex:none}
+.discharge-text-dialog{width:min(620px,calc(100vw - 24px))}
+.discharge-text-hint{font-size:12px;line-height:1.55;color:#71899a;margin:13px 0}
+.discharge-text-controls{display:grid;grid-template-columns:minmax(145px,1fr) minmax(190px,1.5fr);gap:10px;margin:15px 0}
+.discharge-text-controls label{display:flex;flex-direction:column;gap:6px;font-size:11px;font-weight:750;color:#536f80}
+.discharge-text-controls input,.discharge-text-controls select{
+ width:100%;min-width:0;height:40px;background:#fff;border:1px solid #d5e2e9;
+ border-radius:8px;color:#38566a;padding:8px;font-size:12px
+}
+.discharge-text-summary{min-height:22px;font-size:11px;line-height:1.5;color:#567a8c}
+.discharge-text-output-label{display:block;font-size:11px;font-weight:750;color:#496b80;margin:6px 0}
+.discharge-text-dialog textarea{
+ display:block;width:100%;min-height:170px;max-height:45vh;resize:vertical;
+ border:1px solid #d4e3eb;border-radius:9px;padding:13px;background:#f8fbfd;
+ color:#2f4b5d;font:13px/1.75 ui-monospace,SFMono-Regular,Consolas,monospace;
+ white-space:pre;overflow:auto
+}
+.discharge-text-dialog textarea:focus{outline:2px solid #96c7dc}
+.discharge-text-dialog .discharge-actions{justify-content:flex-end}
+.discharge-text-dialog .discharge-actions button:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:700px){
+ .topbar .topbar-demo-extra{display:none}
+ .topbar .topbar-cloud-label{display:none}
+ .topbar #discharge-text-open{width:40px;height:40px;min-height:40px;padding:8px}
+ .topbar #discharge-text-open .discharge-text-button-label{display:none}
+ .topbar #cloud-open{width:40px;height:40px;padding:8px;font-size:18px}
+ .topbar #reset{padding:8px 10px}
+ .topbar .demo{font-size:9px;padding:7px 8px}
+ .discharge-text-controls{grid-template-columns:1fr;gap:8px}
+ .discharge-text-dialog{padding:14px}
+ .discharge-text-dialog textarea{font-size:12px;min-height:180px}
+}
+@media(max-width:370px){
+ .topbar{gap:5px;padding:0 8px}
+ .topbar .logo{margin-right:0}
+ .topbar #cloud-open,.topbar #discharge-text-open{width:36px;height:36px;min-height:36px}
+ .topbar #reset{padding:7px}
+}
+
 /* Patient identity edits replace the card summary in situ. Course editors and
    the new-patient form continue to use their separate lower panel. */
 .patient-detail-inline-form{min-width:0}
