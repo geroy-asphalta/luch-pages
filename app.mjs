@@ -3,7 +3,7 @@ import {isWorkingDay,effectiveDay,effectiveDayLabel} from './work-calendar.mjs';
 import {createWorkdayUI} from './workday-ui.mjs?v=2';
 import {createOperationalUI} from './operations-ui.mjs';
 import {ensurePatientModel} from './patient-model.mjs';
-import {createPatientUI} from './patient-ui.mjs?v=10';
+import {createPatientUI} from './patient-ui.mjs?v=11';
 import {createCatalogUI} from './catalog-ui.mjs';
 import {currentCtvName} from './ctv-display.mjs';
 import {courseProgress,localToday,radiationSessionCompletion,dischargeCandidates,dischargeBatchDraft} from './course-progress.mjs?v=3';
@@ -20,10 +20,10 @@ import {calendarPatientNameParts} from './calendar-patient-name.mjs?v=2';
 import {notesColumnWidth} from './notes-column-width.mjs';
 import {initialPhoneExpanded,savePhoneExpanded} from './calendar-phone-prefs.mjs';
 import {calendarTreatmentCellContent} from './calendar-event-icons.mjs?v=2';
-import {chemoAdministrationState,chemoAdministrationSummary,chemoAdministrationDraft} from './chemo-administration.mjs';
+import {chemoAdministrationState,chemoAdministrationSummary,chemoAdministrationDraft} from './chemo-administration.mjs?v=2';
 import {calendarMaintenanceCellContent} from './calendar-maintenance-icon.mjs';
 import {setupCalendarRangeSelection,calendarClickSelection} from './calendar-range-select.mjs?v=2';
-import {setupCalendarCellContextMenu} from './calendar-cell-context-menu.mjs?v=3';
+import {setupCalendarCellContextMenu} from './calendar-cell-context-menu.mjs?v=4';
 import {setupChemoChangeUI} from './chemo-change-ui.mjs?v=2';
 import {setupPatientCardDrawer} from './patient-card-drawer.mjs';
 import {createImportedDemoState,installImportedDemoRoster} from './demo-roster.mjs?v=5';
@@ -670,14 +670,14 @@ setupCalendarCellContextMenu({
   if(which==='skip')buttonClick('skip');
   else if(which==='lab')applyLabAction();
   else if(which==='issue')issueWeekClick();
-  else if(['chemo-not-given','chemo-given','chemo-outcome-reset'].includes(which)){
+  else if(['chemo-not-given','chemo-outcome-reset'].includes(which)){
    const event=(state.events||[]).find(e=>e.patientId===cell?.patientId&&e.date===cell?.date&&e.type==='chemo'&&e.source==='hlt');
-   const decision={'chemo-not-given':'not-given','chemo-given':'given','chemo-outcome-reset':'reset'}[which];
+   const decision={'chemo-not-given':'not-given','chemo-outcome-reset':'reset'}[which];
    const updated=chemoAdministrationDraft(state,{eventId:event?.id,decision},localToday());
    if(!updated.changed){notice(updated.error||'ХТ не изменена');return;}
    state=updated.state;save();render();
    notice(decision==='not-given'?'ХТ не проводилась — капельница выделена красным':
-    decision==='given'?'ХТ проведена — подтверждено вручную':'Ручная отметка ХТ снята');
+    'Ручная отметка ХТ снята — учёт по календарю восстановлен');
   }
   else if(which.startsWith('chemo-'))chemoChangeUI.open(cell,which);
  }

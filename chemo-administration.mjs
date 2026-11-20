@@ -35,19 +35,20 @@ export function chemoAdministrationSummary(state,courseId,today){
  return summary;
 }
 
-// After the scheduled day starts, the doctor can explicitly record that an
-// infusion was not delivered or confirm actual delivery. Neither changes the
+// On or after the scheduled day, the user can record a missed infusion or
+// clear a manual mark. Legacy 'given' records remain readable, but new manual
+// confirmations are not accepted. Neither operation changes the
 // course plan, later dates, laboratory referrals, or any radiotherapy session.
 export function chemoAdministrationDraft(state,{eventId,decision}={},today){
  const event=(state.events||[]).find(item=>item.id===eventId&&isInfusion(item));
  if(!event)return {state,changed:false,error:'Введение ХТ не найдено.'};
  if(event.status!=='planned')
   return {state,changed:false,error:'Фактическую отметку можно менять только у запланированной ХТ.'};
- if(!['not-given','given','reset'].includes(decision))
+ if(!['not-given','reset'].includes(decision))
   return {state,changed:false,error:'Неизвестное действие с отметкой ХТ.'};
  if(!validDay(today)||!validDay(event.date))
   return {state,changed:false,error:'Не определена корректная дата ХТ.'};
- if(decision!=='reset'&&event.date>today)
+ if(decision==='not-given'&&event.date>today)
   return {state,changed:false,error:'Будущую капельницу нельзя заранее отмечать как проведённую или пропущенную. Используй отмену плана.'};
  if(decision==='reset'&&!['not-given','given'].includes(event.administrationOutcome))
   return {state,changed:false,error:'У введения нет ручной отметки для отмены.'};
@@ -62,8 +63,8 @@ export function chemoAdministrationDraft(state,{eventId,decision}={},today){
   updated.administrationOutcome=decision;
   updated.administrationMarkedAt=new Date().toISOString();
  }
- const descriptions={'not-given':'ХТ не проводилась','given':'ХТ проведена — подтверждено вручную',
-  reset:'Снята ручная отметка о проведении ХТ'};
+ const descriptions={'not-given':'ХТ не проводилась',
+  reset:'Снята ручная отметка ХТ; восстановлен учёт по календарю'};
  (draft.audit??=[]).push({date:new Date().toISOString(),kind:'chemo-administration-'+decision,
   patientId:event.patientId,day:event.date,
   detail:'ХТ №'+(Number(event.chemoIndex)+1)+' · '+descriptions[decision]});

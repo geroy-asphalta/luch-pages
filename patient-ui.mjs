@@ -173,19 +173,22 @@ function wireChemo(form,course,getState){
  count.addEventListener('input',()=>{countAutomaticallySet=Boolean(count.value)});
  return {update};
 }
-// Narrow, two-tone progress bars: dark = confirmed; pale = elapsed on the calendar.
-function courseProgressRow(label,metric,{factOnly=false}={}){
- const value=factOnly?metric.confirmed:metric.counted;
- const caption=factOnly?
-   (metric.total?'Подтверждено вручную: '+metric.confirmed+' · по датам: '+metric.inferred:'План введений пока не задан'):
-   'Подтверждено: '+metric.confirmed+' · по календарю: '+metric.inferred;
+// LT retains separate verified/calendar colours; HT uses one automatic count.
+function courseProgressRow(label,metric,{chemo=false}={}){
+ const value=metric.counted;
+ const caption=chemo?
+  'Прошедшие даты учтены автоматически; пропуски исключаются вручную':
+  'Подтверждено: '+metric.confirmed+' · по календарю: '+metric.inferred;
  const percent=n=>Number(n).toFixed(2)+'%';
+ const bars=chemo?
+  '<span class="course-progress-inferred" style="width:'+percent(metric.confirmedPercent+metric.inferredPercent)+'"></span>':
+  '<span class="course-progress-confirmed" style="width:'+percent(metric.confirmedPercent)+'"></span>'+
+  '<span class="course-progress-inferred" style="width:'+percent(metric.inferredPercent)+'"></span>';
  return '<div class="course-progress-item">'+
    '<div class="course-progress-label"><span>'+esc(label)+'</span><strong>'+value+' / '+metric.total+'</strong></div>'+
-   '<div class="course-progress-track" role="progressbar" aria-label="'+esc(label+(factOnly?' (подтверждённые введения)':' (учёт по календарю)'))+
+   '<div class="course-progress-track" role="progressbar" aria-label="'+esc(label+' (учёт по календарю)')+
    '" aria-valuemin="0" aria-valuemax="'+metric.total+'" aria-valuenow="'+value+'">'+
-   '<span class="course-progress-confirmed" style="width:'+percent(metric.confirmedPercent)+'"></span>'+
-   '<span class="course-progress-inferred" style="width:'+percent(metric.inferredPercent)+'"></span></div>'+
+   bars+'</div>'+
    '<div class="course-progress-caption">'+esc(caption)+'</div></div>';
 }
 function courseProgressMarkup(state,course){
@@ -201,7 +204,7 @@ function courseProgressMarkup(state,course){
        '<div class="course-progress-closure">Выписка отложена</div>':'';
  return '<div class="course-progress-bars" aria-label="Прогресс лечения">'+
    courseProgressRow('Сеансы ЛТ',metrics.lt)+
-   (metrics.chemo?courseProgressRow('Капельницы ХТ',metrics.chemo,{factOnly:true}):'')+
+   (metrics.chemo?courseProgressRow('Капельницы ХТ',metrics.chemo,{chemo:true}):'')+
    info+'</div>';
 }
 function chemoCourseMarkup(state,course){
@@ -223,8 +226,8 @@ function chemoCourseMarkup(state,course){
    const status=(infusion?.status==='cancelled'?' · отменено':infusion?.originalDate&&infusion.originalDate!==date?' · перенесено с '+datestr(infusion.originalDate):'')+holidayInfo;
    const outcome=chemoAdministrationState(infusion,localToday());
    const deliveryLabel={
-    confirmed:'Выполнена (подтверждено вручную)',
-    assumed:'Выполнена автоматически по календарю — факт не подтверждён',
+    confirmed:'Учтена выполненной (ранняя ручная отметка)',
+    assumed:'Учтена выполненной по прошедшей дате',
     'not-given':'ХТ не проводилась',
     cancelled:'Запланированное введение отменено',
     planned:'Ожидается по плану'
@@ -232,10 +235,9 @@ function chemoCourseMarkup(state,course){
    return '<div class="hlt-plan-item"><b>Кровь '+datestr(labDate)+' → ХТ '+(i+1)+' · '+datestr(date)+esc(status)+'</b><span>Направление: '+esc(label)+'</span><span class="hlt-administration-status'+(outcome==='not-given'||outcome==='cancelled'?' hlt-admin-missed':'')+'">'+esc(deliveryLabel)+'</span></div>';
  }).join('');
  return '<details class="hlt-plan"><summary>ХЛТ · выполнено '+summary.completed+' / '+summary.total+' введений · первое '+datestr(chemo.firstDate)+'</summary>'+
-   '<p class="hlt-administration-summary">Подтверждено вручную: '+summary.confirmed+
-   '; выполнено по календарю без подтверждения: '+summary.assumed+
+   '<p class="hlt-administration-summary">Учтено выполненных: '+summary.completed+
    '; не проводилось: '+summary.notGiven+'; отменено по плану: '+summary.cancelled+
-   '. Даты сами по себе не подтверждают фактическое проведение ХТ.</p>'+
+   '. Прошедшая дата учитывается автоматически, но не подтверждает клинический факт проведения.</p>'+
    '<div class="hlt-plan-grid">'+list+'</div>'+ 
    (chemoWarningsFor(state,course).length?'<div class="hlt-alert">'+chemoWarningsFor(state,course).map(w=>'<p>'+esc(w)+'</p>').join('')+'</div>':'')+'</details>';
 }

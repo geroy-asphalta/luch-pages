@@ -2,7 +2,7 @@
 // as the toolbar; the controller never mutates treatment or laboratory data.
 import {labButtonIntent,issueButtonIntent,skipButtonIntent,calendarActionIcon} from './calendar-action-ui.mjs';
 import {chemoEventAt} from './chemo-change.mjs?v=2';
-import {chemoAdministrationState} from './chemo-administration.mjs';
+import {chemoAdministrationState} from './chemo-administration.mjs?v=2';
 import {localToday} from './course-progress.mjs';
 
 const cellKey=cell=>cell.patientId+'|'+cell.date;
@@ -34,7 +34,6 @@ export function calendarCellContextActions(state,cells,clickedCell=null,today=lo
  const manuallyMarked=infusion&&['not-given','given'].includes(infusion.administrationOutcome);
  const deliveryActions=active&&historical?[
   ...(outcome!=='not-given'?[{id:'chemo-not-given',label:'ХТ не проводилась',title:'Пометить введение как не проведённое: только капельница станет красной',disabled:false,icon:'✕'}]:[]),
-  ...(outcome!=='confirmed'?[{id:'chemo-given',label:outcome==='not-given'?'ХТ всё-таки проведена':'Подтвердить проведение ХТ',title:'Ручное подтверждение фактического проведения',disabled:false,icon:'✓'}]:[]),
   ...(manuallyMarked?[{id:'chemo-outcome-reset',label:'Снять ручную отметку ХТ',title:'Вернуться к автоматическому учёту по прошедшей дате',disabled:false,icon:'↶'}]:[])
  ]:[];
  const chemoActions=active?(infusion.status==='cancelled'?
@@ -95,7 +94,7 @@ export function setupCalendarCellContextMenu({
   if(!opened||!button||button.disabled)return;
   const which=button.dataset.calendarCellAction;
   if(!['skip','lab','issue','chemo-move','chemo-cancel','chemo-restore',
-   'chemo-not-given','chemo-given','chemo-outcome-reset'].includes(which))return;
+   'chemo-not-given','chemo-outcome-reset'].includes(which))return;
   const clicked=targetCell;
   close();
   onAction(which,clicked); // Use the existing toolbar operation against the same selection.
