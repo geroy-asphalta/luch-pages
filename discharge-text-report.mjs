@@ -1,17 +1,7 @@
-// Plain-text discharge list for a single calendar month.
-// Read-only organizational export; it never attests that a planned
-// final fraction has actually been delivered.
-import {courseProgress} from './course-progress.mjs';
-
-const validMonth=month=>typeof month==='string'&&/^\d{4}-(0[1-9]|1[0-2])$/.test(month);
-const hasArchivedCourse=(c,previous)=>c.status==='archived'&&c.previousStatus===previous;
-const completedNormally=c=>c.dischargeReview?.decision==='yes'&&
- c.dischargeReview?.operatorConfirmedLastFraction===true&&
- (c.status==='completed'||hasArchivedCourse(c,'completed'));
-const completedEarly=c=>Boolean(c.earlyDischarge?.date)&&
- (c.status==='early_completed'||hasArchivedCourse(c,'early_completed'));
-const validDay=day=>typeof day==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(day)&&
- !Number.isNaN(Date.parse(day))&&new Date(day+'T00:00:00Z').toISOString().slice(0,10)===day;
+// A read-only organizational list by the week of the LAST PLANNED LT fraction.
+// A planned last fraction is not proof of treatment or actual discharge.
+import {addDays,weekBounds} from './planner.mjs';
+import {courseProgress,localToday} from './course-progress.mjs';
 
 export function dischargeShortName(value){
  const full=String(value||'').trim().replace(/\s+/g,' ');
@@ -27,35 +17,42 @@ export function dischargeShortName(value){
  return surname+(name||patronymic?' '+name+patronymic:'');
 }
 
-// Strictly separate confirmed discharges from tentative final-fraction dates.
-// The tentative mode excludes already answered "do not discharge" decisions.
-export function dischargeTextReport(state,{month,mode='confirmed'}={}){
- if(!validMonth(month))return {error:'Выбери месяц для списка выписок.'};
- if(!['confirmed','planned'].includes(mode))
-  return {error:'Неизвестный режим списка выписок.'};
- const persons=new Map((state.people||[]).map(person=>[person.id,person]));
- const grouped=new Map();
+export function nextDischargeWeekStart(today=localToday()){
+ const week=weekBounds(today);
+ return week?addDays(week.start,7):null;
+}
+
+export function dischargeTextReport(state,{weekStart}={}){
+ const week=weekBounds(weekStart);
+ if(!week)return {error:'Выбери дату недели для списка выписок.'};
+ const people=new Map((state.people||[]).map(person=>[person.id,person]));
+ const groups=new Map();
  for(const course of state.patients||[]){
-  const person=persons.get(course.personId);
+  // An early discharge is NOT the planned final fraction. It is deliberately
+  // absent from this list. Archived completed courses remain visible in history.
+  const eligible=['active','planned','completed'].includes(course.status)||
+   (course.status==='archived'&&course.previousStatus==='completed');
+  if(!eligible||!course.start)continue;
+  const person=people.get(course.personId);
   if(!person||!dischargeShortName(person.name))continue;
-  let date='';
-  if(mode==='confirmed'){
-   if(completedEarly(course))date=course.earlyDischarge.date;
-   else if(completedNormally(course))date=course.dischargeReview.finalDate;
-  }else{
-   if(!['active','planned'].includes(course.status)||person.archived||
-    course.dischargeReview?.decision==='no'||course.dischargeReview?.decision==='yes')continue;
-   date=courseProgress(state,course,month+'-01').finalDate||'';
-  }
-  if(!validDay(date)||date.slice(0,7)!==month)continue;
-  if(!grouped.has(date))grouped.set(date,new Map());
-  grouped.get(date).set(person.id,dischargeShortName(person.name));
+  if(person.archived&&['active','planned'].includes(course.status))continue;
+  const confirmedEnd=course.dischargeReview?.decision==='yes'?
+   course.dischargeReview.finalDate:null;
+  const finalDate=confirmedEnd||
+   courseProgress(state,{...course,status:'active'},week.start).finalDate;
+  if(!finalDate||finalDate<week.start||finalDate>week.end)continue;
+  if(!groups.has(finalDate))groups.set(finalDate,new Map());
+  groups.get(finalDate).set(person.id,dischargeShortName(person.name));
  }
- const comparator=new Intl.Collator('ru-RU',{sensitivity:'base'}).compare;
- const rows=[...grouped.keys()].sort().map(date=>({
-  date,people:[...grouped.get(date).values()].sort(comparator)
+ const collator=new Intl.Collator('ru-RU',{sensitivity:'base'});
+ const rows=[...groups.keys()].sort().map(date=>({
+  date,people:[...groups.get(date).values()].sort(collator.compare)
  }));
- const text=rows.map(row=>row.date.slice(8,10)+'.'+row.date.slice(5,7)+
-  ': '+row.people.join(', ')).join('\n');
- return {month,mode,rows,text,dates:rows.length,people:rows.reduce((total,row)=>total+row.people.length,0)};
+ return {
+  weekStart:week.start,weekEnd:week.end,rows,
+  dates:rows.length,
+  people:rows.reduce((total,row)=>total+row.people.length,0),
+  text:rows.map(row=>row.date.slice(8,10)+'.'+row.date.slice(5,7)+': '+
+   row.people.join(', ')).join('\n')
+ };
 }

@@ -57,7 +57,7 @@ let cloudUI=null,inlineNotesUI=null,applyingRemoteState=false;
 let taskPanelOpen=localStorage.getItem('luch-task-panel-expanded')!=='false',taskShowCompleted=false,taskViewDate=localToday(),taskLastToday=localToday();
 const save=()=>{state=captureTodayTaskHistoryDraft(state,localToday()).state;localStorage.setItem(store,JSON.stringify(state));cloudUI?.localChanged();};
 function notice(message){const t=el('toast');t.textContent=message;t.classList.add('show');clearTimeout(notice.timer);notice.timer=setTimeout(()=>t.classList.remove('show'),2900);}
-setupDischargeTextReportUI({getState:()=>state,getMonth:()=>month,notice});
+setupDischargeTextReportUI({getState:()=>state,notice});
 const cellKey=(id,date)=>id+'|'+date;
 const selectionItems=()=>[...selected].map(x=>{const [patientId,date]=x.split('|');return {patientId,date};});
 function buttonClick(kind){

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#172b38">
 <meta name="description" content="ЛУЧ: демонстрационный календарь лучевой терапии.">
-<link rel="stylesheet" href="./style.css?v=1.44">
+<link rel="stylesheet" href="./style.css?v=1.45">
 <link rel="stylesheet" href="./catalog-ui.css?v=3">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" type="image/svg+xml" href="./icon.svg">
@@ -16,10 +16,6 @@
 <header class="topbar">
  <div class="logo"><span class="mark">✳</span><span><b>ЛУЧ</b><small>Календарь отделения</small></span></div>
  <div class="demo"><span>ДЕМО</span><span class="topbar-demo-extra"> · ВЫМЫШЛЕННЫЕ ПАЦИЕНТЫ</span></div>
- <button id="discharge-text-open" type="button" title="Сформировать текстовый список выписок" aria-label="Сформировать список выписок">
-  <svg aria-hidden="true" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 9h8M8 13h8M8 17h5"/><path d="M14 3v3h5"/></svg>
-  <span class="discharge-text-button-label">Выписки</span>
- </button>
  <button id="cloud-open" type="button" aria-label="Настройки синхронизации" title="Синхронизация вымышленных данных"><span aria-hidden="true">☁</span> <span class="topbar-cloud-label">Синхронизация</span></button>
   <button id="reset" title="Восстановить демо">↺ <span class="long">Сбросить демо</span></button>
 </header>
@@ -43,6 +39,8 @@
 <div class="toolbar">
  <div class="filters"><button id="calendar-add-patient" type="button" class="action-with-icon" data-tooltip="Добавить пациента" aria-label="Добавить пациента">
   <span class="action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7.3" r="3.2"/><path d="M3.4 20v-2a5.6 5.6 0 0 1 11.2 0v2"/><path d="M18.5 10.5v8M14.5 14.5h8"/></svg></span><span class="calendar-active-count" id="calendar-active-count" aria-hidden="true">0</span>
+ </button><button id="discharge-text-open" type="button" class="action-with-icon" data-tooltip="Список выписок на следующую неделю" aria-label="Сформировать список выписок на неделю">
+  <span class="action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 9h8M8 13h8M8 17h5"/><path d="M14 3v3h5"/></svg></span>
  </button><select id="filter" aria-label="Установка"><option value="">Все установки</option></select><span class="count" id="selected-count">Выберите ячейки</span><button id="clear-selected" type="button" class="clear-selection hidden">Снять выделение</button></div>
  <div class="calendar-toolbar-right">
   <div class="month-controls" role="group" aria-label="Навигация по месяцам календаря"><button id="prev" aria-label="Предыдущий месяц">‹</button><b id="month" aria-live="polite"></b><button id="next" aria-label="Следующий месяц">›</button><button id="reset-month" title="Вернуться к текущей неделе">Сегодня</button></div>
@@ -258,13 +256,15 @@
   <h2 id="discharge-text-title">Список выписок</h2>
   <button id="discharge-text-close" type="button" class="issue-close" aria-label="Закрыть список выписок">×</button>
  </div>
- <p class="discharge-text-hint">Текст для копирования. Подтверждённые выписки и предварительные даты завершения лечения показываются отдельно.</p>
- <div class="discharge-text-controls">
-  <label>Месяц<input type="month" id="discharge-text-month" aria-label="Месяц выписок"></label>
-  <label>Тип списка<select id="discharge-text-mode" aria-label="Тип списка выписок">
-   <option value="confirmed">Подтверждённые выписки</option>
-   <option value="planned">Плановые даты (не подтверждены)</option>
-  </select></label>
+ <p class="discharge-text-hint">Все пациенты, у которых последняя <b>запланированная</b> фракция приходится на выбранную неделю. Список не подтверждает проведение лечения или выписку.</p>
+ <div class="discharge-text-week-nav" role="group" aria-label="Выбор недели выписок">
+  <button id="discharge-text-prev" type="button" aria-label="Предыдущая неделя" title="Предыдущая неделя">‹</button>
+  <strong id="discharge-text-week-label" aria-live="polite"></strong>
+  <button id="discharge-text-next" type="button" aria-label="Следующая неделя" title="Следующая неделя">›</button>
+  <label class="discharge-text-week-picker">Выбрать дату
+   <input type="date" id="discharge-text-date" aria-label="Дата в нужной неделе">
+  </label>
+  <button id="discharge-text-default" type="button" title="Вернуться к следующей неделе">Следующая неделя</button>
  </div>
  <p id="discharge-text-summary" class="discharge-text-summary" role="status" aria-live="polite"></p>
  <label class="discharge-text-output-label" for="discharge-text-output">Готовый текст</label>
@@ -317,5 +317,5 @@
  <p class="cloud-explain">На втором устройстве подключись под тем же тестовым аккаунтом и нажми «Принять облачную версию». После этого изменения начнут приходить автоматически. Одновременные несовместимые правки не объединяются: при конфликте запись блокируется, локальная копия сохраняется.</p>
 </dialog>
 <div role="status" aria-live="polite" id="toast" class="toast"></div>
-<script type="module" src="./app.mjs?v=1.53"></script>
+<script type="module" src="./app.mjs?v=1.54"></script>
 </body></html>

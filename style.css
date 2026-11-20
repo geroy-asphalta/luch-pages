@@ -1043,28 +1043,39 @@ main{padding-top:16px}
 }
 
 
-/* A small text-report action in the existing dark topbar. Existing sync and
-   reset buttons keep their familiar shape; labels collapse on narrow screens. */
+/* Discharge export sits beside Add Patient, matching its 46px icon button. */
 .topbar{gap:clamp(8px,1.5vw,22px)}
 .topbar .demo{margin-right:auto;white-space:nowrap}
-.topbar #discharge-text-open,.topbar #cloud-open,.topbar #reset{margin-left:0;flex:none}
-.topbar #discharge-text-open{
- display:inline-flex;align-items:center;justify-content:center;gap:8px;
- min-height:38px;padding:8px 12px;white-space:nowrap;font-weight:700;
- border:1px solid #526575;border-radius:10px;background:transparent;color:#cfdfec
-}
-.topbar #discharge-text-open:hover,.topbar #discharge-text-open:focus-visible{
- background:#294353;color:#fff;border-color:#7797a9
-}
-.topbar #discharge-text-open svg{flex:none}
+.topbar #cloud-open,.topbar #reset{margin-left:0;flex:none}
+.filters #discharge-text-open{margin-right:2px}
+.filters #discharge-text-open .action-icon svg{width:24px;height:24px}
+
 .discharge-text-dialog{width:min(620px,calc(100vw - 24px))}
 .discharge-text-hint{font-size:12px;line-height:1.55;color:#71899a;margin:13px 0}
-.discharge-text-controls{display:grid;grid-template-columns:minmax(145px,1fr) minmax(190px,1.5fr);gap:10px;margin:15px 0}
-.discharge-text-controls label{display:flex;flex-direction:column;gap:6px;font-size:11px;font-weight:750;color:#536f80}
-.discharge-text-controls input,.discharge-text-controls select{
- width:100%;min-width:0;height:40px;background:#fff;border:1px solid #d5e2e9;
- border-radius:8px;color:#38566a;padding:8px;font-size:12px
+
+.discharge-text-week-nav{
+ display:flex;flex-wrap:wrap;align-items:center;gap:7px;
+ margin:15px 0;padding:9px;background:#f7fafc;
+ border:1px solid #e2ebf1;border-radius:9px
 }
+.discharge-text-week-nav button{
+ flex:none;min-height:36px;padding:7px 10px;border:1px solid #d6e3eb;
+ border-radius:8px;background:white;color:#496b80;font-size:12px;font-weight:700
+}
+.discharge-text-week-nav button:hover,.discharge-text-week-nav button:focus-visible{
+ background:#ecf4f8;border-color:#9fc5d8
+}
+.discharge-text-week-nav strong{
+ flex:1 1 155px;min-width:125px;text-align:center;
+ font-size:12px;color:#36576a;white-space:nowrap
+}
+.discharge-text-week-picker{display:flex;align-items:center;gap:5px;font-size:10px;
+ color:#567184;font-weight:750}
+.discharge-text-week-picker input{
+ max-width:135px;min-width:120px;height:36px;background:white;
+ border:1px solid #d5e2e9;border-radius:8px;color:#38566a;padding:6px;font-size:11px
+}
+.discharge-text-week-nav #discharge-text-default{font-size:11px}
 .discharge-text-summary{min-height:22px;font-size:11px;line-height:1.5;color:#567a8c}
 .discharge-text-output-label{display:block;font-size:11px;font-weight:750;color:#496b80;margin:6px 0}
 .discharge-text-dialog textarea{
@@ -1079,19 +1090,20 @@ main{padding-top:16px}
 @media(max-width:700px){
  .topbar .topbar-demo-extra{display:none}
  .topbar .topbar-cloud-label{display:none}
- .topbar #discharge-text-open{width:40px;height:40px;min-height:40px;padding:8px}
- .topbar #discharge-text-open .discharge-text-button-label{display:none}
  .topbar #cloud-open{width:40px;height:40px;padding:8px;font-size:18px}
  .topbar #reset{padding:8px 10px}
  .topbar .demo{font-size:9px;padding:7px 8px}
- .discharge-text-controls{grid-template-columns:1fr;gap:8px}
+ .discharge-text-week-nav{gap:6px}
+ .discharge-text-week-nav strong{flex:1 1 130px;font-size:11px}
+ .discharge-text-week-picker{flex:1 1 180px}
+ .discharge-text-week-picker input{flex:1;max-width:none}
  .discharge-text-dialog{padding:14px}
  .discharge-text-dialog textarea{font-size:12px;min-height:180px}
 }
 @media(max-width:370px){
  .topbar{gap:5px;padding:0 8px}
  .topbar .logo{margin-right:0}
- .topbar #cloud-open,.topbar #discharge-text-open{width:36px;height:36px;min-height:36px}
+ .topbar #cloud-open{width:36px;height:36px;min-height:36px}
  .topbar #reset{padding:7px}
 }
 

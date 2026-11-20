@@ -1,43 +1,53 @@
-// View and copy a read-only, month-grouped discharge list.
-import {dischargeTextReport} from './discharge-text-report.mjs';
+// Weekly read-only list of everyone whose LAST PLANNED fraction falls in
+// the chosen Monday–Sunday week; independent of actual discharge confirmation.
+import {addDays,weekBounds} from './planner.mjs';
+import {localToday} from './course-progress.mjs';
+import {dischargeTextReport,nextDischargeWeekStart} from './discharge-text-report.mjs';
 const el=id=>document.getElementById(id);
+const shortDate=date=>date.slice(8,10)+'.'+date.slice(5,7);
 
 export function setupDischargeTextReportUI({
- getState,getMonth,notice,clipboard=typeof navigator!=='undefined'?navigator.clipboard:null,
+ getState,notice,getToday=localToday,
+ clipboard=typeof navigator!=='undefined'?navigator.clipboard:null,
  doc=typeof document!=='undefined'?document:null
 }){
  const dialog=el('discharge-text-dialog');
- const dateInput=el('discharge-text-month');
- const modeInput=el('discharge-text-mode');
+ const dateInput=el('discharge-text-date');
+ const weekLabel=el('discharge-text-week-label');
  const output=el('discharge-text-output');
  const summary=el('discharge-text-summary');
  const copyButton=el('discharge-text-copy');
  const selectButton=el('discharge-text-select');
- let generated='';
+ let selectedWeek='',generated='';
  function render(){
-  const result=dischargeTextReport(getState(),{month:dateInput.value,mode:modeInput.value});
+  const result=dischargeTextReport(getState(),{weekStart:selectedWeek});
   generated=result.text||'';
   output.value=generated;
   copyButton.disabled=!generated;
   selectButton.disabled=!generated;
   if(result.error){
    summary.textContent=result.error;
+   weekLabel.textContent='Выбери неделю';
    return;
   }
-  if(result.dates===0){
-   summary.textContent=modeInput.value==='confirmed'?
-    'В этом месяце нет подтверждённых выписок. Можно переключиться на плановые даты.':
-    'Для выбранного месяца нет пациентов с запланированным последним сеансом.';
-  }else{
-   summary.textContent='Дат: '+result.dates+' · Пациентов: '+result.people+
-    (modeInput.value==='planned'?' · Только план, не подтверждение выписки':' · Подтверждённые выписки');
-  }
+  selectedWeek=result.weekStart;
+  dateInput.value=selectedWeek;
+  weekLabel.textContent=shortDate(result.weekStart)+' – '+shortDate(result.weekEnd)+'.'+
+   result.weekEnd.slice(0,4);
+  summary.textContent=result.dates?
+   'Дат: '+result.dates+' · Пациентов: '+result.people+' · Плановые последние фракции':
+   'На выбранной неделе нет пациентов с запланированной последней фракцией.';
+ }
+ function setWeek(date){
+  const week=weekBounds(date);
+  if(!week){notice('Выбери корректную дату недели.');dateInput.value=selectedWeek;return;}
+  selectedWeek=week.start;
+  render();
  }
  function open(){
-  const currentMonth=String(getMonth()||'');
-  dateInput.value=/^\d{4}-(0[1-9]|1[0-2])$/.test(currentMonth)?
-   currentMonth:new Date().toISOString().slice(0,7);
-  modeInput.value='confirmed';
+  const next=nextDischargeWeekStart(getToday());
+  if(!next){notice('Не удалось определить следующую неделю.');return;}
+  selectedWeek=next;
   render();
   if(typeof dialog.showModal==='function')dialog.showModal();
   else dialog.setAttribute('open','');
@@ -46,10 +56,7 @@ export function setupDischargeTextReportUI({
   if(dialog.open&&typeof dialog.close==='function')dialog.close();
   else dialog.removeAttribute('open');
  }
- function selectAll(){
-  output.focus();
-  output.select();
- }
+ function selectAll(){output.focus();output.select();}
  async function copy(){
   if(!generated){notice('Нет текста для копирования.');return;}
   try{
@@ -58,7 +65,7 @@ export function setupDischargeTextReportUI({
     notice('Список выписок скопирован');
     return;
    }
-  }catch{ /* Clipboard API may be restricted in local/offline browsers. */ }
+  }catch{ /* Local/offline browsers can restrict Clipboard API. */ }
   selectAll();
   let copied=false;
   try{copied=Boolean(doc?.execCommand?.('copy'));}catch{}
@@ -67,8 +74,10 @@ export function setupDischargeTextReportUI({
  el('discharge-text-open').addEventListener('click',open);
  el('discharge-text-close').addEventListener('click',close);
  el('discharge-text-done').addEventListener('click',close);
- dateInput.addEventListener('change',render);
- modeInput.addEventListener('change',render);
+ el('discharge-text-prev').addEventListener('click',()=>setWeek(addDays(selectedWeek,-7)));
+ el('discharge-text-next').addEventListener('click',()=>setWeek(addDays(selectedWeek,7)));
+ el('discharge-text-default').addEventListener('click',()=>setWeek(nextDischargeWeekStart(getToday())));
+ dateInput.addEventListener('change',()=>setWeek(dateInput.value));
  selectButton.addEventListener('click',selectAll);
  copyButton.addEventListener('click',copy);
  dialog.addEventListener('cancel',event=>{event.preventDefault();close();});
