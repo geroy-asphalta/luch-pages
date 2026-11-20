@@ -947,7 +947,6 @@ main{padding-top:16px}
  background:#f0f7f9;border-color:#c6e1eb;outline:2px solid #82b5c8;outline-offset:-2px
 }
 .calendar td.calendar-notes .calendar-note-value{flex:1;min-width:0}
-.calendar td.calendar-notes .calendar-note-pencil{flex:none;color:#6396aa;font-size:13px;line-height:1}
 .calendar td.calendar-notes.calendar-note-editing{
  overflow:visible;text-overflow:clip;white-space:normal;
  z-index:8;vertical-align:top;background:#f9fcfd
