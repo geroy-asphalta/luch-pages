@@ -7,7 +7,7 @@ import {createPatientUI} from './patient-ui.mjs?v=12';
 import {createCatalogUI} from './catalog-ui.mjs';
 import {currentCtvName} from './ctv-display.mjs';
 import {courseProgress,localToday,radiationSessionCompletion,dischargeCandidates,dischargeBatchDraft} from './course-progress.mjs?v=3';
-import {activePatientCount,todayTasks,toggleTodayTaskDraft,tasksForDate,captureTodayTaskHistoryDraft} from './today-tasks.mjs?v=4';
+import {activePatientCount,todayTasks,toggleTodayTaskDraft,tasksForDate,captureTodayTaskHistoryDraft} from './today-tasks.mjs?v=5';
 import {orderedPersonIds,comparePatientEntries,reorderPatientDraft} from './patient-order.mjs';
 import {setupPatientReordering} from './patient-drag.mjs';
 import {labSingleButtonDraft} from './lab-batch-preview.mjs';
@@ -33,7 +33,7 @@ import {calendarRosterRows} from './calendar-roster-rows.mjs';
 import {syncCourseStartStatusesDraft} from './course-start-status.mjs';
 import {installImportedLabColors} from './demo-lab-colors.mjs?v=1';
 import {createFirebaseDemoSync} from './firebase-demo-state-ui.mjs';
-import {setupDischargeTextReportUI} from './discharge-text-ui.mjs?v=2';
+import {setupDischargeTextReportUI} from './discharge-text-ui.mjs?v=3';
 import {setupThemeUI} from './theme-ui.mjs';
 import {setupGlassUI,isGlassSuccessNotice} from './glass-ui.mjs';
 
@@ -62,7 +62,7 @@ let cloudUI=null,inlineNotesUI=null,applyingRemoteState=false;
 let taskPanelOpen=false,taskShowCompleted=false,taskViewDate=localToday(),taskLastToday=localToday();
 const save=()=>{state=captureTodayTaskHistoryDraft(state,localToday()).state;localStorage.setItem(store,JSON.stringify(state));cloudUI?.localChanged();};
 function notice(message){const t=el('toast');t.textContent=message;t.classList.toggle('glass-toast-success',isGlassSuccessNotice(message));t.classList.add('show');clearTimeout(notice.timer);notice.timer=setTimeout(()=>t.classList.remove('show'),2900);}
-setupDischargeTextReportUI({getState:()=>state,notice});
+const dischargeTextUI=setupDischargeTextReportUI({getState:()=>state,notice});
 const cellKey=(id,date)=>id+'|'+date;
 const selectionItems=()=>[...selected].map(x=>{const [patientId,date]=x.split('|');return {patientId,date};});
 function buttonClick(kind){
@@ -235,10 +235,13 @@ function renderStats(){
   const call=task.kind==='hlt-call'?(task.phoneHref
    ?'<a class="today-task-call" href="tel:'+esc(task.phoneHref)+'" title="Позвонить: '+esc(task.fullName)+'" aria-label="Позвонить: '+esc(task.fullName)+'"><span aria-hidden="true">☎</span></a>'
    :'<span class="today-task-call is-unavailable" role="img" aria-label="Номер телефона не указан" title="Номер телефона не указан">☎</span>'):'';
+  const dischargeCopy=task.kind==='weekly-discharge'?
+   '<button type="button" class="today-task-discharge-copy" data-task-copy-discharge="'+esc(task.id)+'" title="Скопировать список выписок на следующую неделю" aria-label="Скопировать список выписок на следующую неделю">'+
+   '<svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="8" y="8" width="11" height="12" rx="2"/><path d="M15 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h2"/></svg></button>':'';
   return '<li class="today-task'+(task.done?' is-done':'')+'">'
    +'<button type="button" class="today-task-check" data-today-task-id="'+esc(task.id)+'" aria-pressed="'+task.done+'" aria-label="'+esc((task.done?'Снять отметку выполнения: ':'Отметить выполненной: ')+task.label)+'"><span aria-hidden="true">'+(task.done?'✓':'')+'</span></button>'
    +'<span class="today-task-text" title="'+esc(task.fullName)+'">'+esc(task.label)+'</span>'
-   +call+'</li>';
+   +call+dischargeCopy+'</li>';
  };
  const active=activePatientCount(state);
  el('calendar-active-count').textContent=String(active);
@@ -579,6 +582,14 @@ function onTodayTasksClick(event){
   if(date<=localToday()){
    taskViewDate=date;taskShowCompleted=false;renderStats();
   }
+  return;
+ }
+ const copyButton=event.target.closest('[data-task-copy-discharge]');
+ if(copyButton){
+  const task=tasksForDate(state,taskViewDate,localToday()).tasks.find(item=>
+   item.kind==='weekly-discharge'&&item.id===copyButton.dataset.taskCopyDischarge);
+  if(!task){notice('Задача обновилась. Открой список снова.');renderStats();return;}
+  void dischargeTextUI.copyNextWeek(task.date||taskViewDate);
   return;
  }
  const button=event.target.closest('button[data-today-task-id]');

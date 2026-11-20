@@ -42,13 +42,17 @@ export function setupDischargeTextReportUI({
   selectedWeek=week.start;
   render();
  }
+ function showDialog(){
+  if(dialog.open)return;
+  if(typeof dialog.showModal==='function')dialog.showModal();
+  else dialog.setAttribute('open','');
+ }
  function open(){
   const next=nextDischargeWeekStart(getToday());
   if(!next){notice('Не удалось определить следующую неделю.');return;}
   selectedWeek=next;
   render();
-  if(typeof dialog.showModal==='function')dialog.showModal();
-  else dialog.setAttribute('open','');
+  showDialog();
  }
  function close(){
   if(dialog.open&&typeof dialog.close==='function')dialog.close();
@@ -64,10 +68,26 @@ export function setupDischargeTextReportUI({
     return;
    }
   }catch{ /* Local/offline browsers can restrict Clipboard API. */ }
+  // The toolbar/weekly-task action can copy without opening this dialog.
+  // If browser clipboard permissions block it, show the same report so the
+  // user can select its text manually, even from a historical Thursday.
+  showDialog();
   selectAll();
   let copied=false;
   try{copied=Boolean(doc?.execCommand?.('copy'));}catch{}
   notice(copied?'Список выписок скопирован':'Текст выделен — нажми Ctrl+C или ⌘+C');
+ }
+ async function copyNextWeek(fromDate=getToday()){
+  const next=nextDischargeWeekStart(fromDate);
+  if(!next){notice('Не удалось определить следующую неделю.');return false;}
+  selectedWeek=next;
+  render();
+  if(!generated){
+   notice('На следующей неделе нет запланированных выписок.');
+   return false;
+  }
+  await copy();
+  return true;
  }
  el('discharge-text-open').addEventListener('click',open);
  el('discharge-text-close').addEventListener('click',close);
@@ -77,5 +97,5 @@ export function setupDischargeTextReportUI({
  dateInput.addEventListener('change',()=>setWeek(dateInput.value));
  copyButton.addEventListener('click',copy);
  dialog.addEventListener('cancel',event=>{event.preventDefault();close();});
- return {open,render,close};
+ return {open,render,close,copyNextWeek};
 }

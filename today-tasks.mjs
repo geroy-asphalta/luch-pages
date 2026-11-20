@@ -1,6 +1,6 @@
 // Administrative reminders for the local-only patient calendar.
 // A checkmark acknowledges a reminder; it never orders chemo or discharges a patient.
-import {addDays} from './planner.mjs';
+import {addDays,weekBounds} from './planner.mjs';
 import {nextWorkingDay} from './work-calendar.mjs';
 import {courseProgress} from './course-progress.mjs';
 import {phoneDigitsRU} from './patient-model.mjs';
@@ -19,6 +19,15 @@ export function todayTaskCandidates(state,today){
  const tomorrow=addDays(today,1);
  const courses=(state.patients||[]).filter(course=>eligible(course,people));
  const results=[];
+ // One organizational reminder every Thursday, regardless of whether there
+ // are currently patients due for discharge. Its date is stable in history.
+ if(weekBounds(today)&&new Date(today+'T12:00:00Z').getUTCDay()===4){
+  results.push({
+   id:'weekly-discharge:'+today,kind:'weekly-discharge',date:today,
+   courseId:null,personId:null,surname:'',fullName:'Подать выписку',
+   label:'Подать выписку',phoneHref:null
+  });
+ }
  for(const course of courses){
   const person=people.get(course.personId);
   const fullName=String(person?.name||course.name||'Пациент').trim();
@@ -72,7 +81,7 @@ export function todayTaskCandidates(state,today){
   seenPeople.add(course.personId);
  }
  // Discharge preparation first, then next-day labs, then HLT call reminders.
- const priority={'discharge-prep':0,'lab-review':1,'hlt-call':2};
+ const priority={'weekly-discharge':-1,'discharge-prep':0,'lab-review':1,'hlt-call':2};
  return results.sort((a,b)=>(priority[a.kind]??99)-(priority[b.kind]??99)||
   a.surname.localeCompare(b.surname,'ru')||a.id.localeCompare(b.id));
 }
@@ -122,7 +131,12 @@ export function tasksForDate(state,date,today=date){
   // neither stale pending nor stale checked snapshots belong here.
   // Snapshots and checks remain untouched for browsing prior dates.
   base=candidates;
- }else base=snapshot?history:candidates;
+ }else if(snapshot){
+  // Old snapshots predate this recurring reminder. Backfill ONLY this
+  // date-based Thursday task, not other possibly obsolete course tasks.
+  const oldIds=new Set(history.map(task=>task.id));
+  base=[...candidates.filter(task=>task.kind==='weekly-discharge'&&!oldIds.has(task.id)),...history];
+ }else base=candidates;
  return {tasks:base.map(task=>({...task,
   done:Object.prototype.hasOwnProperty.call(checks,task.id)
  })),snapshot};
