@@ -29,7 +29,16 @@ export function chemoWarningsFor(state,course){
  const results=[],chemo=course.chemo;
  if(!isHlt(course)||!chemo?.count)return results;
  if(!chemo.firstDate){results.push('Начало ЛТ ещё не известно или нет доступного первого сеанса: даты ХТ и анализов пока не сформированы.');return results;}
- for(const [i,date] of weeklyChemoDates(chemo.firstDate,chemo.count).entries()){
+ for(const [i,baseDate] of weeklyChemoDates(chemo.firstDate,chemo.count).entries()){
+   const changed=(state.events||[]).find(e=>e.patientId===course.id&&e.type==='chemo'&&e.source==='hlt'&&e.chemoIndex===i);
+   const date=changed?.date||baseDate;
+   if(changed?.nominalDate&&date!==changed.nominalDate)
+    results.push('ХТ №'+(i+1)+' по 7-дневному графику '+changed.nominalDate+
+     ' перенесена на ближайший рабочий день '+date+'.');
+   if(changed?.status==='cancelled'){
+    results.push('Введение ХТ №'+(i+1)+' на '+date+' отменено. Проверь связанный анализ и выданные направления.');
+    continue;
+   }
    const blood=bloodDateBeforeChemo(date,state),original=addDays(date,-1);
    if(original!==blood)results.push('Анализ перед ХТ №'+(i+1)+' перенесён с нерабочего дня '+original+' на предыдущий рабочий день '+blood+'.');
    const issuedWrong=(state.events||[]).find(e=>e.patientId===course.id&&e.type==='lab'&&e.source==='hlt'&&e.chemoIndex===i&&e.status==='issued'&&e.date!==blood);
@@ -40,7 +49,11 @@ export function chemoWarningsFor(state,course){
  }
  if(course.start&&course.status!=='archived'){
    const lastFraction=[...schedule(course,state,addDays(course.start,400))].filter(([,c])=>c.kind==='session').at(-1)?.[0]||null;
-   const lastChemo=addDays(chemo.firstDate,(chemo.count-1)*7);
+   const activeDates=weeklyChemoDates(chemo.firstDate,chemo.count).flatMap((baseDate,i)=>{
+    const actual=(state.events||[]).find(e=>e.patientId===course.id&&e.type==='chemo'&&e.source==='hlt'&&e.chemoIndex===i);
+    return actual?.status==='cancelled'?[]:[actual?.date||baseDate];
+   });
+   const lastChemo=activeDates.sort().at(-1)||'';
    if(lastFraction&&lastChemo>lastFraction)results.push('Последнее введение ХТ запланировано позже последней расчётной фракции ЛТ: проверь даты.');
  }
  return results;
@@ -60,6 +73,9 @@ export function applyHltPlanDraft(draft,course,previous,data){
    course.chemo=null;
    return {dates:[],warnings:[]};
  }
+ // Keep individual manual decisions on routine edits; protect them from
+ // a global change of count, mode, or first date.
+ const individuallyChanged=oldEvents.some(e=>e.type==='chemo'&&e.manualChange);
  const count=Number(data.chemoCount);
  if(!Number.isInteger(count)||count<1||count>52)return {error:'Укажи количество введений ХТ: от 1 до 52.'};
  const mode=isBreastDiagnosis(course.diagnosis)?'manual':'first-fraction';
@@ -72,6 +88,12 @@ export function applyHltPlanDraft(draft,course,previous,data){
    firstDate=sameMode&&!data.chemoReanchor&&validDate(before.firstDate)?before.firstDate:firstRadiationFraction(course,draft)||'';
  }
  const dates=firstDate?weeklyChemoDates(firstDate,count):[];
+ if(individuallyChanged){
+  if(before?.firstDate!==firstDate||before?.count!==count||before?.mode!==mode)
+   return {error:'Есть индивидуально перенесённые или отменённые капельницы. Изменение всей схемы ХТ может их стереть. Сначала согласуй изменения в календаре.'};
+  course.chemo={mode,count,firstDate,intervalDays:7};
+  return {dates,warnings:chemoWarningsFor(draft,course)};
+ }
  // Manually issued referrals are never moved or detached silently, even when they
  // came from the earlier Google Sheets demonstration rather than this HLT planner.
  if(before?.firstDate&&before.count){
@@ -121,7 +143,10 @@ export function migrateHltBloodDates(state){
  const now=()=>new Date().toISOString();
  for(const course of state.patients||[]){
   if(!isHlt(course)||['completed','archived'].includes(course.status)||!course.chemo?.firstDate||!course.chemo.count)continue;
-  for(const [chemoIndex,chemoDate] of weeklyChemoDates(course.chemo.firstDate,course.chemo.count).entries()){
+  for(const [chemoIndex,baseDate] of weeklyChemoDates(course.chemo.firstDate,course.chemo.count).entries()){
+   const infusion=state.events.find(e=>e.patientId===course.id&&e.type==='chemo'&&e.source==='hlt'&&e.chemoIndex===chemoIndex);
+   if(infusion?.status==='cancelled')continue;
+   const chemoDate=infusion?.date||baseDate;
    const target=bloodDateBeforeChemo(chemoDate,state);
    if(!target)continue;
    const lab=state.events.find(e=>e.patientId===course.id&&e.type==='lab'&&e.source==='hlt'&&e.chemoIndex===chemoIndex);

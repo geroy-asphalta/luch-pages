@@ -3,7 +3,7 @@
 import {calendarDay,productionDay,effectiveDayLabel,calendarDayDraft,calendarDayRemoveDraft,isWorkingDay,baseWeekend} from './work-calendar.mjs';
 import {RU_PRODUCTION_YEARS} from './ru-production-calendar.mjs';
 import {pretty} from './planner.mjs';
-import {productionMonths,productionToggleDraft,safeWorkdayChange} from './workday-actions.mjs';
+import {productionMonths,productionToggleDraft,safeWorkdayChange} from './workday-actions.mjs?v=2';
 
 const el=id=>document.getElementById(id);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -82,6 +82,7 @@ export function createWorkdayUI({getState,commitState,renderApp,notice}){
   commitState(outcome.state);
   renderApp();
   const message='Календарь обновлён. Изменено плановых курсов: '+outcome.affected.length+
+   ' · скорректировано дат капельниц ХТ: '+(outcome.chemoAdjusted||0)+
    ' · перенесено невыданных анализов перед ХТ: '+outcome.aligned+'.';
   const warning=outcome.warnings.length?
    ' Внимание: ранее выданные направления не перенесены. Проверь их даты вручную.':'';

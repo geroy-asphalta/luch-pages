@@ -973,6 +973,33 @@ main{padding-top:16px}
  .calendar-note-shortcut{display:none}
 }
 
+/* Chemotherapy series rescheduling: confirmed administrative plan, never a
+   medical order or a record that an infusion was actually administered. */
+.chemo-change-dialog{width:min(760px,calc(100vw - 24px))}
+.chemo-change-info{font-size:12px;line-height:1.5;color:#355367;margin:14px 0}
+.chemo-change-info p{margin:7px 0 0;color:#738a98}
+.chemo-change-field{display:flex;flex-direction:column;gap:6px;margin:12px 0;color:#526d7e;font-size:12px;font-weight:700}
+.chemo-change-field input,.chemo-change-field textarea{width:100%;min-width:0;border:1px solid #d5e2e9;border-radius:9px;padding:10px;font:inherit;font-weight:450;background:#fff;color:#27475a}
+.chemo-change-field input{max-width:230px;min-height:40px}
+.chemo-change-preview{padding:12px;margin:14px 0;border:1px solid #e3ebf0;border-radius:10px;background:#f8fafb;font-size:12px;line-height:1.45}
+.chemo-change-subtitle{font-weight:700;color:#38586b;margin:0 0 9px}
+.chemo-change-table-wrap{max-height:270px;max-width:100%;overflow:auto}
+.chemo-change-table{border-collapse:collapse;min-width:530px;width:100%;font-size:11px}
+.chemo-change-table th,.chemo-change-table td{border-bottom:1px solid #e1e9ee;text-align:left;padding:9px;white-space:nowrap}
+.chemo-change-table th{background:#e9f1f5;color:#426277;position:sticky;top:0}
+.chemo-change-table td b{color:#26734f}
+.chemo-change-warnings p,.chemo-change-note{margin:8px 0;color:#795d3e}
+.chemo-change-error{color:#a94343;font-weight:700;margin:0}
+.chemo-change-agree{display:flex;gap:9px;align-items:flex-start;color:#526d7e;font-size:12px;line-height:1.45;margin:12px 0 16px}
+.chemo-change-agree input{flex:none;margin-top:3px}
+.calendar td.day.chemo-cancelled{box-shadow:inset 0 -2px 0 #b96d61}
+.calendar td.day .chemo-cancel-mark{position:absolute;top:3px;left:3px;background:#faeeeb;color:#ab554f;border:1px solid #dba7a1;border-radius:4px;font-size:16px;font-weight:850;line-height:1;padding:2px 3px;pointer-events:none}
+@media(max-width:700px){
+ .chemo-change-dialog{padding:14px}
+ .chemo-change-preview{padding:8px}
+ .chemo-change-table{font-size:10px}
+}
+
 
 /* Collapsible task history: date navigation and a separately expandable
    completed list keep the everyday widget compact. */

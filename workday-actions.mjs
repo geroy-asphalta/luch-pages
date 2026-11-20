@@ -2,7 +2,8 @@
 import {ruProductionDays} from './ru-production-calendar.mjs';
 import {calendarDay,productionDay,isWorkingDay,calendarDayDraft,calendarDayRemoveDraft} from './work-calendar.mjs';
 import {previewChanges,schedule,addDays} from './planner.mjs';
-import {migrateHltBloodDates,chemoWarningsFor} from './chemo-schedule.mjs';
+import {migrateHltBloodDates,chemoWarningsFor} from './chemo-schedule.mjs?v=2';
+import {reconcileChemoWorkdayDraft} from './chemo-change.mjs?v=2';
 
 export function productionMonths(year){
  const months=new Map();
@@ -37,7 +38,9 @@ export function productionToggleDraft(state,date){
 // Apply the same safety checks that the previous preview/confirmation path used.
 export function safeWorkdayChange(before,result,fromDate){
  if(result.error)return {error:result.error};
- const after=migrateHltBloodDates(result.state);
+ const adjustedChemo=reconcileChemoWorkdayDraft(result.state);
+ if(adjustedChemo.error)return {error:adjustedChemo.error};
+ const after=migrateHltBloodDates(adjustedChemo.state);
  for(const course of before.patients.filter(p=>['active','planned'].includes(p.status))){
   const completed=(before.breakdowns||[]).filter(b=>(b.completed||[]).includes(course.id));
   if(!completed.length)continue;
@@ -65,7 +68,7 @@ export function safeWorkdayChange(before,result,fromDate){
  const affected=previewChanges(before,after,fromDate);
  const aligned=(after.audit||[]).filter(a=>a.kind==='hlt-lab-align').length-
   (before.audit||[]).filter(a=>a.kind==='hlt-lab-align').length;
- const warnings=after.patients.filter(p=>p.chemo?.firstDate)
-  .flatMap(p=>chemoWarningsFor(after,p).filter(w=>w.includes('выдано')&&w.includes('перенос')));
- return {state:after,affected,aligned,warnings};
+ const warnings=[...adjustedChemo.warnings,...after.patients.filter(p=>p.chemo?.firstDate)
+  .flatMap(p=>chemoWarningsFor(after,p).filter(w=>w.includes('выдано')&&w.includes('перенос')))];
+ return {state:after,affected,aligned,warnings,chemoAdjusted:adjustedChemo.adjusted};
 }

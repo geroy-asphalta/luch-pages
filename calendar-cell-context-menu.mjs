@@ -1,6 +1,7 @@
 // Right-click actions for calendar session cells. Reuses the same intent helpers
 // as the toolbar; the controller never mutates treatment or laboratory data.
 import {labButtonIntent,issueButtonIntent,skipButtonIntent,calendarActionIcon} from './calendar-action-ui.mjs';
+import {chemoEventAt} from './chemo-change.mjs?v=2';
 
 const cellKey=cell=>cell.patientId+'|'+cell.date;
 const fromKeys=keys=>[...keys].map(key=>{
@@ -18,14 +19,24 @@ export function calendarCellContextSelection(selected,cell){
  return selected?.has(key)?new Set(selected):new Set([key]);
 }
 
-export function calendarCellContextActions(state,cells){
+export function calendarCellContextActions(state,cells,clickedCell=null){
  const skip=skipButtonIntent(state,cells);
  const lab=labButtonIntent(state,cells);
  const issue=issueButtonIntent(state,cells);
+ const infusion=clickedCell&&chemoEventAt(state,clickedCell.patientId,clickedCell.date);
+ const course=infusion&&(state.patients||[]).find(c=>c.id===infusion.patientId);
+ const active=course&&['active','planned'].includes(course.status)&&course.treatmentType==='ХЛТ'&&
+  !(state.people||[]).some(p=>p.id===course.personId&&p.archived);
+ const chemoActions=active?(infusion.status==='cancelled'?
+  [{id:'chemo-restore',label:'Восстановить капельницу…',title:'Восстановить плановое введение с подтверждением',disabled:false,icon:'↶'}]:[
+   {id:'chemo-move',label:'Перенести капельницу и следующие…',title:'Сдвинуть выбранное и все последующие введения с интервалом 7 дней',disabled:false,icon:'↗'},
+   {id:'chemo-cancel',label:'Отменить капельницу…',title:'Отменить выбранное введение; остальные даты не меняются',disabled:false,icon:'⊘'}
+  ]):[];
  return [
   {id:'skip',label:skip.label,title:skip.title,disabled:!cells.length||(lab.disabled&&issue.disabled),icon:calendarActionIcon('skip',skip.mode)},
   {id:'lab',label:lab.label,title:lab.title,disabled:lab.disabled,icon:calendarActionIcon('lab',lab.mode)},
-  {id:'issue',label:issue.label,title:issue.title,disabled:issue.disabled,icon:calendarActionIcon('issue',issue.mode)}
+  {id:'issue',label:issue.label,title:issue.title,disabled:issue.disabled,icon:calendarActionIcon('issue',issue.mode)},
+  ...chemoActions
  ];
 }
 
@@ -36,10 +47,11 @@ export function setupCalendarCellContextMenu({
 }){
  if(!calendar?.addEventListener||!menu?.addEventListener||!doc?.addEventListener||!win?.addEventListener)
   throw new Error('Не найдены элементы контекстного меню календаря.');
- let opened=false;
+ let opened=false,targetCell=null;
  function close(){
   if(!opened)return;
   opened=false;
+  targetCell=null;
   menu.classList.add('hidden');
   menu.innerHTML='';
  }
@@ -49,9 +61,10 @@ export function setupCalendarCellContextMenu({
   event.preventDefault();
   close();
   const cell={patientId:td.dataset.id,date:td.dataset.date};
+  targetCell=cell;
   const selected=calendarCellContextSelection(getSelected(),cell);
   onSelect(selected,cell);
-  const actions=calendarCellContextActions(getState(),fromKeys(selected));
+  const actions=calendarCellContextActions(getState(),fromKeys(selected),cell);
   const count=selected.size;
   menu.innerHTML='<div class="calendar-cell-menu-summary">'+
     (count===1?'Действия с ячейкой':'Выбрано ячеек: '+count)+'</div>'+
@@ -71,9 +84,10 @@ export function setupCalendarCellContextMenu({
   const button=event.target?.closest?.('button[data-calendar-cell-action]');
   if(!opened||!button||button.disabled)return;
   const which=button.dataset.calendarCellAction;
-  if(!['skip','lab','issue'].includes(which))return;
+  if(!['skip','lab','issue','chemo-move','chemo-cancel','chemo-restore'].includes(which))return;
+  const clicked=targetCell;
   close();
-  onAction(which); // Use the existing toolbar operation against the same selection.
+  onAction(which,clicked); // Use the existing toolbar operation against the same selection.
  });
  doc.addEventListener('pointerdown',event=>{
   if(opened&&!menu.contains(event.target))close();

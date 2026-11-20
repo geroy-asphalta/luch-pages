@@ -177,11 +177,17 @@ function chemoCourseMarkup(state,course){
  if(!chemo?.count)return '<p class="course-hint">ХЛТ · расписание введений ещё не задано.</p>';
  if(!chemo.firstDate)return '<p class="course-hint">ХЛТ · '+chemo.count+' введений. Ожидается дата начала ЛТ для первого ХТ.</p>';
  const dates=weeklyChemoDates(chemo.firstDate,chemo.count);
- const list=dates.map((date,i)=>{
-   const labDate=bloodDateBeforeChemo(date,state);
-   const event=state.events.find(e=>e.patientId===course.id&&e.type==='lab'&&e.date===labDate&&e.status!=='cancelled');
+ const list=dates.map((baseDate,i)=>{
+   const infusion=(state.events||[]).find(e=>e.patientId===course.id&&e.type==='chemo'&&e.source==='hlt'&&e.chemoIndex===i);
+   const date=infusion?.date||baseDate;
+   const linked=(state.events||[]).find(e=>e.patientId===course.id&&e.type==='lab'&&e.source==='hlt'&&e.chemoIndex===i);
+   const labDate=linked?.date||bloodDateBeforeChemo(date,state);
+   const event=(state.events||[]).find(e=>e.patientId===course.id&&e.type==='lab'&&e.date===labDate&&e.status!=='cancelled');
    const label=event?.status==='issued'?'направление выдано':event?.status==='todo'?'нужно оформить': 'не назначено';
-   return '<div class="hlt-plan-item"><b>Кровь '+datestr(labDate)+' → ХТ '+(i+1)+' · '+datestr(date)+'</b><span>Направление: '+esc(label)+'</span></div>';
+   const holidayInfo=infusion?.nominalDate&&infusion.nominalDate!==date?
+    ' · по 7-дневной схеме '+datestr(infusion.nominalDate)+' (перенос на рабочий день)':'';
+   const status=(infusion?.status==='cancelled'?' · отменено':infusion?.originalDate&&infusion.originalDate!==date?' · перенесено с '+datestr(infusion.originalDate):'')+holidayInfo;
+   return '<div class="hlt-plan-item"><b>Кровь '+datestr(labDate)+' → ХТ '+(i+1)+' · '+datestr(date)+esc(status)+'</b><span>Направление: '+esc(label)+'</span></div>';
  }).join('');
  return '<details class="hlt-plan"><summary>ХЛТ · '+chemo.count+' введений · первое '+datestr(chemo.firstDate)+'</summary>'+
    '<div class="hlt-plan-grid">'+list+'</div>'+ 
