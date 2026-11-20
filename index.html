@@ -21,6 +21,7 @@
 <link rel="stylesheet" href="./catalog-ui.css?v=3">
 <link rel="stylesheet" href="./theme-dark.css?v=1">
 <link rel="stylesheet" href="./glass-ui.css?v=2">
+<link rel="stylesheet" href="./mobile-week.css?v=1">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" type="image/svg+xml" href="./icon.svg">
 <title>ЛУЧ · Календарь</title>
@@ -85,6 +86,72 @@
  </div>
  </div>
 </div>
+<section id="mobile-patient-shell" class="mobile-only mobile-patient-shell" aria-label="Мобильный календарь пациентов">
+ <header class="mobile-patient-header">
+  <div><span class="mobile-eyebrow">ЛУЧ · Календарь отделения</span><h2 id="mobile-page-title">Пациенты</h2></div>
+  <div class="mobile-header-actions">
+   <button type="button" data-mobile-command="add" class="mobile-add-button" aria-label="Добавить пациента">＋</button>
+   <button type="button" data-mobile-tab-shortcut="tasks" class="mobile-header-tasks" aria-label="Задачи на сегодня"><span aria-hidden="true">☑</span><span id="mobile-task-count">0</span></button>
+  </div>
+ </header>
+ <div id="mobile-card-view">
+  <div class="mobile-search-row">
+   <label class="mobile-search-label" for="mobile-search"><span aria-hidden="true">⌕</span><input id="mobile-search" type="search" placeholder="Поиск пациента, ID, схемы…" autocomplete="off" aria-label="Поиск пациентов"></label>
+   <select id="mobile-filter" aria-label="Фильтр установок"><option value="">Все установки</option></select>
+  </div>
+  <div class="mobile-week-toolbar">
+   <div class="mobile-mode" role="group" aria-label="Режим мобильного календаря">
+    <button type="button" id="mobile-segment-today" data-mobile-command="today" aria-pressed="true">Сегодня</button>
+    <button type="button" id="mobile-segment-week" data-mobile-command="week" aria-pressed="false">Неделя</button>
+   </div>
+   <span id="mobile-patient-count" class="mobile-patient-count"></span>
+  </div>
+  <div class="mobile-week-navigation">
+   <button type="button" data-mobile-week-shift="-1" aria-label="Предыдущая неделя">‹</button>
+   <span id="mobile-week-range" aria-live="polite"></span>
+   <button type="button" data-mobile-week-shift="1" aria-label="Следующая неделя">›</button>
+   <label class="mobile-date-jump" for="mobile-week-date" title="Выбрать дату">▦<input type="date" id="mobile-week-date" aria-label="Дата для просмотра недели"></label>
+  </div>
+  <p class="mobile-mobile-hint">Нажми на день, чтобы выбрать его. Можно выбрать несколько дней и открыть действия.</p>
+  <div id="mobile-card-list" class="mobile-card-list" aria-live="off"></div>
+ </div>
+ <section id="mobile-task-view" class="mobile-secondary-screen" aria-label="Мои задачи" hidden>
+  <div class="mobile-task-navigation">
+   <button type="button" data-mobile-task-shift="-1" aria-label="Предыдущий день">‹</button>
+   <strong id="mobile-task-day"></strong>
+   <button type="button" data-mobile-task-shift="1" id="mobile-task-next" aria-label="Следующий день">›</button>
+  </div>
+  <div class="mobile-task-tools">
+   <label>Выбрать дату <input type="date" id="mobile-task-date" aria-label="Дата задач"></label>
+   <button type="button" id="mobile-task-today" data-mobile-command="tasks-today">Сегодня</button>
+  </div>
+  <div id="mobile-task-list" class="mobile-task-list"></div>
+ </section>
+ <section id="mobile-more-view" class="mobile-secondary-screen" aria-label="Другие разделы ЛУЧ" hidden>
+  <div class="mobile-more-group">
+   <h3>Рабочее пространство</h3>
+   <button type="button" data-mobile-section="ctv-catalog"><span>☰</span> Справочник CTV <span aria-hidden="true">›</span></button>
+   <button type="button" data-mobile-section="workdays"><span>▦</span> Рабочие дни и праздники <span aria-hidden="true">›</span></button>
+   <button type="button" data-mobile-section="maintenance"><span>⚒</span> ТО установок <span aria-hidden="true">›</span></button>
+   <button type="button" data-mobile-section="breakdowns"><span>⚠</span> Поломки аппаратов <span aria-hidden="true">›</span></button>
+   <button type="button" data-mobile-section="transfers"><span>⇄</span> Переводы пациентов <span aria-hidden="true">›</span></button>
+   <button type="button" data-mobile-section="journal"><span>◷</span> История действий <span aria-hidden="true">›</span></button>
+  </div>
+  <div class="mobile-more-group">
+   <h3>Инструменты</h3>
+   <button type="button" data-mobile-command="register"><span>♙</span> Все пациенты / архив <span aria-hidden="true">›</span></button>
+   <button type="button" data-mobile-command="export"><span>▤</span> Список выписок <span aria-hidden="true">›</span></button>
+   <button type="button" data-mobile-command="cloud"><span>☁</span> Синхронизация <span aria-hidden="true">›</span></button>
+   <button type="button" data-mobile-command="desktop"><span>▦</span> Полная таблица ПК <span aria-hidden="true">›</span></button>
+   <button type="button" data-mobile-command="reset"><span>↶</span> Сбросить демо-данные <span aria-hidden="true">›</span></button>
+  </div>
+ </section>
+ <div id="mobile-selection" class="mobile-selection" hidden>
+  <span id="mobile-selection-count">Выбрано: 0</span>
+  <button type="button" data-mobile-command="clear">Сбросить</button>
+  <button type="button" data-mobile-action-open class="mobile-selection-primary">Действия…</button>
+ </div>
+</section>
 <div class="scroll"><table id="calendar" class="calendar"><thead></thead><tbody></tbody></table></div>
 <div id="calendar-cell-menu" class="calendar-cell-context-menu hidden" role="menu" aria-label="Действия с сеансами и анализами"></div>
 </section>
@@ -353,6 +420,20 @@
  </div>
  <p class="cloud-explain">На втором устройстве подключись под тем же тестовым аккаунтом и нажми «Принять облачную версию». После этого изменения начнут приходить автоматически. Одновременные несовместимые правки не объединяются: при конфликте запись блокируется, локальная копия сохраняется.</p>
 </dialog>
+<nav id="mobile-bottom-nav" class="mobile-only mobile-bottom-nav" aria-label="Навигация по приложению">
+ <button type="button" data-mobile-tab="patients" class="is-current" aria-current="page"><span aria-hidden="true">♙</span>Пациенты</button>
+ <button type="button" data-mobile-tab="calendar"><span aria-hidden="true">▦</span>Календарь</button>
+ <button type="button" data-mobile-tab="tasks"><span aria-hidden="true">☑</span>Задачи <small id="mobile-tab-tasks-count"></small></button>
+ <button type="button" data-mobile-tab="more"><span aria-hidden="true">•••</span>Ещё</button>
+</nav>
+<button id="mobile-exit-desktop" type="button" class="mobile-only mobile-desktop-exit">← Вернуться к карточкам</button>
+<dialog id="mobile-actions-dialog" class="mobile-actions-dialog" aria-labelledby="mobile-actions-title">
+ <div class="mobile-action-grabber" aria-hidden="true"></div>
+ <div class="mobile-actions-head"><div><h2 id="mobile-actions-title">Действия с расписанием</h2><small id="mobile-actions-summary"></small></div>
+ <button type="button" data-mobile-actions-close aria-label="Закрыть действия">×</button></div>
+ <div id="mobile-actions-list" class="mobile-actions-list"></div>
+ <p class="mobile-actions-footnote">Изменения расписания не являются клиническим подтверждением проведения процедур.</p>
+</dialog>
 <div role="status" aria-live="polite" id="toast" class="toast"></div>
-<script type="module" src="./app.mjs?v=1.70"></script>
+<script type="module" src="./app.mjs?v=1.71"></script>
 </body></html>

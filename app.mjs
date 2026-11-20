@@ -36,6 +36,7 @@ import {createFirebaseDemoSync} from './firebase-demo-state-ui.mjs';
 import {setupDischargeTextReportUI} from './discharge-text-ui.mjs?v=3';
 import {setupThemeUI} from './theme-ui.mjs';
 import {setupGlassUI,isGlassSuccessNotice} from './glass-ui.mjs';
+import {createMobileWeekUI} from './mobile-week-ui.mjs?v=1';
 
 setupThemeUI();
 const glassUI=setupGlassUI();
@@ -58,7 +59,7 @@ let phoneExpanded=initialPhoneExpanded(localStorage,window.matchMedia('(max-widt
 const el=id=>document.getElementById(id);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const visibleCourse=p=>['active','planned'].includes(p.status)&&!state.people.find(x=>x.id===p.personId)?.archived;
-let cloudUI=null,inlineNotesUI=null,applyingRemoteState=false;
+let cloudUI=null,inlineNotesUI=null,mobileUI=null,applyingRemoteState=false;
 let taskPanelOpen=false,taskShowCompleted=false,taskViewDate=localToday(),taskLastToday=localToday();
 const save=()=>{state=captureTodayTaskHistoryDraft(state,localToday()).state;localStorage.setItem(store,JSON.stringify(state));cloudUI?.localChanged();};
 function notice(message){const t=el('toast');t.textContent=message;t.classList.toggle('glass-toast-success',isGlassSuccessNotice(message));t.classList.add('show');clearTimeout(notice.timer);notice.timer=setTimeout(()=>t.classList.remove('show'),2900);}
@@ -540,6 +541,7 @@ function setView(next){
  document.querySelectorAll('.nav').forEach(x=>x.classList.toggle('active',x.dataset.view===next));
  glassUI.syncNavigation();
  document.querySelectorAll('[data-panel]').forEach(x=>x.classList.toggle('hidden',x.dataset.panel!==next));
+ mobileUI?.syncView(next);
  el('title').textContent=({calendar:'Пациенты','ctv-catalog':'Справочник CTV',workdays:'Рабочие дни и праздники',maintenance:'Техническое обслуживание',journal:'История действий',breakdowns:'Поломки аппаратов',transfers:'Переводы пациентов'})[next];
 }
 function showCurrentWeek(){
@@ -562,7 +564,7 @@ function render(){
  renderStats();renderCalendar();renderActionButtons();renderPatients();catalogUI.render();workdayUI.render();renderMaintenance();operations.renderBreakdowns();operations.renderTransfers();renderJournal();setView(view);maybeAskDischarge();
 }
 MACHINES.forEach(m=>{
- const o=document.createElement('option');o.value=m;o.textContent=m;el('filter').append(o.cloneNode(true));el('maint-machine').append(o);
+ const o=document.createElement('option');o.value=m;o.textContent=m;el('filter').append(o.cloneNode(true));el('mobile-filter').append(o.cloneNode(true));el('maint-machine').append(o);
 });
 function onTodayTasksClick(event){
  const collapse=event.target.closest('[data-task-collapse]');
@@ -674,15 +676,7 @@ el('calendar').addEventListener('contextmenu',event=>{
 });
 setupPatientReordering({container:el('patient-list'),onMove:movePatient,getEnabled:()=>patientSort==='order',notice});
 setupPatientReordering({container:el('calendar'),onMove:movePatient,getEnabled:()=>patientSort==='order',notice});
-setupCalendarCellContextMenu({
- calendar:el('calendar'),menu:el('calendar-cell-menu'),
- getState:()=>state,getSelected:()=>selected,
- onSelect:(keys,cell)=>{
-  hideWeekPreview();
-  selected=keys;anchor=cellKey(cell.patientId,cell.date);
-  render();
- },
- onAction:(which,cell)=>{
+function handleCalendarContextAction(which,cell){
   if(which==='skip')buttonClick('skip');
   else if(which==='lab')applyLabAction();
   else if(which==='issue')issueWeekClick();
@@ -696,8 +690,40 @@ setupCalendarCellContextMenu({
     'Ручная отметка ХТ снята — учёт по календарю восстановлен');
   }
   else if(which.startsWith('chemo-'))chemoChangeUI.open(cell,which);
- }
+}
+setupCalendarCellContextMenu({
+ calendar:el('calendar'),menu:el('calendar-cell-menu'),
+ getState:()=>state,getSelected:()=>selected,
+ onSelect:(keys,cell)=>{
+  hideWeekPreview();
+  selected=keys;anchor=cellKey(cell.patientId,cell.date);
+  render();
+ },
+ onAction:handleCalendarContextAction
 });
+mobileUI=createMobileWeekUI({
+ root:el('mobile-patient-shell'),tabbar:el('mobile-bottom-nav'),
+ actionsDialog:el('mobile-actions-dialog'),
+ getState:()=>state,getRows:()=>visiblePatients(),getSelected:()=>selected,getFilter:()=>filter,
+ onFilter:value=>{hideWeekPreview();filter=value;el('filter').value=value;selected.clear();anchor=null;render();},
+ onSelect:(id,date,event)=>selectCell(id,date,event),
+ onPatient:personId=>patientUI.selectPerson(personId),
+ onAdd:()=>patientUI.createNew(),
+ onOpenRegister:()=>{cardDrawer.open();el('patient-card-register-toggle').click();},
+ onReset:()=>el('reset').click(),
+ onOpenExport:()=>el('discharge-text-open').click(),
+ onOpenCloud:()=>el('cloud-open').click(),
+ onOpenView:next=>setView(next),
+ onOpenDesktop:()=>setView('calendar'),
+ onClearSelection:()=>{selected.clear();anchor=null;hideWeekPreview();render();},
+ onAction:handleCalendarContextAction,
+ onToggleTask:(id,date)=>{
+  const outcome=toggleTodayTaskDraft(state,id,date);
+  if(outcome.changed){state=outcome.state;save();render();}
+  return outcome;
+ },onCopyDischarge:date=>void dischargeTextUI.copyNextWeek(date),onNotice:notice
+});
+el('mobile-exit-desktop').onclick=()=>mobileUI.exitDesktop();
 setupCalendarRangeSelection({
  calendar:el('calendar'),
  getPatients:()=>visiblePatients(),

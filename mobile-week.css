@@ -1,0 +1,380 @@
+/* LUCH iPhone / Card week. No selector affects the 27" desktop table.
+   Real treatment events are projected from the shared planner state. */
+.mobile-only{display:none}
+@media(max-width:700px){
+ :root{
+  --mobile-bg:#edf4f7;--mobile-surface:#ffffffee;--mobile-surface-2:#f6fafc;
+  --mobile-border:#d8e5ec;--mobile-text:#213a4b;--mobile-muted:#607c8e;
+  --mobile-accent:#167d73;--mobile-accent-soft:#e0f6ed;
+  --mobile-shadow:0 7px 23px rgba(28,59,76,.095);
+  --mobile-glass:rgba(248,252,253,.83)
+ }
+ html[data-theme="dark"]{
+  --mobile-bg:#151e28;--mobile-surface:#22313eee;--mobile-surface-2:#273b4b;
+  --mobile-border:#425d70;--mobile-text:#eef6fb;--mobile-muted:#b0c8d6;
+  --mobile-accent:#79d9c2;--mobile-accent-soft:#29574a;
+  --mobile-shadow:0 7px 23px rgba(0,0,0,.3);
+  --mobile-glass:rgba(34,51,64,.84)
+ }
+ body{background:var(--mobile-bg);min-height:100dvh;overflow-x:hidden}
+ body>.app,.app{min-height:100dvh}
+ .mobile-only{display:block}
+ .layout{display:block;min-height:calc(100dvh - 60px)}
+ .sidebar{display:none!important}
+ main{padding:0 0 calc(106px + env(safe-area-inset-bottom,0px));min-width:0}
+ .topbar{height:60px;min-height:60px;padding:0 14px;gap:10px}
+ .topbar .logo{margin-right:auto}
+ .topbar .mark{width:32px;height:32px;font-size:23px;border-radius:10px}
+ .topbar .logo b{font-size:18px}
+ .topbar .demo{font-size:8px;letter-spacing:0;padding:5px 7px;white-space:nowrap}
+ .topbar #reset{display:none}
+ .topbar #cloud-open{margin-left:0;min-width:38px;min-height:38px}
+ .topbar #theme-toggle{width:38px;height:38px}
+ .topbar .theme-menu{right:0}
+ .workspace[data-panel="calendar"]{
+  padding:0;border:0;border-radius:0;box-shadow:none;overflow:visible;background:transparent
+ }
+ .workspace[data-panel="calendar"]>.toolbar,
+ .workspace[data-panel="calendar"]>.scroll,
+ .workspace[data-panel="calendar"]>#calendar-cell-menu{display:none!important}
+ /* Original desktop table remains available for unusual operations,
+    while all data and click handlers are shared with mobile cards. */
+ body.mobile-desktop-table .workspace[data-panel="calendar"]{
+  padding:10px;background:var(--mobile-bg)
+ }
+ body.mobile-desktop-table .workspace[data-panel="calendar"]>.toolbar{
+  display:flex!important;background:var(--mobile-surface);border-radius:14px
+ }
+ body.mobile-desktop-table .workspace[data-panel="calendar"]>.scroll{display:block!important}
+ body.mobile-desktop-table .workspace[data-panel="calendar"]>#calendar-cell-menu:not(.hidden){display:block!important}
+ body.mobile-desktop-table #mobile-patient-shell{display:none!important}
+ #mobile-exit-desktop{display:none}
+ body.mobile-desktop-table #mobile-exit-desktop{
+  display:block;position:fixed;z-index:105;bottom:calc(82px + env(safe-area-inset-bottom,0px));
+  left:50%;transform:translateX(-50%);width:max-content;max-width:90vw;
+  background:#176f6a;color:white;border:1px solid #70b6a5;
+  border-radius:24px;padding:11px 17px;font-size:13px;font-weight:750;
+  box-shadow:0 12px 30px #112e39a0
+ }
+ .mobile-patient-shell{
+  padding:14px 13px 28px;max-width:560px;margin:0 auto;color:var(--mobile-text)
+ }
+ .mobile-patient-header{
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+  padding:4px 2px 16px
+ }
+ .mobile-eyebrow{font-size:10px;letter-spacing:.08em;font-weight:700;color:var(--mobile-muted)}
+ .mobile-patient-header h2{
+  font-size:29px;letter-spacing:-.9px;margin:4px 0 0;
+  font-weight:800;color:var(--mobile-text)
+ }
+ .mobile-header-actions{display:flex;align-items:center;gap:7px}
+ .mobile-header-actions button{
+  min-height:44px;border:1px solid var(--mobile-border);
+  background:var(--mobile-surface);color:var(--mobile-text);
+  box-shadow:var(--mobile-shadow);border-radius:15px;
+  font-size:13px;font-weight:750
+ }
+ .mobile-add-button{width:44px;font-size:25px!important;line-height:1}
+ .mobile-header-tasks{display:flex;align-items:center;gap:7px;padding:0 12px}
+ .mobile-header-tasks span:first-child{font-size:17px;color:var(--mobile-accent)}
+ #mobile-task-count{
+  display:grid;place-items:center;min-width:23px;height:23px;
+  padding:0 5px;border-radius:14px;color:var(--mobile-muted);background:var(--mobile-surface-2);font-variant-numeric:tabular-nums
+ }
+ #mobile-task-count.has-pending{background:#fff0f2;color:#ba3046}
+ html[data-theme="dark"] #mobile-task-count.has-pending{background:#573640;color:#ffd4dc}
+ .mobile-search-row{display:flex;align-items:center;gap:8px;margin-bottom:11px}
+ .mobile-search-label{
+  display:flex;align-items:center;flex:1;min-width:0;gap:9px;
+  padding:0 12px;height:46px;border:1px solid var(--mobile-border);
+  border-radius:15px;background:var(--mobile-surface);
+  box-shadow:var(--mobile-shadow);color:var(--mobile-muted)
+ }
+ .mobile-search-label span{font-size:23px}
+ .mobile-search-label input{
+  border:0!important;outline:0!important;background:transparent!important;
+  width:100%;min-width:0;color:var(--mobile-text);font-size:14px;box-shadow:none!important
+ }
+ .mobile-search-label input::placeholder{color:var(--mobile-muted)}
+ #mobile-filter{
+  max-width:124px;width:124px;height:46px;border-radius:14px;
+  border:1px solid var(--mobile-border);
+  padding:0 7px;background:var(--mobile-surface);
+  color:var(--mobile-text);font-size:11px;font-weight:700
+ }
+ .mobile-week-toolbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:12px 1px}
+ .mobile-mode{
+  display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:3px;
+  background:var(--mobile-surface-2);border:1px solid var(--mobile-border);
+  border-radius:14px;min-width:185px
+ }
+ .mobile-mode button{min-height:38px;padding:7px 14px;background:transparent;border:0;border-radius:11px;
+  font-size:12px;font-weight:700;color:var(--mobile-muted)}
+ .mobile-mode button[aria-pressed="true"]{color:var(--mobile-text);background:var(--mobile-surface);
+  box-shadow:0 2px 7px #182d3b20}
+ .mobile-patient-count{color:var(--mobile-muted);font-size:11px;white-space:nowrap}
+ .mobile-week-navigation{
+  display:flex;align-items:center;justify-content:space-between;gap:6px;
+  border:1px solid var(--mobile-border);border-radius:15px;
+  padding:5px 7px;background:var(--mobile-surface);box-shadow:var(--mobile-shadow);
+  margin-bottom:10px
+ }
+ .mobile-week-navigation>button,.mobile-date-jump{
+  display:grid;place-items:center;flex:none;
+  width:41px;height:41px;border-radius:12px;background:var(--mobile-surface-2);
+  border:1px solid var(--mobile-border);color:var(--mobile-text);
+  font-size:24px;font-weight:500;position:relative
+ }
+ .mobile-week-navigation>span{
+  flex:1;min-width:0;text-align:center;font-size:13px;font-weight:750;
+  font-variant-numeric:tabular-nums
+ }
+ .mobile-date-jump{font-size:19px;overflow:hidden}
+ .mobile-date-jump input{position:absolute;inset:0;opacity:0;width:100%;cursor:pointer}
+ .mobile-mobile-hint{font-size:10px;line-height:1.4;color:var(--mobile-muted);margin:9px 3px 12px}
+ .mobile-card-list{display:grid;gap:12px}
+ .mobile-patient-card{
+  background:var(--mobile-surface);border:1px solid var(--mobile-border);
+  box-shadow:var(--mobile-shadow);border-radius:20px;padding:14px 12px 12px;
+  min-width:0
+ }
+ .mobile-patient-name{
+  width:100%;display:flex;align-items:flex-start;justify-content:space-between;
+  gap:9px;min-height:38px;background:transparent;border:0;padding:0;
+  font-size:15px;font-weight:800;line-height:1.3;text-align:left;color:var(--mobile-text);
+  overflow-wrap:anywhere
+ }
+ .mobile-patient-name span:last-child{flex:none;font-size:23px;font-weight:400;line-height:1;color:var(--mobile-muted)}
+ .mobile-patient-details{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:4px 0 5px}
+ .mobile-patient-details span{
+  font-size:10px;font-weight:750;padding:3px 7px;border-radius:9px;
+  border:1px solid var(--mobile-border);color:var(--mobile-muted);background:var(--mobile-surface-2)
+ }
+ .mobile-patient-details .mobile-eln{
+  background:#d6f4db;border-color:#98d9a8;color:#226e40
+ }
+ .mobile-patient-details .mobile-hlt{
+  background:#e7ddfa;border-color:#c6a8ed;color:#65519c
+ }
+ .mobile-patient-details .mobile-patient-progress{color:var(--mobile-text)}
+ html[data-theme="dark"] .mobile-patient-details .mobile-eln{background:#2b573d;color:#b9f0c8;border-color:#437b55}
+ html[data-theme="dark"] .mobile-patient-details .mobile-hlt{background:#493a68;color:#d7c4ff;border-color:#68518d}
+ .mobile-patient-description{font-size:12px;color:var(--mobile-muted);margin-bottom:7px}
+ .mobile-patient-meta{
+  display:flex;justify-content:space-between;flex-wrap:wrap;align-items:center;
+  gap:6px;color:var(--mobile-muted);font-size:11px;margin-bottom:12px
+ }
+ .mobile-patient-meta>a{color:var(--mobile-accent);text-decoration:none;font-size:11px;font-weight:700;
+  min-height:30px;display:flex;align-items:center}
+ .mobile-patient-week{
+  display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;
+  border-radius:14px;overflow:visible
+ }
+ .mobile-date-cell{
+  display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:2px;
+  min-width:0;min-height:69px;padding:6px 1px 5px;border:1px solid var(--mobile-border);
+  border-radius:11px;background:var(--mobile-surface-2);
+  color:var(--mobile-text);font-size:10px;font-weight:750;position:relative;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation
+ }
+ .mobile-date-weekday{font-size:9px;font-weight:600;color:inherit;opacity:.85}
+ .mobile-date-day{font-size:9px;font-variant-numeric:tabular-nums}
+ .mobile-date-symbol{font-size:12px;font-weight:850;min-height:14px;line-height:1}
+ .mobile-date-secondary{
+  position:absolute;right:1px;bottom:1px;
+  border-radius:4px;background:#245d74;color:#fff;font-size:8px;padding:1px 2px
+ }
+ .mobile-date-cell.is-today{box-shadow:inset 0 0 0 1.5px #68b7ad}
+ .mobile-date-cell.is-selected{outline:2.5px solid #209fbc;outline-offset:1px;z-index:1}
+ .mobile-date-off,.mobile-date-weekend{background:#edeae1;color:#977e4a}
+ .mobile-date-session,.mobile-date-empty{background:var(--mobile-surface-2)}
+ .mobile-date-final{background:#cdf0dc;color:#246e48}
+ .mobile-date-maintenance{background:#ac6741;color:#fff}
+ .mobile-date-breakdown{background:#f3c9c2;color:#923e34}
+ .mobile-date-skip{background:#444d58;color:#fff}
+ .mobile-date-lab{background:#f3d4e0;color:#8e456c}
+ .mobile-date-issued{background:#e66b91;color:#fff}
+ .mobile-date-chemo{background:#c4e3f8;color:#285877}
+ .mobile-date-chemo-missed{background:#e9b4c1;color:#9a344f}
+ .mobile-date-lab-chemo{background:#dbc9f2;color:#61428f}
+ html[data-theme="dark"] .mobile-date-off,html[data-theme="dark"] .mobile-date-weekend{background:#544b38;color:#f2dfaf}
+ html[data-theme="dark"] .mobile-date-final{background:#2a6046;color:#c4f3db}
+ html[data-theme="dark"] .mobile-date-session,html[data-theme="dark"] .mobile-date-empty{background:#293b4a}
+ html[data-theme="dark"] .mobile-date-lab{background:#633a50;color:#ffd6e6}
+ html[data-theme="dark"] .mobile-date-issued{background:#7e3d58;color:#fff}
+ html[data-theme="dark"] .mobile-date-chemo{background:#2e5770;color:#d1efff}
+ html[data-theme="dark"] .mobile-date-chemo-missed{background:#754350;color:#ffd2dc}
+ html[data-theme="dark"] .mobile-date-lab-chemo{background:#57466e;color:#efddff}
+ html[data-theme="dark"] .mobile-date-skip{background:#4e515d;color:#fff}
+ html[data-theme="dark"] .mobile-date-breakdown{background:#713d38;color:#ffd9d0}
+ html[data-theme="dark"] .mobile-date-maintenance{background:#815437;color:#ffdfba}
+ .mobile-patient-note{
+  border-top:1px solid var(--mobile-border);margin:10px 0 0;padding-top:7px;
+  font-size:10px;color:var(--mobile-muted);line-height:1.4;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden
+ }
+ .mobile-empty,.mobile-hint{padding:25px 12px;border:1px dashed var(--mobile-border);
+  border-radius:16px;color:var(--mobile-muted);font-size:12px;text-align:center;line-height:1.5}
+ /* Touch-friendly native navigation. Only the floating chrome gets blurred. */
+ .mobile-bottom-nav{
+  position:fixed;bottom:max(7px,env(safe-area-inset-bottom,0px));left:50%;
+  transform:translateX(-50%);z-index:99;width:min(calc(100vw - 20px),540px);
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3px;
+  background:var(--mobile-glass);border:1px solid var(--mobile-border);
+  border-radius:24px;padding:7px;box-shadow:0 10px 34px #112e3b40;
+  -webkit-backdrop-filter:blur(15px);backdrop-filter:blur(15px)
+ }
+ .mobile-bottom-nav button{
+  display:flex;align-items:center;flex-direction:column;justify-content:center;
+  min-width:0;min-height:57px;gap:3px;border-radius:18px;padding:5px 2px;
+  background:transparent;border:0;color:var(--mobile-muted);
+  font-size:10px;font-weight:700;position:relative
+ }
+ .mobile-bottom-nav button>span{font-size:22px;line-height:1}
+ .mobile-bottom-nav button.is-current{
+  color:var(--mobile-accent);background:var(--mobile-accent-soft)
+ }
+ #mobile-tab-tasks-count{
+  position:absolute;top:2px;right:17%;
+  background:#b6384f;color:white;border-radius:50%;
+  min-width:16px;height:16px;display:grid;place-items:center;font-size:9px
+ }
+ #mobile-tab-tasks-count:empty{display:none}
+ .mobile-selection{
+  position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom,0px));
+  transform:translateX(-50%);z-index:101;
+  display:flex;align-items:center;gap:7px;width:min(calc(100vw - 28px),510px);
+  padding:9px 10px;background:var(--mobile-glass);border:1px solid var(--mobile-border);
+  border-radius:17px;box-shadow:0 12px 35px #142e4055;
+  -webkit-backdrop-filter:blur(15px);backdrop-filter:blur(15px);
+  color:var(--mobile-text);font-size:12px;font-weight:750
+ }
+ .mobile-selection[hidden]{display:none}
+ .mobile-selection>span{flex:1;white-space:nowrap}
+ .mobile-selection button{
+  min-height:43px;border:1px solid var(--mobile-border);
+  border-radius:12px;background:var(--mobile-surface);padding:8px 10px;
+  color:var(--mobile-text);font-size:12px;font-weight:750
+ }
+ .mobile-selection button.mobile-selection-primary{
+  background:#177a71;color:white;border-color:#177a71
+ }
+ .mobile-secondary-screen[hidden]{display:none}
+ .mobile-secondary-screen{display:grid;gap:12px;padding:4px 0 20px}
+ .mobile-more-group{
+  background:var(--mobile-surface);border:1px solid var(--mobile-border);
+  box-shadow:var(--mobile-shadow);border-radius:19px;overflow:hidden
+ }
+ .mobile-more-group h3{font-size:12px;padding:13px 16px;margin:0;color:var(--mobile-muted);
+  border-bottom:1px solid var(--mobile-border)}
+ .mobile-more-group>button{
+  display:flex;align-items:center;width:100%;gap:10px;min-height:52px;
+  padding:10px 15px;background:transparent;color:var(--mobile-text);
+  border:0;border-bottom:1px solid var(--mobile-border);font-size:13px;text-align:left
+ }
+ .mobile-more-group>button:last-child{border-bottom:0}
+ .mobile-more-group>button>span:first-child{width:23px;text-align:center;font-size:18px;color:var(--mobile-accent)}
+ .mobile-more-group>button>span:last-child{margin-left:auto;color:var(--mobile-muted)}
+ .mobile-task-navigation{display:flex;align-items:center;justify-content:space-between;gap:9px;
+  border-radius:16px;background:var(--mobile-surface);border:1px solid var(--mobile-border);padding:6px}
+ .mobile-task-navigation button{width:42px;height:42px;font-size:23px;border-radius:12px;
+  border:1px solid var(--mobile-border);background:var(--mobile-surface-2);color:var(--mobile-text)}
+ .mobile-task-navigation strong{flex:1;text-align:center;font-size:13px}
+ .mobile-task-tools{display:flex;align-items:center;gap:9px;justify-content:space-between}
+ .mobile-task-tools label{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--mobile-muted)}
+ .mobile-task-tools input,.mobile-task-tools button{
+  min-height:42px;border-radius:12px;background:var(--mobile-surface);
+  border:1px solid var(--mobile-border);color:var(--mobile-text);padding:6px 9px;font-size:12px
+ }
+ .mobile-task-list{display:grid;gap:8px}
+ .mobile-task-row{
+  display:flex;align-items:center;gap:11px;padding:10px 12px;min-height:60px;
+  background:var(--mobile-surface);border:1px solid var(--mobile-border);
+  border-radius:15px;font-size:13px
+ }
+ .mobile-task-row>button{
+  width:42px;height:42px;flex:none;border-radius:13px;
+  border:1px solid var(--mobile-border);background:var(--mobile-surface-2);
+  font-size:20px;color:var(--mobile-accent)
+ }
+ .mobile-task-row.is-done>button:not(.mobile-task-discharge-copy){background:var(--mobile-accent-soft)}
+ .mobile-task-row>button.mobile-task-discharge-copy{
+  background:var(--mobile-accent-soft);font-size:21px;color:var(--mobile-accent)
+ }
+ .mobile-task-row>span{flex:1}
+ .mobile-task-row.is-done>span{color:var(--mobile-muted);text-decoration:line-through}
+ .mobile-task-row a{color:var(--mobile-accent);text-decoration:none;font-size:22px;padding:8px}
+ .mobile-task-subtitle{font-size:13px;margin:12px 0 2px;color:var(--mobile-muted)}
+ /* The batch menu is a real iOS-style native dialog; it preserves focus and
+    the original intent handlers, including chemotherapy corrections. */
+ .mobile-actions-dialog{
+  position:fixed;inset:auto 0 0;width:100vw;max-width:100vw;
+  max-height:min(80dvh,780px);margin:0;padding:11px 14px calc(23px + env(safe-area-inset-bottom,0px));
+  overflow-y:auto;border:1px solid var(--mobile-border);border-bottom:0;
+  border-radius:25px 25px 0 0;background:var(--mobile-surface);color:var(--mobile-text);
+  box-shadow:0 -15px 45px #142d3b45
+ }
+ .mobile-actions-dialog::backdrop{background:rgba(13,31,42,.52)}
+ .mobile-action-grabber{width:37px;height:4px;border-radius:3px;margin:0 auto 18px;
+  background:var(--mobile-muted);opacity:.4}
+ .mobile-actions-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:15px}
+ .mobile-actions-head h2{font-size:17px;color:var(--mobile-text);margin:0 0 5px}
+ .mobile-actions-head small{font-size:11px;color:var(--mobile-muted)}
+ .mobile-actions-head button{width:39px;height:39px;border-radius:14px;
+  border:1px solid var(--mobile-border);background:var(--mobile-surface-2);
+  color:var(--mobile-text);font-size:23px}
+ .mobile-actions-list{display:grid;gap:7px}
+ .mobile-actions-list>button{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:left;
+  min-height:52px;border:1px solid var(--mobile-border);border-radius:14px;
+  background:var(--mobile-surface-2);color:var(--mobile-text);padding:10px 15px;font-weight:700;font-size:13px
+ }
+ .mobile-actions-list>button:disabled{opacity:.42}
+ .mobile-actions-footnote{color:var(--mobile-muted);font-size:10px;line-height:1.5;margin:14px 3px 0}
+ /* All existing functionality remains on other data-panels. */
+ .workspace[data-panel]:not([data-panel="calendar"]){
+  margin:12px 10px 0;border-radius:18px;overflow-x:auto
+ }
+ :is(.discharge-text-dialog,.issue-dialog,.discharge-dialog,.cloud-dialog,.chemo-change-dialog){
+  max-height:92dvh;overflow:auto;width:min(calc(100vw - 18px),620px);border-radius:22px;padding:15px
+ }
+ .toast{bottom:calc(98px + env(safe-area-inset-bottom,0px));left:12px;right:12px;
+  width:fit-content;max-width:calc(100vw - 24px);margin:auto}
+}
+@media(max-width:370px){
+ .mobile-patient-shell{padding-inline:8px}
+ .mobile-patient-card{padding:10px 8px}
+ .mobile-patient-week{gap:2px}
+ .mobile-date-cell{min-height:66px}
+ .mobile-search-row{gap:5px}
+ #mobile-filter{max-width:108px;width:108px}
+ .mobile-week-toolbar{gap:3px}
+ .mobile-mode{min-width:160px}
+}
+@media(prefers-reduced-transparency:reduce),(prefers-contrast:more),(forced-colors:active){
+ @media(max-width:700px){
+  .mobile-bottom-nav,.mobile-selection{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+   background:var(--mobile-surface)}
+  .mobile-patient-card{box-shadow:none}
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ @media(max-width:700px){
+  .mobile-bottom-nav,.mobile-patient-card,.mobile-date-cell{scroll-behavior:auto;animation:none!important;transition:none!important}
+ }
+}
+
+/* iOS Safari focuses fields without zooming the entire page. This does not
+   affect desktop/Windows and keeps the dynamic type layout fluid. */
+@supports (-webkit-touch-callout:none){
+ @media(max-width:700px){
+  input,select,textarea{font-size:16px!important}
+ }
+}
+@media(max-width:700px){
+ .mobile-bottom-nav button,.mobile-patient-name,.mobile-date-cell,
+ .mobile-actions-dialog button,.mobile-week-navigation button{
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation
+ }
+}
