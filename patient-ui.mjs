@@ -3,7 +3,7 @@ import {MACHINES,pretty,schedule,addDays} from './planner.mjs';
 import {ICD_C_GROUPS,ICD_C_FAVORITES,ICD_C_LOOKUP,ICD_C_GROUP_LOOKUP} from './clinical-dictionaries.mjs';
 import {schemesForDiagnosis,ctvSuggestion,ctvGroupFor,ctvConflict,schemeByName} from './ctv-logic.mjs';
 import {fieldText,zoneSummary,asDoseText,courseIsBreast} from './dose-zones.mjs';
-import {registerRows,registerStats} from './patient-register.mjs?v=2';
+import {registerRows,registerStats} from './patient-register.mjs?v=3';
 import {currentCtvName} from './ctv-display.mjs';
 import {notesColumnWidth} from './notes-column-width.mjs';
 import {courseProgress,localToday} from './course-progress.mjs';
@@ -191,17 +191,17 @@ function chemoCourseMarkup(state,course){
    const status=(infusion?.status==='cancelled'?' · отменено':infusion?.originalDate&&infusion.originalDate!==date?' · перенесено с '+datestr(infusion.originalDate):'')+holidayInfo;
    const outcome=chemoAdministrationState(infusion,localToday());
    const deliveryLabel={
-    confirmed:'Проведена (подтверждено вручную)',
-    assumed:'Учтена по календарю — факт не подтверждён',
+    confirmed:'Выполнена (подтверждено вручную)',
+    assumed:'Выполнена автоматически по календарю — факт не подтверждён',
     'not-given':'ХТ не проводилась',
     cancelled:'Запланированное введение отменено',
     planned:'Ожидается по плану'
    }[outcome]||'Статус требует проверки';
    return '<div class="hlt-plan-item"><b>Кровь '+datestr(labDate)+' → ХТ '+(i+1)+' · '+datestr(date)+esc(status)+'</b><span>Направление: '+esc(label)+'</span><span class="hlt-administration-status'+(outcome==='not-given'||outcome==='cancelled'?' hlt-admin-missed':'')+'">'+esc(deliveryLabel)+'</span></div>';
  }).join('');
- return '<details class="hlt-plan"><summary>ХЛТ · учтено '+summary.counted+' / '+summary.total+' введений · первое '+datestr(chemo.firstDate)+'</summary>'+
+ return '<details class="hlt-plan"><summary>ХЛТ · выполнено '+summary.completed+' / '+summary.total+' введений · первое '+datestr(chemo.firstDate)+'</summary>'+
    '<p class="hlt-administration-summary">Подтверждено вручную: '+summary.confirmed+
-   '; учтено по календарю без подтверждения: '+summary.assumed+
+   '; выполнено по календарю без подтверждения: '+summary.assumed+
    '; не проводилось: '+summary.notGiven+'; отменено по плану: '+summary.cancelled+
    '. Даты сами по себе не подтверждают фактическое проведение ХТ.</p>'+
    '<div class="hlt-plan-grid">'+list+'</div>'+ 
@@ -383,9 +383,9 @@ export function createPatientUI({getState,commitState,renderApp,notice,onDischar
            '<b>Досрочно завершён '+esc(datestr(c.earlyDischarge.date))+'.</b> '+c.earlyDischarge.elapsedByCalendar+' из '+c.earlyDischarge.totalAtDecision+' плановых фракций по датам. Причина: '+esc(EARLY_DISCHARGE_REASONS[c.earlyDischarge.reason]||'Другая')+
            (c.earlyDischarge.comment?' · '+esc(c.earlyDischarge.comment):'')+
            '. <span>Не является подтверждением фактического проведения фракций.</span>':
-         '<b>По календарю:</b> '+progress.elapsed+' из '+progress.total+' прошедших плановых сеансов'+ 
+         '<b>ЛТ выполнено:</b> '+progress.completed+' из '+progress.total+' фракций (по календарю: '+progress.calendarCompleted+', подтверждено отдельно: '+progress.explicit+')'+ 
            (c.dischargeReview?.decision==='yes'?' · выписка подтверждена':c.dischargeReview?.decision==='no'?' · выписка отложена':'')+
-           '. <span>Это оценка по датам, а не медицинское подтверждение выполнения.</span>';
+           '. <span>Автоматический учёт не заменяет подтверждения фактического проведения.</span>';
        })()+'</div>'+
        '<div class="course-facts"><span><b>Ds:</b> '+esc(c.diagnosis||'—')+'</span><span><b>CTV:</b> '+esc(currentCtvName(getState(),c)||'—')+(c.boost?' · Буст':'')+'</span><span><b>Аппарат:</b> '+esc(c.machine)+'</span><span><b>Начало:</b> '+(c.start?datestr(c.start):'пока неизвестно')+'</span><span><b>Фракций:</b> '+c.total+'</span><span><b>РОД:</b> '+(fieldText(c,'rod')?esc(fieldText(c,'rod'))+' Гр':'не указана')+'</span><span><b>СОД:</b> '+(fieldText(c,'sod')?esc(fieldText(c,'sod'))+' Гр':'не указана')+'</span></div>'+ 
        (zoneSummary(c).length?'<div class="course-zone-details">'+zoneSummary(c).map(z=>'<span>'+esc(z.label)+': '+(z.rod==null?'—':asDoseText(z.rod))+' / '+(z.sod==null?'—':asDoseText(z.sod))+' Гр (РОД / СОД)</span>').join('')+'</div>':'')+

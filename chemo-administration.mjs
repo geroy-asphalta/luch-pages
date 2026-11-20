@@ -20,7 +20,7 @@ export function chemoAdministrationSummary(state,courseId,today){
  const course=(state.patients||[]).find(item=>item.id===courseId);
  const events=(state.events||[]).filter(event=>event.patientId===courseId&&isInfusion(event));
  const summary={total:Number(course?.chemo?.count)||events.length,scheduled:events.length,
-  counted:0,assumed:0,confirmed:0,notGiven:0,cancelled:0,upcoming:0};
+  counted:0,completed:0,assumed:0,confirmed:0,notGiven:0,cancelled:0,upcoming:0};
  for(const event of events){
   const kind=chemoAdministrationState(event,today);
   if(kind==='assumed'){summary.assumed++;summary.counted++;}
@@ -29,6 +29,9 @@ export function chemoAdministrationSummary(state,courseId,today){
   if(kind==='cancelled')summary.cancelled++;
   if(kind==='planned')summary.upcoming++;
  }
+ // Calendar-completed and explicitly confirmed administrations are both
+ // counted as completed for scheduling, never as verified clinical records.
+ summary.completed=summary.assumed+summary.confirmed;
  return summary;
 }
 

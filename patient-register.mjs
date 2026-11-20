@@ -41,7 +41,7 @@ function rowFor(state,person,course){
   machine:course?.machine||'',eln:person.eln||'',phone:person.phone||'',
   notes,treatmentType:course?.treatmentType||'',
   start:course?.start||'',status,
-  progress:progress?(course?.earlyDischarge?course.earlyDischarge.elapsedByCalendar+' / '+course.earlyDischarge.totalAtDecision+' (по датам)':course?.dischargeReview?.decision==='yes'?'Завершён':progress.elapsed+' / '+progress.total):'',
+  progress:progress?(course?.earlyDischarge?course.earlyDischarge.elapsedByCalendar+' / '+course.earlyDischarge.totalAtDecision+' (по датам)':course?.dischargeReview?.decision==='yes'?'Завершён':progress.completed+' / '+progress.total):'',
   discharge:course?.dischargeReview?.decision||'',
   total:Number.isFinite(Number(course?.total))?Number(course.total):null,
   rod:course?fieldText(course,'rod'):'',sod:course?fieldText(course,'sod'):'',

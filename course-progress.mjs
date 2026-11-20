@@ -8,25 +8,41 @@ export function localToday(now=new Date()){
  if(Number.isNaN(d.getTime()))return '';
  return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');
 }
+// A finished calendar day counts as an administratively completed session.
+// This projection MUST NOT set the clinical delivered flag. X/maintenance/
+// breakdown entries are not session events and therefore are never counted.
+export function radiationSessionCompletion(entry,date,today=localToday()){
+ if(entry?.kind!=='session')return {completed:false,source:null};
+ if(entry.delivered)return {completed:true,source:'confirmed'};
+ if(typeof date==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(date)&&
+    typeof today==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(today)&&date<today)
+  return {completed:true,source:'calendar'};
+ return {completed:false,source:null};
+}
 const activeCourse=c=>c&&['active','planned'].includes(c.status);
 export function courseProgress(state,course,today=localToday()){
- if(!course)return {total:0,elapsed:0,explicit:0,finalDate:null,finalToday:false,completedByCalendar:false};
+ if(!course)return {total:0,elapsed:0,completed:0,calendarCompleted:0,explicit:0,finalDate:null,finalToday:false,completedByCalendar:false};
  const total=Number(course.total)||0;
  if(!activeCourse(course)||!course.start){
-   return {total,elapsed:course.dischargeReview?.decision==='yes'?course.dischargeReview.elapsedAtDecision??total:0,
+   const elapsed=course.earlyDischarge?.elapsedByCalendar??
+    (course.dischargeReview?.decision==='yes'?course.dischargeReview.elapsedAtDecision??total:0);
+   return {total,elapsed,completed:elapsed,calendarCompleted:0,
     explicit:course.dischargeReview?.operatorConfirmedLastFraction?1:0,
     finalDate:course.dischargeReview?.finalDate||null,finalToday:false,completedByCalendar:false};
  }
  const until=addDays(course.start,700);
  const events=schedule(course,state,until);
- let elapsed=0,explicit=0,finalDate=null;
+ let elapsed=0,explicit=0,completed=0,calendarCompleted=0,finalDate=null;
  for(const [date,entry] of events){
    if(entry.kind!=='session')continue;
    if(date<today)elapsed++;
+   const completion=radiationSessionCompletion(entry,date,today);
+   if(completion.completed)completed++;
+   if(completion.source==='calendar')calendarCompleted++;
    if(entry.delivered)explicit++;
    if(entry.final)finalDate=date;
  }
- return {total,elapsed,explicit,finalDate,finalToday:finalDate===today,
+ return {total,elapsed,completed,calendarCompleted,explicit,finalDate,finalToday:finalDate===today,
   completedByCalendar:Boolean(finalDate&&finalDate<today)};
 }
 export function dischargeCandidates(state,today=localToday()){
