@@ -1,4 +1,4 @@
-// Compact ELN status for the calendar's patient-name column.
+// Compact ELN status for the calendar's ID cell (upper-right corner).
 // Presentation only; the saved patient value remains "Да", "Нет" or empty.
 export function calendarElnIndicator(value){
  const status=String(value??'').trim();

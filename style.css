@@ -776,14 +776,14 @@ body.calendar-range-moving .calendar tbody td.day{cursor:crosshair}
 }
 .calendar tr.calendar-no-course-row td.calendar-no-course-day:hover{box-shadow:none}
 
-/* Compact ELN status below the patient name replaces the separate 60px column.
-   Colors communicate yes/no, while an unset status is kept neutral. */
+/* ELN lives in the upper-right corner of the existing sticky ID cell.
+   Keep all three states and their tooltips, without adding a calendar column. */
 .calendar .name .calendar-patient-meta{display:flex;align-items:center;flex-wrap:nowrap;gap:2px 5px;min-width:0;max-width:100%;overflow:hidden;margin-top:3px;line-height:1.2}
 .calendar .name .calendar-patient-ctv{font-size:9px;flex:1 1 auto;min-width:0;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.calendar .name .calendar-eln-indicator{display:inline-flex;align-items:center;flex:none;border:1px solid transparent;border-radius:4px;padding:2px 4px;font-size:9px;font-weight:800;line-height:1.1;white-space:nowrap}
-.calendar .name .calendar-eln-yes{background:#fce3e3;color:#a43c43;border-color:#eab5b5}
-.calendar .name .calendar-eln-no{background:#def3e6;color:#26764c;border-color:#a9d9bb}
-.calendar .name .calendar-eln-unknown{background:#edf2f5;color:#647889;border-color:#d7e1e8}
+.calendar td.id .calendar-eln-indicator{position:absolute;top:2px;right:2px;display:inline-flex;align-items:center;z-index:1;border:1px solid transparent;border-radius:4px;padding:1px 2px;font-size:9px;font-weight:800;line-height:1.1;white-space:nowrap}
+.calendar td.id .calendar-eln-yes{background:#fce3e3;color:#a43c43;border-color:#eab5b5}
+.calendar td.id .calendar-eln-no{background:#def3e6;color:#26764c;border-color:#a9d9bb}
+.calendar td.id .calendar-eln-unknown{background:#edf2f5;color:#647889;border-color:#d7e1e8}
 
 /* Overview: active patient count + today's persistent administrative checklist. */
 .stats{display:flex;align-items:flex-start;justify-content:flex-start;gap:0}
@@ -1130,7 +1130,7 @@ main{padding-top:16px}
 }
 
 /* Patient name hierarchy (UI-only): keep the existing two-line calendar row,
-   frozen-column widths, CTV/ELN indicators and full-name tooltips intact. */
+   frozen-column widths, CTV and full-name tooltips intact. */
 .calendar .name .calendar-patient-primary .patient-open{
  font-family:inherit;font-size:13px;font-weight:700;line-height:1.2;
  letter-spacing:.005em;color:#29485a;
