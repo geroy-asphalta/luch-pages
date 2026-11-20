@@ -54,7 +54,7 @@ const el=id=>document.getElementById(id);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const visibleCourse=p=>['active','planned'].includes(p.status)&&!state.people.find(x=>x.id===p.personId)?.archived;
 let cloudUI=null,inlineNotesUI=null,applyingRemoteState=false;
-let taskPanelOpen=localStorage.getItem('luch-task-panel-expanded')!=='false',taskShowCompleted=false,taskViewDate=localToday(),taskLastToday=localToday();
+let taskPanelOpen=false,taskShowCompleted=false,taskViewDate=localToday(),taskLastToday=localToday();
 const save=()=>{state=captureTodayTaskHistoryDraft(state,localToday()).state;localStorage.setItem(store,JSON.stringify(state));cloudUI?.localChanged();};
 function notice(message){const t=el('toast');t.textContent=message;t.classList.add('show');clearTimeout(notice.timer);notice.timer=setTimeout(()=>t.classList.remove('show'),2900);}
 setupDischargeTextReportUI({getState:()=>state,notice});
@@ -182,6 +182,22 @@ function visiblePatients(){
  return state.patients.filter(p=>visibleCourse(p)&&(!filter||dates.some(d=>machineAt(p,state,d)===filter)))
   .sort((a,b)=>comparePatientEntries({...a,name:names.get(a.personId)||a.name},{...b,name:names.get(b.personId)||b.name},patientSort,positions));
 }
+// Position the single task list outside the clipped calendar workspace.
+function positionTodayTasksPopover(){
+ if(!taskPanelOpen||view!=='calendar')return;
+ const trigger=el('stats').querySelector('[data-task-collapse]');
+ const popup=el('today-tasks-popover');
+ if(!trigger||popup.classList.contains('hidden'))return;
+ const rect=trigger.getBoundingClientRect(),padding=10;
+ const width=Math.min(360,Math.max(0,window.innerWidth-2*padding));
+ const left=Math.max(padding,Math.min(rect.left+(rect.width-width)/2,window.innerWidth-width-padding));
+ const top=Math.max(padding,rect.bottom+8);
+ popup.style.left=left+'px';
+ popup.style.top=top+'px';
+ popup.style.width=width+'px';
+ popup.style.maxHeight=Math.max(120,window.innerHeight-top-padding)+'px';
+}
+
 function renderStats(){
  const today=localToday();
  if(taskLastToday!==today){
@@ -214,11 +230,14 @@ function renderStats(){
  el('calendar-active-count').textContent=String(active);
  el('calendar-add-patient').setAttribute('aria-label','Добавить пациента. Активных пациентов: '+active);
  const completedCount=completedTasks.length;
- const header='<div class="today-tasks-head">'
-  +'<button type="button" class="today-tasks-toggle" data-task-collapse aria-controls="today-tasks-body" aria-expanded="'+taskPanelOpen+'">'
-  +'<span class="today-tasks-chevron" aria-hidden="true">'+(taskPanelOpen?'▾':'▸')+'</span>'
-  +'<span class="today-tasks-title-group"><span id="today-tasks-title">'+(taskViewDate===today?'Задачи на сегодня':'Задачи за день')+'</span><small>'+esc(date)+'</small></span></button>'
-  +'<span class="today-tasks-count">'+(tasks.length?(pending?pending+' не выполнено':'Все выполнено'):'Нет задач')+'</span></div>';
+ // The toolbar badge ALWAYS counts today's open tasks, even while viewing history.
+ const todayPending=taskViewDate===today?pending:todayTasks(state,today).filter(task=>!task.done).length;
+ const header='<button type="button" class="today-tasks-toggle" data-task-collapse aria-controls="today-tasks-popover" aria-expanded="'+taskPanelOpen+'" aria-label="Задачи на сегодня. Невыполнено: '+todayPending+'">'
+  +'<svg class="today-tasks-icon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 4h11M9 10h11M9 16h11M3.5 4l1.5 1.5L7 3M3.5 10l1.5 1.5L7 9M3.5 16l1.5 1.5L7 15"/></svg>'
+  +'<span id="today-tasks-title" class="today-tasks-title-long">Задачи на сегодня</span>'
+  +'<span class="today-tasks-title-short" aria-hidden="true">Задачи</span>'
+  +'<span class="today-tasks-count'+(todayPending?' has-pending':'')+'" aria-hidden="true">'+todayPending+'</span>'
+  +'<span class="today-tasks-chevron" aria-hidden="true">'+(taskPanelOpen?'▴':'▾')+'</span></button>';
  const nav='<div class="today-tasks-nav" aria-label="Выбор даты задач">'
   +'<button type="button" data-task-shift="-1" aria-label="Предыдущий день" title="Предыдущий день">‹</button>'
   +'<input type="date" data-task-date-picker value="'+taskViewDate+'" max="'+today+'" aria-label="Дата задач">'
@@ -230,15 +249,23 @@ function renderStats(){
  const doneButton=completedCount?'<button type="button" class="today-tasks-completed-toggle" data-task-completed aria-expanded="'+taskShowCompleted+'">'
   +(taskShowCompleted?'Скрыть выполненные':'Показать выполненные')+' ('+completedCount+')'
   +' <span aria-hidden="true">'+(taskShowCompleted?'▴':'▾')+'</span></button>':'';
- const body='<div id="today-tasks-body" class="today-tasks-body">'+nav
+ const body='<div class="today-tasks-body">'+nav
   +(taskViewDate!==today&&!snapshot?'<p class="today-tasks-history-note">Для этой даты нет сохранённого снимка. Показаны задачи, которые удалось восстановить по текущему расписанию.</p>':'')
   +(pending?'<ul class="today-tasks-list">'+currentRows+'</ul>':
     '<p class="today-tasks-empty">'+(tasks.length?'Нет невыполненных задач':'На выбранную дату задач нет')+'</p>')
   +doneButton
   +(taskShowCompleted&&completedCount?'<ul class="today-tasks-list today-tasks-completed-list" aria-label="Выполненные задачи">'+completedRows+'</ul>':'')
   +'</div>';
- el('stats').innerHTML='<section class="today-tasks" aria-labelledby="today-tasks-title">'
-  +header+(taskPanelOpen?body:'<div id="today-tasks-body" class="today-tasks-body hidden"></div>')+'</section>';
+ el('stats').innerHTML='<section class="today-tasks" aria-labelledby="today-tasks-title">'+header+'</section>';
+ const popup=el('today-tasks-popover');
+ const previousScroll=popup.scrollTop;
+ popup.innerHTML=taskPanelOpen
+  ?'<div class="today-tasks-popover-head"><strong>'+(taskViewDate===today?'Задачи на сегодня':'Задачи за день')+'</strong><small>'+esc(date)+'</small>'
+    +'<span class="today-tasks-popover-count">'+(tasks.length?(pending?pending+' не выполнено':'Все выполнено'):'Нет задач')+'</span></div>'+body
+  :'';
+ popup.classList.toggle('hidden',!taskPanelOpen||view!=='calendar');
+ if(taskPanelOpen){popup.scrollTop=previousScroll;positionTodayTasksPopover();}
+
 }
 
 function renderCalendar(){
@@ -497,6 +524,12 @@ function renderJournal(){
 }
 function setView(next){
  view=next;
+ if(next!=='calendar'&&taskPanelOpen){
+  taskPanelOpen=false;
+  el('stats').querySelector('[data-task-collapse]')?.setAttribute('aria-expanded','false');
+ }
+ el('today-tasks-popover').classList.toggle('hidden',next!=='calendar'||!taskPanelOpen);
+ if(next==='calendar')positionTodayTasksPopover();
  document.querySelectorAll('.nav').forEach(x=>x.classList.toggle('active',x.dataset.view===next));
  document.querySelectorAll('[data-panel]').forEach(x=>x.classList.toggle('hidden',x.dataset.panel!==next));
  el('title').textContent=({calendar:'Пациенты','ctv-catalog':'Справочник CTV',workdays:'Рабочие дни и праздники',maintenance:'Техническое обслуживание',journal:'История действий',breakdowns:'Поломки аппаратов',transfers:'Переводы пациентов'})[next];
@@ -523,9 +556,14 @@ function render(){
 MACHINES.forEach(m=>{
  const o=document.createElement('option');o.value=m;o.textContent=m;el('filter').append(o.cloneNode(true));el('maint-machine').append(o);
 });
-el('stats').addEventListener('click',event=>{
+function onTodayTasksClick(event){
  const collapse=event.target.closest('[data-task-collapse]');
- if(collapse){taskPanelOpen=!taskPanelOpen;localStorage.setItem('luch-task-panel-expanded',String(taskPanelOpen));renderStats();return;}
+ if(collapse){
+  taskPanelOpen=!taskPanelOpen;
+  renderStats();
+  el('stats').querySelector('[data-task-collapse]')?.focus({preventScroll:true});
+  return;
+ }
  const showDone=event.target.closest('[data-task-completed]');
  if(showDone){taskShowCompleted=!taskShowCompleted;renderStats();return;}
  const back=event.target.closest('[data-task-today]');
@@ -543,15 +581,30 @@ el('stats').addEventListener('click',event=>{
  const outcome=toggleTodayTaskDraft(state,button.dataset.todayTaskId,taskViewDate);
  if(!outcome.changed){notice(outcome.error);renderStats();return;}
  state=outcome.state;save();renderStats();
-});
-el('stats').addEventListener('change',event=>{
+}
+function onTodayTasksChange(event){
  if(!event.target.matches('[data-task-date-picker]'))return;
  const date=event.target.value;
  if(/^\d{4}-\d{2}-\d{2}$/.test(date)&&date<=localToday()){
   taskViewDate=date;taskShowCompleted=false;
  }else notice('Можно открыть только сегодняшние и прошедшие даты.');
  renderStats();
+}
+for(const host of [el('stats'),el('today-tasks-popover')]){
+ host.addEventListener('click',onTodayTasksClick);
+ host.addEventListener('change',onTodayTasksChange);
+}
+document.addEventListener('pointerdown',event=>{
+ if(!taskPanelOpen||el('stats').contains(event.target)||el('today-tasks-popover').contains(event.target))return;
+ taskPanelOpen=false;renderStats();
 });
+document.addEventListener('keydown',event=>{
+ if(event.key!=='Escape'||!taskPanelOpen)return;
+ taskPanelOpen=false;renderStats();
+ el('stats').querySelector('[data-task-collapse]')?.focus({preventScroll:true});
+});
+window.addEventListener('resize',positionTodayTasksPopover);
+document.addEventListener('scroll',positionTodayTasksPopover,true);
 el('filter').onchange=e=>{hideWeekPreview();filter=e.target.value;selected.clear();render();};
 el('calendar-add-patient').onclick=()=>patientUI.createNew();
 document.querySelectorAll('.nav').forEach(b=>b.onclick=()=>b.dataset.view==='calendar'?showCurrentWeek():setView(b.dataset.view));

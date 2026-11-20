@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#172b38">
 <meta name="description" content="ЛУЧ: демонстрационный календарь лучевой терапии.">
-<link rel="stylesheet" href="./style.css?v=1.49">
+<link rel="stylesheet" href="./style.css?v=1.50">
 <link rel="stylesheet" href="./catalog-ui.css?v=3">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" type="image/svg+xml" href="./icon.svg">
@@ -34,7 +34,6 @@
 </aside>
 <main>
 <h1 id="title" class="sr-only">Пациенты</h1>
-<div class="stats" id="stats" data-panel="calendar"></div>
 <section data-panel="calendar" class="workspace">
 <div class="toolbar">
  <div class="filters"><button id="calendar-add-patient" type="button" class="action-with-icon" data-tooltip="Добавить пациента" aria-label="Добавить пациента">
@@ -42,6 +41,7 @@
  </button><button id="discharge-text-open" type="button" class="action-with-icon" data-tooltip="Список выписок на следующую неделю" aria-label="Сформировать список выписок на неделю">
   <span class="action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 9h8M8 13h8M8 17h5"/><path d="M14 3v3h5"/></svg></span>
  </button><select id="filter" aria-label="Установка"><option value="">Все установки</option></select><span class="count" id="selected-count">Выберите ячейки</span><button id="clear-selected" type="button" class="clear-selection hidden">Снять выделение</button></div>
+ <div class="stats" id="stats" data-panel="calendar"></div>
  <div class="calendar-toolbar-right">
   <div class="month-controls" role="group" aria-label="Навигация по месяцам календаря"><button id="prev" aria-label="Предыдущий месяц">‹</button><b id="month" aria-live="polite"></b><button id="next" aria-label="Следующий месяц">›</button><button id="reset-month" title="Вернуться к текущей неделе">Сегодня</button></div>
 <div class="actions">
@@ -63,6 +63,7 @@
 <div class="scroll"><table id="calendar" class="calendar"><thead></thead><tbody></tbody></table></div>
 <div id="calendar-cell-menu" class="calendar-cell-context-menu hidden" role="menu" aria-label="Действия с сеансами и анализами"></div>
 </section>
+<div id="today-tasks-popover" class="today-tasks-popover hidden" role="region" aria-label="Список задач"></div>
 
 <dialog id="patient-card-dialog" class="patient-card-drawer" aria-labelledby="patient-card-title">
  <div class="patient-card-top">
@@ -328,5 +329,5 @@
  <p class="cloud-explain">На втором устройстве подключись под тем же тестовым аккаунтом и нажми «Принять облачную версию». После этого изменения начнут приходить автоматически. Одновременные несовместимые правки не объединяются: при конфликте запись блокируется, локальная копия сохраняется.</p>
 </dialog>
 <div role="status" aria-live="polite" id="toast" class="toast"></div>
-<script type="module" src="./app.mjs?v=1.61"></script>
+<script type="module" src="./app.mjs?v=1.62"></script>
 </body></html>

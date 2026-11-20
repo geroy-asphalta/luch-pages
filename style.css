@@ -1166,3 +1166,69 @@ main{padding-top:16px}
  .calendar .name .calendar-patient-primary .patient-open{font-size:14px}
  .calendar .name .patient-name-remainder{font-size:13px}
 }
+
+/* Compact task trigger in the calendar toolbar. The list is mounted separately
+   after .workspace, never under its overflow:hidden clipping boundary. */
+.workspace[data-panel="calendar"] .toolbar{align-items:center;column-gap:12px;row-gap:8px}
+.workspace[data-panel="calendar"] .toolbar > .filters{flex:0 1 auto;min-width:0}
+.workspace[data-panel="calendar"] .toolbar > #stats{
+ display:flex;align-items:center;justify-content:center;
+ flex:1 1 150px;min-width:0;margin:0
+}
+.workspace[data-panel="calendar"] .toolbar > .calendar-toolbar-right{margin-left:0}
+#stats .today-tasks{
+ width:auto;max-width:none;min-width:0;border:0;border-radius:0;
+ background:transparent;padding:0;box-shadow:none
+}
+#stats .today-tasks-toggle{
+ display:inline-flex;align-items:center;justify-content:center;gap:7px;
+ max-width:100%;height:40px;padding:7px 10px;border:1px solid #d8e4ec;
+ border-radius:9px;background:#f7fafc;color:#34586d;
+ font-size:12px;font-weight:700;white-space:nowrap;line-height:1;cursor:pointer
+}
+#stats .today-tasks-toggle:hover{background:#edf4f8;border-color:#bdd3df}
+#stats .today-tasks-toggle:focus-visible{outline:2px solid #3d91b8;outline-offset:2px}
+#stats .today-tasks-icon{display:block;flex:none;width:19px;height:19px}
+#stats .today-tasks-title-short{display:none}
+#stats .today-tasks-count{
+ display:inline-flex;align-items:center;justify-content:center;
+ min-width:23px;height:23px;padding:0 6px;flex:none;
+ border-radius:12px;background:#edf2f5;color:#658090;
+ font-size:12px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums
+}
+#stats .today-tasks-count.has-pending{
+ color:#b5283c;background:#fff0f2;border:1px solid #efc2cb
+}
+#stats .today-tasks-chevron{font-size:12px;line-height:1}
+#today-tasks-popover{
+ position:fixed;z-index:80;width:360px;max-width:calc(100vw - 20px);
+ overflow:auto;overscroll-behavior:contain;
+ border:1px solid #d6e5ec;border-radius:12px;background:#fff;
+ padding:13px 15px;box-shadow:0 12px 34px #193c4e2b
+}
+#today-tasks-popover .today-tasks-popover-head{
+ display:flex;align-items:center;gap:5px 9px;flex-wrap:wrap;
+ margin-bottom:12px;color:#284459
+}
+#today-tasks-popover .today-tasks-popover-head strong{font-size:13px;font-weight:800}
+#today-tasks-popover .today-tasks-popover-head small{font-size:10px;color:#869aa6}
+#today-tasks-popover .today-tasks-popover-count{
+ margin-left:auto;font-size:10px;color:#678497;
+ background:#f0f5f8;padding:5px 7px;border-radius:12px;font-weight:700
+}
+#today-tasks-popover .today-tasks-body{display:flex;flex-direction:column;gap:7px}
+#today-tasks-popover .today-tasks-list{max-height:min(220px,38vh)}
+@media(max-width:1300px){
+ #stats .today-tasks-title-long{display:none}
+ #stats .today-tasks-title-short{display:inline}
+}
+@media(max-width:900px){
+ .workspace[data-panel="calendar"] .toolbar > #stats{justify-content:flex-end}
+}
+@media(max-width:700px){
+ .workspace[data-panel="calendar"] .toolbar > #stats{flex:0 0 auto;min-width:0;margin-left:auto}
+ #stats .today-tasks-title-short,#stats .today-tasks-chevron{display:none}
+ #stats .today-tasks-toggle{height:46px;min-width:46px;padding:5px 7px;gap:4px}
+ #today-tasks-popover{padding:12px}
+ #today-tasks-popover .today-tasks-list{max-height:38vh}
+}
