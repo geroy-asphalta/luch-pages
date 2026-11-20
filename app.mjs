@@ -20,7 +20,7 @@ import {calendarPatientNameParts} from './calendar-patient-name.mjs?v=2';
 import {notesColumnWidth} from './notes-column-width.mjs';
 import {initialPhoneExpanded,savePhoneExpanded} from './calendar-phone-prefs.mjs';
 import {calendarTreatmentCellContent} from './calendar-event-icons.mjs?v=2';
-import {chemoAdministrationState,chemoAdministrationSummary,chemoAdministrationDraft} from './chemo-administration.mjs?v=2';
+import {chemoAdministrationState,chemoAdministrationDraft} from './chemo-administration.mjs?v=2';
 import {calendarMaintenanceCellContent} from './calendar-maintenance-icon.mjs';
 import {setupCalendarRangeSelection,calendarClickSelection} from './calendar-range-select.mjs?v=2';
 import {setupCalendarCellContextMenu} from './calendar-cell-context-menu.mjs?v=4';
@@ -289,18 +289,7 @@ function renderCalendar(){
    const plan=p.noCourse?new Map():schedule(p,state,until),contact=calendarContact(state,p);
    const phone=contact.phone?esc(contact.phone):'<span class="calendar-empty">—</span>';
    const ctvDisplay=p.noCourse?'':currentCtvName(state,p);
-   const radiationCounter=p.noCourse?null:courseProgress(state,p,localToday());
-   const radiationCounterMarkup=radiationCounter?'<span class="calendar-lt-counter" title="Выполнено ЛТ: '+radiationCounter.completed+' из '+radiationCounter.total+
-    ' · автоматически по календарю: '+radiationCounter.calendarCompleted+
-    ' · подтверждено отдельно: '+radiationCounter.explicit+
-    '">ЛТ '+radiationCounter.completed+'/'+radiationCounter.total+'</span>':'';
-   const chemoCounter=p.treatmentType==='ХЛТ'&&p.chemo?.count?chemoAdministrationSummary(state,p.id,localToday()):null;
-   const chemoCounterMarkup=chemoCounter?'<span class="calendar-chemo-counter" title="Выполнено ХТ: '+chemoCounter.completed+' из '+chemoCounter.total+
-    ' · вручную подтверждено: '+chemoCounter.confirmed+
-    ' · учтено только по календарю: '+chemoCounter.assumed+
-    ' · не проводилась: '+chemoCounter.notGiven+' · отменено по плану: '+chemoCounter.cancelled+
-    '">ХТ '+chemoCounter.completed+'/'+chemoCounter.total+'</span>':'';
-   const patientMeta='<small class="calendar-patient-meta">'+(p.noCourse?'<span>Без курса</span>':ctvDisplay?'<span class="calendar-patient-ctv" title="'+esc(ctvDisplay)+'">'+esc(ctvDisplay)+'</span>':'')+radiationCounterMarkup+chemoCounterMarkup+'</small>';
+   const patientMeta='<small class="calendar-patient-meta">'+(p.noCourse?'<span>Без курса</span>':ctvDisplay?'<span class="calendar-patient-ctv" title="'+esc(ctvDisplay)+'">'+esc(ctvDisplay)+'</span>':'')+'</small>';
    const notes=contact.notes?'<span class="calendar-note-value" title="'+esc(contact.notes)+'">'+esc(contact.notes)+'</span>':'<span class="calendar-empty">—</span>';
    const tds=dates.map(d=>{
      if(p.noCourse)return '<td class="calendar-no-course-day" title="Курс лечения пока не назначен"></td>';
