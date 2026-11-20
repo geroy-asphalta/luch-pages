@@ -1031,3 +1031,25 @@ main{padding-top:16px}
  .today-tasks-nav{gap:4px}
  .today-tasks-nav input{flex:1;min-width:112px}
 }
+
+/* Patient identity edits replace the card summary in situ. Course editors and
+   the new-patient form continue to use their separate lower panel. */
+.patient-detail-inline-form{min-width:0}
+.patient-detail-inline-form .patient-inline-name{flex:1 1 280px;min-width:0}
+.patient-detail-inline-form label{display:flex;flex-direction:column;gap:7px;min-width:0;font-size:11px;font-weight:650;color:#566d7c}
+.patient-detail-inline-form input,.patient-detail-inline-form select,.patient-detail-inline-form textarea{
+ width:100%;min-width:0;border:1px solid #dce6ec;border-radius:8px;
+ padding:9px 11px;background:#fff;color:#293f4f;font:inherit;font-size:12px
+}
+.patient-detail-inline-form .patient-inline-name input{font-size:17px;font-weight:750}
+.patient-detail-inline-form .patient-header-actions button.primary{background:#347c99;color:#fff;border-color:#347c99}
+.patient-detail-inline-form .patient-info-editing{align-items:start}
+.patient-detail-inline-form .patient-info-editing textarea{resize:vertical;min-height:60px;white-space:pre-wrap}
+.patient-detail-inline-form select.eln-select.eln-yes{background:#fce3e3;color:#a43c43;border-color:#eab5b5}
+.patient-detail-inline-form select.eln-select.eln-no{background:#def3e6;color:#26764c;border-color:#a9d9bb}
+.patient-detail-inline-form input[name="phone"]{font-variant-numeric:tabular-nums;letter-spacing:.02em}
+@media(max-width:700px){
+ .patient-detail-inline-form .patient-inline-name{flex-basis:100%}
+ .patient-detail-inline-form .patient-header-actions{width:100%}
+ .patient-detail-inline-form .patient-header-actions button{flex:1}
+}

@@ -206,7 +206,7 @@ function renderCtvOptions(form,group='',state=null){
  select.value=matching.some(x=>x.name===current)?current:'';
  return matching;
 }
-function wireCtv(form,{existing=false,getState=()=>null}={}){
+export function wireCtv(form,{existing=false,getState=()=>null}={}){
  const select=form.querySelector('#ctv-quick'),notice=form.querySelector('#ctv-dose-suggestion');
  const ctvField=form.elements.ctv,fracField=form.elements.total,rodField=form.elements.dose,sodField=form.elements.sod;
  const boost=form.elements.boost,boostWrap=form.querySelector('#ctv-boost-wrap');
@@ -248,16 +248,22 @@ function wireCtv(form,{existing=false,getState=()=>null}={}){
      '<small>Источник: '+esc(suggestion.source)+'. Параметры взяты из шаблона, проверь их перед сохранением; это не клиническое подтверждение дозы.</small>'+ 
      (suggestion.discrepancies?.length?'<small class="ctv-caution">Внимание: СОД отличается от РОД × фракции: '+esc(suggestion.discrepancies.join('; '))+'</small>':'')+
      (matches?'<span class="ctv-applied">Поля соответствуют шаблону</span>':
-       '<button id="ctv-apply-template" type="button">Применить параметры схемы</button>')+
+       '<small class="ctv-caution">Поля отличаются от шаблона. Чтобы заполнить их заново, выбери CTV в списке.</small>')+
      '</div>';
-   const button=form.querySelector('#ctv-apply-template');
-   if(button)button.onclick=()=>apply(suggestion);
  }
- boost.addEventListener('change',()=>showSuggestion(true));
+ boost.addEventListener('change',()=>{
+   const suggestion=ctvSuggestion(form.elements.diagnosis.value,ctvField.value,{boost:boost.checked,state:getState()});
+   if(suggestion&&!manualTouched)apply(suggestion);
+   else showSuggestion(false);
+ });
  select.onchange=()=>{
    if(!select.value)return;
    ctvField.value=select.value;
-   showSuggestion(true);
+   // Choosing a CTV explicitly fills the editor; changes reach storage only on Save.
+   // Existing courses are not modified merely by opening the editor.
+   const suggestion=ctvSuggestion(form.elements.diagnosis.value,ctvField.value,{boost:boost.checked,state:getState()});
+   if(suggestion){manualTouched=false;apply(suggestion);}
+   else showSuggestion(false);
  };
  ctvField.addEventListener('change',()=>{renderCtvOptions(form,ctvGroupFor(form.elements.diagnosis.value),getState());showSuggestion(true)});
  return {onDiagnosis(group){
@@ -345,11 +351,15 @@ export function createPatientUI({getState,commitState,renderApp,notice,onDischar
    el('patient-detail').classList.toggle('hidden',!p);
    if(!p){el('patient-detail').innerHTML='';return;}
    const cs=coursesFor(getState(),p.id).slice().sort((a,b)=>a.start.localeCompare(b.start));
-   el('patient-detail').innerHTML=
+   const personEditing=editor?.kind==='person-edit'&&editor.personId===p.id;
+   // Preserve unsaved inline fields if another part of the app re-renders.
+   if(personEditing&&el('patient-detail').querySelector?.('#patient-person-form'))return;
+   const patientOverview=
     '<div class="patient-header"><div><h3>'+esc(p.name)+'</h3><p>'+esc(p.id)+' '+(p.archived?'· В архиве':'· Карточка активна')+'</p></div><div class="patient-header-actions">'+
     '<button type="button" data-p-action="edit">Изменить данные</button>'+
     '<button type="button" data-p-action="archive">'+(p.archived?'Восстановить':'В архив')+'</button></div></div>'+
-    '<div class="patient-info"><span><b>ЭЛН:</b> '+elnBadge(p.eln)+'</span><span><b>Телефон:</b> '+esc(p.phone||'—')+'</span><span class="full"><b>Примечание:</b> '+esc(p.notes||'—')+'</span></div>'+
+    '<div class="patient-info"><span><b>ЭЛН:</b> '+elnBadge(p.eln)+'</span><span><b>Телефон:</b> '+esc(p.phone||'—')+'</span><span class="full"><b>Примечание:</b> '+esc(p.notes||'—')+'</span></div>';
+   el('patient-detail').innerHTML=(personEditing?personInlineForm(p):patientOverview)+
     '<div class="patient-courses-title"><h3>Курсы / этапы лечения</h3><button type="button" data-p-action="add-course" '+(p.archived?'disabled':'')+'>+ Новый курс</button></div>'+
     (cs.length?cs.map(c=>
        '<div class="course-card"><div class="course-heading"><div><b>'+esc(c.courseName)+'</b><small>'+esc(c.id)+'</small></div><span class="course-type">'+esc(c.treatmentType||'ЛТ')+'</span><span class="course-status">'+esc(stat(c))+'</span></div>'+
@@ -387,6 +397,21 @@ export function createPatientUI({getState,commitState,renderApp,notice,onDischar
     '<div class="patient-form-actions"><button type="submit" class="primary">Сохранить</button><button type="button" id="patient-edit-cancel">Отмена</button></div>'+
     '</form>';
  }
+ function personInlineForm(p){
+   const eln=p?.eln||'';
+   // Edit the existing summary area, never create a second form below courses.
+   return '<form id="patient-person-form" class="patient-detail-inline-form" aria-label="Редактирование данных пациента">'+
+    '<div class="patient-header"><div class="patient-inline-name">'+
+    '<label>ФИО (только вымышленные данные)<input name="name" value="'+esc(p.name)+'" required maxlength="100"></label>'+
+    '<p>'+esc(p.id)+' '+(p.archived?'· В архиве':'· Карточка активна')+'</p></div>'+
+    '<div class="patient-header-actions"><button type="submit" class="primary">Сохранить</button>'+
+    '<button type="button" id="patient-edit-cancel">Отмена</button></div></div>'+
+    '<div class="patient-info patient-info-editing">'+
+    '<label>ЭЛН<select name="eln" class="eln-select '+elnClass(eln)+'">'+opts([['','Не выбрано'],['Да','Да'],['Нет','Нет']],eln)+'</select></label>'+
+    '<label>Телефон<input name="phone" type="tel" inputmode="tel" autocomplete="off" placeholder="+7 (999) 123-45-67" value="'+esc(formatPhoneRU(p.phone||''))+'" maxlength="18"></label>'+
+    '<label class="full">Примечание<textarea name="notes" maxlength="500" rows="2">'+esc(p.notes||'')+'</textarea></label>'+
+    '</div></form>';
+ }
  function courseForm(c,person){
    const d=c||{courseName:'Курс '+(coursesFor(getState(),person.id).length+1),diagnosis:'',ctv:'',machine:'Halcyon-kV',start:'',total:20,dose:null,sod:null,displayDose:false,treatmentType:'ЛТ',status:'planned',notes:''};
    const dose=fieldText(d,'rod');
@@ -408,7 +433,7 @@ export function createPatientUI({getState,commitState,renderApp,notice,onDischar
     '<label>РОД, Гр <input name="dose" type="text" inputmode="decimal" maxlength="36" value="'+esc(dose)+'" placeholder="2,67 / 3,2"></label>'+
     '<label>СОД, Гр <input name="sod" type="text" inputmode="decimal" maxlength="36" value="'+esc(sod)+'" placeholder="40,05 / 48"></label>'+
     '<label class="patient-tt"><input name="displayDose" type="checkbox" '+(d.displayDose?'checked':'')+'> Показывать накопленную дозу вместо номера фракции</label>'+
-    '<label>Статус <select name="status">'+opts(Object.entries(COURSE_STATUSES).filter(([key])=>key!=='early_completed'),d.status)+'</select><small class="muted">«Ожидает начала» → «На лечении» автоматически с первой запланированной фракции (с учётом нерабочих дней). Завершение курса — отдельно.</small></label>'+
+    '<label>Статус <select name="status">'+opts(Object.entries(COURSE_STATUSES).filter(([key])=>key!=='early_completed'),d.status)+'</select></label>'+
     '<div id="chemo-fields" class="hlt-fields wide hidden"><h4>План введений ХТ</h4>'+
     '<label>Количество введений ХТ <input name="chemoCount" type="number" min="1" max="52" value="'+esc(d.chemo?.count||'')+'" placeholder="Укажи количество"></label>'+
     '<label id="chemo-manual-date" class="hidden">Дата первого введения ХТ (C50) <input name="chemoFirstDate" type="date" value="'+esc(d.chemo?.mode==='manual'?d.chemo.firstDate||'':'')+'"></label>'+
@@ -417,21 +442,32 @@ export function createPatientUI({getState,commitState,renderApp,notice,onDischar
     '<p class="muted wide">Все последующие введения — с интервалом в 7 дней от первого. Направление на кровь создаётся автоматически за один календарный день до каждой ХТ. Число введений задаёшь ты.</p>'+
     '</div>'+
     '<label class="wide">Примечания к курсу <textarea name="notes" maxlength="500" rows="3">'+esc(d.notes||'')+'</textarea></label>'+
-    '<p class="muted wide">При нескольких зонах РОД и СОД записываются через / в одинаковом порядке; сами зоны сохраняются отдельно. Для нового курса применяем выбранный шаблон, для существующего — только после нажатия «Применить параметры». Проверь назначение до сохранения.</p>'+
     '<div class="patient-hlt-note wide">Даты ХТ — административный план, а не подтверждение проведения или медицинское назначение. Перед сохранением проверь их и направления на анализы.</div>'+
-    '<div class="patient-form-actions wide"><button type="submit" class="primary">Предварительный просмотр</button><button type="button" id="patient-edit-cancel">Закрыть</button></div>'+
+    '<div class="patient-form-actions wide"><button type="submit" class="primary">Сохранить</button><button type="button" id="patient-edit-cancel">Закрыть</button></div>'+
     '</form>';
  }
  function edit(kind,courseId=null){
    const creating=kind==='person-create',s=getState(),p=creating?null:selected();
    if(!creating&&!p){notice('Сначала выбери пациента.');return;}
+   const wasPersonEditing=editor?.kind==='person-edit';
    closeEditor();
+   if(wasPersonEditing)detail();
    // Creating a new patient is independent of the currently selected card.
    // Hide that card and clear the row selection before showing the blank form.
    if(creating){selectedId=null;personRows();detail();}
    editor={kind,personId:creating?null:p.id,courseId:creating?null:courseId};
    const course=!creating&&courseId?s.patients.find(x=>x.id===courseId):null;
-   const html=creating?personForm(null):kind==='person-edit'?personForm(p):courseForm(course,p);
+   if(kind==='person-edit'){
+     detail();
+     const form=el('patient-person-form');
+     wirePatientFields(form);
+     form.onsubmit=submitPerson;
+     el('patient-edit-cancel').onclick=()=>{closeEditor();detail();};
+     form.elements.name?.focus?.();
+     el('patient-detail').scrollIntoView?.({block:'nearest',behavior:'smooth'});
+     return;
+   }
+   const html=creating?personForm(null):courseForm(course,p);
    el('patient-editor').innerHTML=html;
    el('patient-editor').classList.remove('hidden');
    el('patient-edit-cancel').onclick=closeEditor;
@@ -503,35 +539,35 @@ export function createPatientUI({getState,commitState,renderApp,notice,onDischar
  }
  function submitCourse(event){
    event.preventDefault();
+   if(!editor||!['course-create','course-edit'].includes(editor.kind))return;
    const form=event.currentTarget,data=Object.fromEntries(new FormData(form));
    data.displayDose=form.elements.displayDose.checked;
    data.boost=form.elements.boost.checked;
    data.chemoReanchor=form.elements.chemoReanchor.checked;
-   const s=getState(),result=editor.kind==='course-create'?createCourseDraft(s,editor.personId,data):updateCourseDraft(s,editor.courseId,data);
+   const state=getState();
+   const result=editor.kind==='course-create'?
+     createCourseDraft(state,editor.personId,data):updateCourseDraft(state,editor.courseId,data);
    if(result.error){notice(result.error);return;}
-   const before=s.patients.find(x=>x.id===result.entry.id);
-   const prev=previewCourse(s,result.state,result.entry.id);
-   const period=(arr)=>arr.length?datestr(arr[0])+' — '+datestr(arr.at(-1)):'нет плановых дат';
-   const allDays=afterCourse=>afterCourse.start?[...schedule(afterCourse,result.state,addDays(afterCourse.start,200))].filter(([,v])=>v.kind==='session').map(([d])=>d):[];
-   const myDays=new Set(allDays(result.entry));
-   const overlaps=result.state.patients.filter(c=>c.personId===result.entry.personId&&c.id!==result.entry.id&&['active','planned'].includes(c.status)).filter(c=>allDays(c).some(day=>myDays.has(day))).map(c=>c.courseName);
-   const details='<div class="course-preview"><p><b>'+esc(result.entry.courseName)+'</b> · '+esc(result.entry.treatmentType)+
-    ' · '+esc(result.entry.machine)+' · '+result.entry.total+' фракций'+(fieldText(result.entry,'sod')?' · СОД '+esc(fieldText(result.entry,'sod'))+' Гр':'')+'</p>'+ 
-    (zoneSummary(result.entry).length?'<p class="muted">'+zoneSummary(result.entry).map(z=>esc(z.label)+' — РОД '+asDoseText(z.rod)+' Гр, СОД '+asDoseText(z.sod)+' Гр').join('; ')+'</p>':'')+
-    '<p>Было: '+prev.old.length+' плановых сеансов ('+period(prev.old)+')</p>'+
-    '<p>Станет: '+prev.next.length+' плановых сеансов ('+period(prev.next)+')</p>'+ 
-    (!result.entry.start?'<p class="muted">Дата начала пока неизвестна. Курс сохранится без плановых дат до её указания.</p>':'')+
-    ((before&&before.machine!==result.entry.machine)?'<p class="safety-note">Смена аппарата в существующем курсе может затронуть план; для перевода с конкретной даты используй специальный раздел.</p>':'')+
-    (overlaps.length?'<p class="safety-note">У этого пациента есть совпадающие плановые даты с другими курсами: '+esc(overlaps.join(', '))+'. Проверь расписание вручную.</p>':'')+
-    (result.entry.treatmentType==='ХЛТ'?
-       '<div class="hlt-preview"><b>ХТ и кровь накануне</b>'+
-       (result.entry.chemo?.firstDate?weeklyChemoDates(result.entry.chemo.firstDate,result.entry.chemo.count).map((date,i)=>
-         '<p>Анализ '+datestr(bloodDateBeforeChemo(date,result.state))+' → введение №'+(i+1)+' · '+datestr(date)+'</p>').join(''):
-        '<p>Даты ожидают первого запланированного сеанса ЛТ.</p>')+
-       '</div>':'')+
-    (result.chemoWarnings?.length?'<div class="hlt-alert">'+result.chemoWarnings.map(w=>'<p>'+esc(w)+'</p>').join('')+'</div>':'')+
-    '</div>';
-   showPreview(result,editor.kind==='course-create'?'Добавить курс в карточку пациента?':'Подтвердить изменение курса и пересчёт календаря?',details,editor.personId);
+   // Keep the existing administrative overlap warnings, without requiring a
+   // second confirmation. Explicit Save is the only action that commits data.
+   const before=state.patients.find(c=>c.id===result.entry.id);
+   const plannedDays=c=>c.start?[...schedule(c,result.state,addDays(c.start,200))]
+     .filter(([,value])=>value.kind==='session').map(([date])=>date):[];
+   const newDates=new Set(plannedDays(result.entry));
+   const overlaps=result.state.patients
+     .filter(c=>c.personId===result.entry.personId&&c.id!==result.entry.id&&['active','planned'].includes(c.status))
+     .filter(c=>plannedDays(c).some(date=>newDates.has(date)))
+     .map(c=>c.courseName);
+   const warnings=[];
+   if(overlaps.length)warnings.push('Проверь совпадающие даты с курсами: '+overlaps.join(', '));
+   if(before&&before.machine!==result.entry.machine)warnings.push('При смене аппарата проверь расписание переводов');
+   if(result.chemoWarnings?.length)warnings.push('Проверь план ХТ и анализов: '+result.chemoWarnings.join('; '));
+   const personId=editor.personId;
+   closeEditor();
+   selectedId=personId;
+   commitState(result.state);
+   renderApp();
+   notice('Курс сохранён'+(warnings.length?'. '+warnings.join('. '):''));
  }
  function archivePerson(){
    const p=selected();if(!p)return;
