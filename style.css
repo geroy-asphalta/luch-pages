@@ -1128,3 +1128,24 @@ main{padding-top:16px}
  .patient-detail-inline-form .patient-header-actions{width:100%}
  .patient-detail-inline-form .patient-header-actions button{flex:1}
 }
+
+/* Patient name hierarchy (UI-only): keep the existing two-line calendar row,
+   frozen-column widths, CTV/ELN indicators and full-name tooltips intact. */
+.calendar .name .calendar-patient-primary .patient-open{
+ font-family:inherit;font-size:13px;font-weight:700;line-height:1.2;
+ letter-spacing:.005em;color:#29485a;
+}
+.calendar .name .patient-name-surname{font-weight:700;color:#29485a}
+.calendar .name .patient-name-remainder{
+ margin-left:.32em;font-size:12px;font-weight:500;letter-spacing:.005em;
+ color:#718697;
+}
+.calendar .name .patient-open:hover .patient-name-surname{color:#257eaf}
+@media(max-width:700px){
+ .calendar .name .calendar-patient-primary .patient-open{font-size:12px}
+ .calendar .name .patient-name-remainder{font-size:11px}
+}
+@media(min-width:1500px){
+ .calendar .name .calendar-patient-primary .patient-open{font-size:14px}
+ .calendar .name .patient-name-remainder{font-size:13px}
+}
