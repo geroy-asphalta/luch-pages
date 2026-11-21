@@ -697,9 +697,13 @@ body.calendar-range-moving .calendar tbody td.day{cursor:crosshair}
    notes offsets aligned with both normal and wide patient-name layouts. */
 .calendar th.calendar-phone,.calendar td.calendar-phone{
  width:126px;min-width:126px;max-width:126px;left:315px;
+ transition:width 280ms cubic-bezier(.22,.61,.36,1),
+  min-width 280ms cubic-bezier(.22,.61,.36,1),
+  max-width 280ms cubic-bezier(.22,.61,.36,1);
 }
 .calendar th.calendar-notes,.calendar td.calendar-notes{
  width:var(--notes-column-width,105px);min-width:var(--notes-column-width,105px);max-width:var(--notes-column-width,105px);left:441px;
+ transition:left 280ms cubic-bezier(.22,.61,.36,1);
 }
 .calendar td.calendar-phone,.calendar td.calendar-notes{
  text-align:left;font-size:10px;font-weight:500;color:#4d6171;
@@ -770,14 +774,49 @@ body.calendar-range-moving .calendar tbody td.day{cursor:crosshair}
 .calendar .calendar-maintenance-corner .calendar-maintenance-wrench{display:block;width:13px;height:13px}
 
 
-/* ELN and foldable phone: keep 46x42 px date cells and earlier clinical colors. */
-.calendar.calendar-phone-collapsed th.calendar-phone,.calendar.calendar-phone-collapsed td.calendar-phone{width:38px;min-width:38px;max-width:38px;padding-left:2px;padding-right:2px;text-align:center}
+/* Foldable fixed-width phone: the same column animates from 126px to 38px.
+   The chevron and handset remain mounted while the arrow turns left/right. */
+.calendar.calendar-phone-collapsed th.calendar-phone,.calendar.calendar-phone-collapsed td.calendar-phone{
+ width:38px;min-width:38px;max-width:38px;padding-left:2px;padding-right:2px;text-align:center
+}
 .calendar.calendar-phone-collapsed th.calendar-notes,.calendar.calendar-phone-collapsed td.calendar-notes{left:353px}
-.calendar-phone-toggle{display:inline-flex;align-items:center;justify-content:center;gap:5px;border:0;border-radius:5px;background:transparent;color:inherit;font:inherit;font-weight:800;cursor:pointer;padding:5px 2px;white-space:nowrap}
-.calendar-phone-toggle:hover,.calendar-phone-toggle:focus-visible{background:#e0edf3;outline:2px solid #84b6d0;outline-offset:0}
-.calendar-phone-icon{display:none;font-size:14px;font-weight:700;color:#567c90}
-.calendar.calendar-phone-collapsed .calendar-phone-icon{display:inline}
+.calendar-phone-toggle{
+ display:flex;align-items:center;justify-content:space-between;gap:2px;
+ width:100%;min-width:0;height:32px;padding:4px 2px;
+ border:0;border-radius:7px;background:transparent;color:inherit;
+ font:inherit;font-weight:800;cursor:pointer;white-space:nowrap;
+ transition:background-color 160ms ease,transform 120ms ease
+}
+.calendar-phone-toggle:hover,.calendar-phone-toggle:focus-visible{
+ background:#e0edf3;outline:2px solid #84b6d0;outline-offset:0
+}
+.calendar-phone-toggle:active{transform:scale(.94)}
+.calendar-phone-toggle-label{overflow:hidden;white-space:nowrap;text-overflow:clip}
+.calendar-phone-toggle .calendar-phone-handset{display:none}
+.calendar-phone-chevron{
+ flex:none;display:block;width:14px;height:14px;
+ transform:rotate(0deg);transition:transform 280ms cubic-bezier(.22,.61,.36,1)
+}
+.calendar.calendar-phone-collapsed .calendar-phone-toggle{
+ padding:4px 0;gap:1px;justify-content:center
+}
+.calendar.calendar-phone-collapsed .calendar-phone-toggle-label{display:none}
+.calendar.calendar-phone-collapsed .calendar-phone-toggle .calendar-phone-handset{
+ display:block;flex:none;width:14px;height:14px
+}
+.calendar.calendar-phone-collapsed .calendar-phone-chevron{transform:rotate(180deg)}
+.calendar-phone-icon{display:none;color:#567c90}
+.calendar.calendar-phone-collapsed .calendar-phone-icon{
+ display:flex;align-items:center;justify-content:center
+}
+.calendar-phone-icon .calendar-phone-handset{display:block;width:17px;height:17px}
 .calendar.calendar-phone-collapsed .calendar-phone-value{display:none}
+@media(prefers-reduced-motion:reduce){
+ .calendar th.calendar-phone,.calendar td.calendar-phone,
+ .calendar th.calendar-notes,.calendar td.calendar-notes,
+ .calendar-phone-toggle,.calendar-phone-chevron{transition:none!important}
+ .calendar-phone-toggle:active{transform:none}
+}
 @media(max-width:1200px){
  .calendar th.calendar-phone,.calendar td.calendar-phone,.calendar th.calendar-notes,.calendar td.calendar-notes{left:auto}
 }
