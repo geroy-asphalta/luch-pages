@@ -959,3 +959,103 @@ html[data-theme="dark"] .calendar-glass-hint{
   transition:none!important
  }
 }
+
+
+/* LUCH Glass event surfaces v3: preserve the exact semantic backgrounds.
+   Only colored calendar cells get a rounded, inset-painted surface;
+   regular empty cells and calendar spacing stay exactly as before. */
+:root{
+ --luch-panel-elevation:0 17px 42px rgba(31,66,91,.105),
+                        0 3px 12px rgba(33,73,93,.045),
+                        inset 0 1px 0 rgba(255,255,255,.84);
+ --luch-event-glint:rgba(255,255,255,.33);
+ --luch-event-edge:rgba(59,111,137,.075)
+}
+html[data-theme="dark"]{
+ --luch-panel-elevation:0 18px 42px rgba(0,0,0,.27),
+                        0 4px 13px rgba(0,0,0,.12),
+                        inset 0 1px 0 rgba(223,247,255,.075);
+ --luch-event-glint:rgba(255,255,255,.105);
+ --luch-event-edge:rgba(188,221,235,.11)
+}
+/* The existing workspace provides the one large outer glass panel. No
+   extra wrapper, gaps, widths, row height, sticky offsets or transforms. */
+.workspace[data-panel="calendar"]{
+ border-color:rgba(151,180,199,.22);
+ box-shadow:var(--luch-panel-elevation)
+}
+html[data-theme="dark"] .workspace[data-panel="calendar"]{
+ border-color:rgba(148,187,212,.17)
+}
+.workspace[data-panel="calendar"] .toolbar{
+ background-image:linear-gradient(170deg,rgba(255,255,255,.50),rgba(233,244,252,.17) 73%,transparent)
+}
+html[data-theme="dark"] .workspace[data-panel="calendar"] .toolbar{
+ background-image:linear-gradient(170deg,rgba(222,245,255,.055),transparent 79%)
+}
+/* Patient data remains an opaque *single band* above the scrolling date grid.
+   A consistent very soft top-to-bottom sheen is shared across all five cells. */
+.workspace[data-panel="calendar"] .calendar tbody td.sticky{
+ background-image:linear-gradient(180deg,rgba(255,255,255,.15),rgba(227,240,248,.08));
+}
+html[data-theme="dark"] .workspace[data-panel="calendar"] .calendar tbody td.sticky{
+ background-image:linear-gradient(180deg,rgba(223,247,255,.035),rgba(23,42,57,.025))
+}
+/* Rounded OUTER corners only — not separate rectangles around each name,
+   machine, phone or notes value. */
+.workspace[data-panel="calendar"] .calendar thead th.id.sticky{
+ border-top-left-radius:13px
+}
+.workspace[data-panel="calendar"] .calendar tbody tr:last-child > td.id.sticky{
+ border-bottom-left-radius:13px
+}
+@media(min-width:1201px){
+ .workspace[data-panel="calendar"] .calendar thead th.calendar-notes.sticky{
+  border-top-right-radius:13px
+ }
+ .workspace[data-panel="calendar"] .calendar tbody tr:last-child > td.calendar-notes.sticky{
+  border-bottom-right-radius:13px
+ }
+}
+@media(min-width:701px) and (max-width:1200px){
+ .workspace[data-panel="calendar"] .calendar thead th.machine.sticky{
+  border-top-right-radius:13px
+ }
+ .workspace[data-panel="calendar"] .calendar tbody tr:last-child > td.machine.sticky{
+  border-bottom-right-radius:13px
+ }
+}
+/* Inset only the statuses that already have meaningful color. With
+   background-clip:content-box the original CSS paint color is reused as-is;
+   nothing is recalculated or hardcoded for final/chemo/lab/maintenance/skip.
+   The rest of the date grid remains flat, so there are no 'holes'. */
+.workspace[data-panel="calendar"] .calendar tbody td.day:is(
+ .elapsed.session,.final,.skip,.maintenance,.breakdown,.lab,.issued,
+ .delivered,.maintenance-final,.has-lab-event,.has-chemo-event
+){
+ border-radius:9px;
+ background-clip:content-box
+}
+/* A faint light-catching lip makes the colored badges feel like independent
+   glass details rather than solid spreadsheet squares. This element is purely
+   decorative and never steals events, clicks or keyboard focus. */
+.workspace[data-panel="calendar"] .calendar tbody td.day:is(
+ .elapsed.session,.final,.skip,.maintenance,.breakdown,.lab,.issued,
+ .delivered,.maintenance-final,.has-lab-event,.has-chemo-event
+)::before{
+ content:"";
+ position:absolute;
+ inset:2px 2px 3px;
+ border:1px solid var(--luch-event-edge);
+ border-radius:7px;
+ pointer-events:none;
+ box-shadow:inset 0 1px 0 var(--luch-event-glint);
+}
+/* Today uses ::after for its uninterrupted column rim. We never change it.
+   Selected / hovered event cells retain the existing outline and row wash. */
+@media(prefers-contrast:more),(forced-colors:active){
+ .workspace[data-panel="calendar"] .calendar tbody td.day:is(
+  .elapsed.session,.final,.skip,.maintenance,.breakdown,.lab,.issued,
+  .delivered,.maintenance-final,.has-lab-event,.has-chemo-event
+ )::before{display:none}
+}
