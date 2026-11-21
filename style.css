@@ -693,12 +693,13 @@ body.calendar-range-moving .calendar tbody td.day{cursor:crosshair}
 
 
 /* Calendar patient contact fields: same source as the patient register.
-   On desktop they stay frozen; on a narrow screen they scroll with the dates. */
+   Standard +7 (999) 123-45-67 fits the 126px column. Keep the sticky
+   notes offsets aligned with both normal and wide patient-name layouts. */
 .calendar th.calendar-phone,.calendar td.calendar-phone{
- width:145px;min-width:145px;max-width:145px;left:315px;
+ width:126px;min-width:126px;max-width:126px;left:315px;
 }
 .calendar th.calendar-notes,.calendar td.calendar-notes{
- width:var(--notes-column-width,105px);min-width:var(--notes-column-width,105px);max-width:var(--notes-column-width,105px);left:460px;
+ width:var(--notes-column-width,105px);min-width:var(--notes-column-width,105px);max-width:var(--notes-column-width,105px);left:441px;
 }
 .calendar td.calendar-phone,.calendar td.calendar-notes{
  text-align:left;font-size:10px;font-weight:500;color:#4d6171;
@@ -961,7 +962,7 @@ main{padding-top:16px}
     machine, phone and notes offset in sync, even when phone is collapsed. */
  .calendar .machine{left:390px}
  .calendar th.calendar-phone,.calendar td.calendar-phone{left:480px}
- .calendar th.calendar-notes,.calendar td.calendar-notes{left:625px}
+ .calendar th.calendar-notes,.calendar td.calendar-notes{left:606px}
  .calendar.calendar-phone-collapsed th.calendar-notes,
  .calendar.calendar-phone-collapsed td.calendar-notes{left:518px}
 }
