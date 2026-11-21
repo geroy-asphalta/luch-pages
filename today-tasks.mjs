@@ -1,12 +1,55 @@
 // Administrative reminders for the local-only patient calendar.
 // A checkmark acknowledges a reminder; it never orders chemo or discharges a patient.
-import {addDays,weekBounds} from './planner.mjs';
-import {nextWorkingDay} from './work-calendar.mjs';
+import {weekBounds} from './planner.mjs';
+import {nextWorkingDay,priorWorkingDay} from './work-calendar.mjs';
 import {courseProgress} from './course-progress.mjs';
 import {phoneDigitsRU} from './patient-model.mjs';
 
 const eligible=(course,people)=>['active','planned'].includes(course?.status)&&!people.get(course.personId)?.archived;
 const surname=name=>String(name||'Пациент').trim().split(/\s+/)[0]||'Пациент';
+
+// Distinguish names only when DIFFERENT active people share a surname.
+// Multiple courses of the same person do not count as namesakes.
+const patientTaskLabels=(courses,people)=>{
+ const activeNames=new Map();
+ for(const course of courses){
+  if(activeNames.has(course.personId))continue;
+  activeNames.set(course.personId,String(people.get(course.personId)?.name||
+   course.name||'Пациент').trim().replace(/\s+/g,' '));
+ }
+ const groups=new Map();
+ for(const [id,full] of activeNames){
+  const key=surname(full).toLocaleLowerCase('ru-RU');
+  if(!groups.has(key))groups.set(key,[]);
+  groups.get(key).push({id,full});
+ }
+ const labels=new Map();
+ const shortName=full=>{
+  const words=full.split(/\s+/);
+  const initials=words.slice(1,3).map(word=>{
+   const letter=word.match(/\p{L}/u)?.[0];
+   return letter?letter.toLocaleUpperCase('ru-RU')+'.':'';
+  }).join('');
+  return surname(full)+(initials?' '+initials:'');
+ };
+ for(const group of groups.values()){
+  if(group.length===1){
+   labels.set(group[0].id,surname(group[0].full));
+   continue;
+  }
+  const initialsCount=new Map();
+  for(const item of group){
+   const key=shortName(item.full).toLocaleLowerCase('ru-RU');
+   initialsCount.set(key,(initialsCount.get(key)||0)+1);
+  }
+  for(const item of group){
+   const abbreviated=shortName(item.full);
+   labels.set(item.id,initialsCount.get(abbreviated.toLocaleLowerCase('ru-RU'))>1?
+    item.full:abbreviated);
+  }
+ }
+ return labels;
+};
 
 export function activePatientCount(state){
  const people=new Map((state.people||[]).map(person=>[person.id,person]));
@@ -16,8 +59,8 @@ export function activePatientCount(state){
 export function todayTaskCandidates(state,today){
  if(!/^\d{4}-\d{2}-\d{2}$/.test(String(today||'')))return [];
  const people=new Map((state.people||[]).map(person=>[person.id,person]));
- const tomorrow=addDays(today,1);
  const courses=(state.patients||[]).filter(course=>eligible(course,people));
+ const displayNames=patientTaskLabels(courses,people);
  const results=[];
  // One organizational reminder every Thursday, regardless of whether there
  // are currently patients due for discharge. Its date is stable in history.
@@ -32,11 +75,13 @@ export function todayTaskCandidates(state,today){
   const person=people.get(course.personId);
   const fullName=String(person?.name||course.name||'Пациент').trim();
   const name=surname(fullName);
-  if(courseProgress(state,course,today).finalDate===tomorrow){
+  const shownName=displayNames.get(course.personId)||name;
+  const finalDate=courseProgress(state,course,today).finalDate;
+  if(finalDate&&priorWorkingDay(state,finalDate)===today){
    results.push({
-    id:'discharge-prep:'+course.id+':'+tomorrow,kind:'discharge-prep',courseId:course.id,
+    id:'discharge-prep:'+course.id+':'+finalDate,kind:'discharge-prep',courseId:course.id,
     personId:course.personId,surname:name,fullName,
-    label:'Сделай выписку — '+name,phoneHref:null
+    label:'Сделай выписку — '+shownName,phoneHref:null
    });
   }
   // The call-and-schedule reminder is a setup task, not a daily reminder
@@ -51,7 +96,7 @@ export function todayTaskCandidates(state,today){
    results.push({
     id:'hlt-call:'+course.id,kind:'hlt-call',courseId:course.id,
     personId:course.personId,surname:name,fullName,
-    label:'Назначь ХТ — '+name+', и позвони ему',
+    label:'Назначь ХТ — '+shownName+', и позвони ему',
     phoneHref:digits.length===10?'+7'+digits:null
    });
   }
@@ -76,7 +121,7 @@ export function todayTaskCandidates(state,today){
   results.push({
    id:'lab-review:'+course.personId+':'+event.date,kind:'lab-review',
    courseId:course.id,personId:course.personId,surname:name,fullName,
-   label:'Посмотри анализы — '+name,phoneHref:null
+   label:'Посмотри анализы — '+(displayNames.get(course.personId)||name),phoneHref:null
   });
   seenPeople.add(course.personId);
  }
