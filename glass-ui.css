@@ -1007,3 +1007,43 @@ html[data-theme="dark"] .workspace[data-panel="calendar"] .calendar tbody td.sti
 }
 /* Today is drawn independently with ::after; hover, selection and every
    clinical status color remain managed by the existing cascade. */
+
+/* LUCH Glass brand: an exactly centered, font-independent eight-ray mark.
+   Use a fixed 40×40 SVG viewBox; four crossing paths form eight equal rays.
+   No animation: the clinical workspace header should stay calm and legible. */
+.topbar .logo .brand-glass-mark{
+ flex:0 0 39px;width:39px;height:39px;min-width:39px;min-height:39px;
+ display:grid;place-items:center;padding:0;line-height:0;font-size:0;
+ border:1px solid rgba(110,235,207,.57);border-radius:12px;
+ background:
+  radial-gradient(ellipse at 50% 98%,rgba(16,204,146,.24),transparent 66%),
+  linear-gradient(145deg,#226f68 0%,#164b52 53%,#103c3d 100%);
+ box-shadow:inset 0 1px 0 rgba(211,255,244,.19),
+            inset 0 -1px 0 rgba(16,69,69,.4),
+            0 0 12px rgba(39,193,160,.13);
+}
+.topbar .logo .brand-glass-mark .brand-rays{
+ display:block;width:29px;height:29px;flex:none;overflow:visible;
+ transform:none
+}
+.topbar .logo .brand-rays-glow{
+ opacity:.57;filter:blur(2px)
+}
+.topbar .logo .brand-rays-core{
+ filter:drop-shadow(0 0 1px rgba(116,255,218,.64))
+}
+html[data-theme="dark"] .topbar .logo .brand-glass-mark{
+ border-color:rgba(102,230,212,.54);
+ background:
+  radial-gradient(ellipse at 50% 95%,rgba(21,195,154,.23),transparent 66%),
+  linear-gradient(145deg,#20595d 0%,#123a47 53%,#102f38 100%);
+ box-shadow:inset 0 1px 0 rgba(194,251,241,.17),
+            0 0 12px rgba(32,173,158,.14)
+}
+@media(prefers-reduced-transparency:reduce),(forced-colors:active),(prefers-contrast:more){
+ .topbar .logo .brand-glass-mark{
+  background:#174a4a;border:1px solid currentColor;box-shadow:none
+ }
+ .topbar .logo .brand-rays-glow{display:none}
+ .topbar .logo .brand-rays-core{filter:none}
+}
