@@ -255,3 +255,138 @@ html[data-theme="dark"] #today-tasks-popover .today-task-discharge-copy{color:#9
 @media(prefers-reduced-motion:reduce){
  #today-tasks-popover .today-task-discharge-copy{transition:none!important}
 }
+
+/* Calendar machine selector · LUCH Glass. The real #filter select remains in the
+   DOM as the single value source; this floating layer only changes presentation. */
+.machine-filter-glass{display:inline-flex;position:relative;flex:none;min-width:150px;vertical-align:middle}
+.machine-filter-glass.is-enhanced #filter{
+ position:absolute!important;width:1px!important;height:1px!important;
+ padding:0!important;margin:0!important;opacity:0!important;
+ border:0!important;pointer-events:none!important;
+ clip-path:inset(50%);white-space:nowrap
+}
+.filters .machine-filter-glass .machine-filter-trigger{
+ display:flex;align-items:center;justify-content:space-between;gap:12px;
+ width:100%;min-width:150px;height:42px;padding:0 13px 0 15px;
+ border:1px solid var(--glass-stroke);border-radius:13px;
+ background:linear-gradient(150deg,var(--glass-top),transparent 85%),var(--glass-control);
+ box-shadow:var(--glass-shadow);color:#34586d;
+ font:inherit;font-size:12px;font-weight:650;line-height:1.2;
+ white-space:nowrap;cursor:pointer;
+ transition:border-color 210ms ease,box-shadow 210ms ease,
+            background-color 210ms ease,transform 180ms var(--glass-ease)
+}
+html[data-theme="dark"] .filters .machine-filter-glass .machine-filter-trigger{color:#e2f0f7}
+.filters .machine-filter-glass .machine-filter-trigger:focus-visible{
+ outline:2px solid var(--glass-focus);outline-offset:3px
+}
+.filters .machine-filter-glass .machine-filter-trigger:active{transform:scale(.985)}
+.machine-filter-glass .machine-filter-label{overflow:hidden;text-overflow:ellipsis}
+.machine-filter-glass .machine-filter-chevron{
+ display:grid;place-items:center;flex:none;width:19px;height:19px;
+ color:#62879a;transform:translateY(0) rotate(0deg);
+ transition:transform 230ms var(--glass-ease),color 160ms ease
+}
+html[data-theme="dark"] .machine-filter-glass .machine-filter-chevron{color:#b0d9eb}
+.machine-filter-glass[data-open="true"] .machine-filter-chevron{
+ transform:translateY(-2px) rotate(180deg);color:#2b94b3
+}
+html[data-theme="dark"] .machine-filter-glass[data-open="true"] .machine-filter-chevron{color:#9be4f1}
+@media(hover:hover) and (pointer:fine){
+ .filters .machine-filter-glass .machine-filter-trigger:hover{
+  border-color:var(--glass-stroke-hover);
+  box-shadow:var(--glass-shadow-hover);transform:translateY(-1px)
+ }
+}
+.filters .machine-filter-glass[data-open="true"] .machine-filter-trigger{
+ border-color:var(--glass-stroke-hover);
+ box-shadow:0 0 0 3px rgba(70,177,211,.13),var(--glass-shadow-hover);
+ background-color:var(--glass-control-hover)
+}
+/* Floating on <body> avoids clipping inside the workspace's overflow:hidden. */
+.machine-filter-menu{
+ --machine-filter-ink:#29475a;
+ --machine-filter-hover:rgba(85,156,192,.12);
+ --machine-filter-selected:rgba(75,170,194,.16);
+ --machine-filter-selected-mark:#207e97;
+ position:fixed;z-index:130;display:flex;flex-direction:column;gap:3px;
+ width:max-content;min-width:150px;padding:8px;
+ overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;
+ border:1px solid var(--glass-stroke);border-radius:17px;
+ background:var(--glass-floating);color:var(--machine-filter-ink);
+ box-shadow:0 17px 42px rgba(20,44,62,.23),inset 0 1px 0 var(--glass-top);
+ opacity:0;transform:translateY(-8px) scale(.975);pointer-events:none;
+ transform-origin:top center;
+ transition:opacity 190ms var(--glass-ease),transform 190ms var(--glass-ease),
+            border-color 200ms ease,box-shadow 200ms ease
+}
+.machine-filter-menu[hidden]{display:none!important}
+.machine-filter-menu[data-side="top"]{
+ transform:translateY(8px) scale(.975);transform-origin:bottom center
+}
+.machine-filter-menu[data-state="open"]{
+ opacity:1;transform:translateY(0) scale(1);pointer-events:auto
+}
+html[data-theme="dark"] .machine-filter-menu{
+ --machine-filter-ink:#e3f0f6;
+ --machine-filter-hover:rgba(131,194,219,.13);
+ --machine-filter-selected:rgba(100,190,216,.19);
+ --machine-filter-selected-mark:#a5ebf6;
+ box-shadow:0 20px 46px rgba(0,0,0,.53),inset 0 1px 0 var(--glass-top)
+}
+.machine-filter-menu .machine-filter-option{
+ position:relative;display:flex;align-items:center;justify-content:space-between;
+ gap:20px;min-height:43px;width:100%;padding:0 11px 0 13px;
+ border:1px solid transparent;border-radius:11px;
+ background:transparent;color:inherit;
+ font:inherit;font-size:12px;font-weight:600;text-align:left;
+ white-space:nowrap;cursor:pointer;
+ transition:background-color 150ms ease,border-color 150ms ease,transform 150ms ease
+}
+.machine-filter-menu .machine-filter-option:first-child{margin-bottom:3px}
+.machine-filter-menu .machine-filter-option[data-selected="true"]{
+ background:var(--machine-filter-selected);
+ border-color:rgba(83,170,196,.2);font-weight:750
+}
+.machine-filter-menu .machine-filter-option[data-selected="true"]::before{
+ content:"";position:absolute;left:2px;top:9px;bottom:9px;width:2px;
+ border-radius:2px;background:var(--machine-filter-selected-mark)
+}
+.machine-filter-menu .machine-filter-check{
+ display:grid;place-items:center;color:var(--machine-filter-selected-mark);
+ opacity:0;transform:scale(.7);
+ transition:opacity 150ms ease,transform 180ms var(--glass-ease)
+}
+.machine-filter-menu .machine-filter-option[data-selected="true"] .machine-filter-check{
+ opacity:1;transform:scale(1)
+}
+.machine-filter-menu .machine-filter-option:hover,
+.machine-filter-menu .machine-filter-option:focus-visible{
+ background:var(--machine-filter-hover);outline:none;border-color:var(--glass-stroke-hover)
+}
+.machine-filter-menu .machine-filter-option:active{transform:scale(.985)}
+@keyframes machine-filter-option-enter{
+ from{opacity:0;transform:translateY(-4px)}
+ to{opacity:1;transform:translateY(0)}
+}
+.machine-filter-menu[data-state="open"] .machine-filter-option{
+ animation:machine-filter-option-enter 205ms var(--glass-ease) both;
+ animation-delay:calc(var(--machine-filter-index) * 38ms)
+}
+@supports ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+ .machine-filter-menu{
+  -webkit-backdrop-filter:blur(15px) saturate(1.25);
+  backdrop-filter:blur(15px) saturate(1.25)
+ }
+}
+@media(prefers-reduced-transparency:reduce),(forced-colors:active),(prefers-contrast:more){
+ .machine-filter-menu{-webkit-backdrop-filter:none;backdrop-filter:none}
+ .filters .machine-filter-glass .machine-filter-trigger{background:var(--glass-control)}
+}
+@media(prefers-reduced-motion:reduce){
+ .filters .machine-filter-glass .machine-filter-trigger,
+ .machine-filter-glass .machine-filter-chevron,.machine-filter-menu,
+ .machine-filter-menu .machine-filter-option,.machine-filter-menu .machine-filter-check{
+  transition:none!important;animation:none!important
+ }
+}

@@ -37,6 +37,7 @@ import {setupDischargeTextReportUI} from './discharge-text-ui.mjs?v=3';
 import {setupThemeUI} from './theme-ui.mjs';
 import {setupGlassUI,isGlassSuccessNotice} from './glass-ui.mjs';
 import {createMobileWeekUI} from './mobile-week-ui.mjs?v=2';
+import {setupMachineFilterGlass} from './calendar-machine-filter-glass.mjs?v=1';
 
 setupThemeUI();
 const glassUI=setupGlassUI();
@@ -562,11 +563,14 @@ function render(){
   if(sync.changed){state=sync.state;save();}
  }
  const [y,m]=month.split('-');el('month').textContent=new Intl.DateTimeFormat('ru-RU',{month:'long',year:'numeric'}).format(new Date(Date.UTC(Number(y),Number(m)-1,1)));
+ machineFilterUI?.sync();
  renderStats();renderCalendar();renderActionButtons();renderPatients();catalogUI.render();workdayUI.render();renderMaintenance();operations.renderBreakdowns();operations.renderTransfers();renderJournal();setView(view);maybeAskDischarge();
 }
 MACHINES.forEach(m=>{
  const o=document.createElement('option');o.value=m;o.textContent=m;el('filter').append(o.cloneNode(true));el('mobile-filter').append(o.cloneNode(true));el('maint-machine').append(o);
 });
+const machineFilterUI=setupMachineFilterGlass(el('filter'));
+
 function onTodayTasksClick(event){
  const collapse=event.target.closest('[data-task-collapse]');
  if(collapse){
