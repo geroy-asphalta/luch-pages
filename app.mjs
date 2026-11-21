@@ -19,7 +19,7 @@ import {calendarElnIndicator} from './calendar-eln-indicator.mjs';
 import {calendarPatientNameParts} from './calendar-patient-name.mjs?v=2';
 import {notesColumnWidth} from './notes-column-width.mjs';
 import {initialPhoneExpanded,savePhoneExpanded} from './calendar-phone-prefs.mjs';
-import {calendarTreatmentCellContent} from './calendar-event-icons.mjs?v=3';
+import {calendarTreatmentCellContent} from './calendar-event-icons.mjs?v=4';
 import {chemoAdministrationState,chemoAdministrationDraft} from './chemo-administration.mjs?v=2';
 import {calendarMaintenanceCellContent} from './calendar-maintenance-icon.mjs';
 import {setupCalendarRangeSelection,calendarClickSelection} from './calendar-range-select.mjs?v=2';
@@ -36,7 +36,7 @@ import {createFirebaseDemoSync} from './firebase-demo-state-ui.mjs';
 import {setupDischargeTextReportUI} from './discharge-text-ui.mjs?v=3';
 import {setupThemeUI} from './theme-ui.mjs';
 import {setupGlassUI,isGlassSuccessNotice} from './glass-ui.mjs';
-import {createMobileWeekUI} from './mobile-week-ui.mjs?v=1';
+import {createMobileWeekUI} from './mobile-week-ui.mjs?v=2';
 
 setupThemeUI();
 const glassUI=setupGlassUI();

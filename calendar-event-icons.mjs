@@ -31,9 +31,9 @@ export const chemoInfusionMissedIcon=chemoInfusionIcon
 
 // One shared, presentation-only mark for a skipped RT fraction (desktop + iPhone).
 // The underlying planner still stores the original "Х" label.
-export const skippedFractionIcon='<svg class="calendar-skip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">'+
- '<circle cx="12" cy="12" r="8.2"/>'+
- '<path d="M9.2 9.2l5.6 5.6m0-5.6-5.6 5.6"/>'+
+export const skippedFractionIcon='<svg class="calendar-skip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">'+
+ '<circle cx="12" cy="12" r="9.5"/>'+
+ '<path d="M8.6 8.6l6.8 6.8m0-6.8-6.8 6.8"/>'+
  '</svg>';
 
 /**

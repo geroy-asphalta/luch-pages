@@ -743,15 +743,16 @@ body.calendar-range-moving .calendar tbody td.day{cursor:crosshair}
 .calendar td.day.has-lab-event.has-chemo-event:not(.issued):not(.final):not(.skip):not(.maintenance):not(.breakdown):not(.delivered){background:#f0e9f8}
 /* Compact 46×42 px date cells are shared by desktop and mobile. */
 
-/* White circle-X is the skip symbol in both themes. Keep the 46×42 cell. */
+/* Readable skip cross without changing the compact 46×42 px calendar cell.
+   The larger SVG geometry increases the visible ring, not only its outer box. */
 .calendar td.day.skip .calendar-skip-icon{
- display:block;width:16px;height:16px;margin:auto;color:#fff;flex:none
+ display:block;width:18px;height:18px;margin:auto;color:#fff;flex:none
 }
 .calendar td.day.skip.has-treatment-event .calendar-event-status-skip{
  display:flex;align-items:center;justify-content:center;bottom:1px;z-index:2
 }
 .calendar td.day.skip.has-treatment-event .calendar-event-status-skip .calendar-skip-icon{
- width:14px;height:14px
+ width:16px;height:16px
 }
 /* Keep a skipped session graphite even if lab/issued event classes coexist. */
 .calendar tbody td.day.skip{background:#48515c;color:#fff}

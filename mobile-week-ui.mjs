@@ -8,7 +8,7 @@ import {currentCtvName} from './ctv-display.mjs';
 import {courseProgress,localToday,radiationSessionCompletion} from './course-progress.mjs';
 import {tasksForDate,todayTasks} from './today-tasks.mjs';
 import {calendarCellContextActions} from './calendar-cell-context-menu.mjs';
-import {skippedFractionIcon} from './calendar-event-icons.mjs?v=3';
+import {skippedFractionIcon} from './calendar-event-icons.mjs?v=4';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const weekDays=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
