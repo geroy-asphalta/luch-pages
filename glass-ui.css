@@ -967,16 +967,12 @@ html[data-theme="dark"] .calendar-glass-hint{
 :root{
  --luch-panel-elevation:0 17px 42px rgba(31,66,91,.105),
                         0 3px 12px rgba(33,73,93,.045),
-                        inset 0 1px 0 rgba(255,255,255,.84);
- --luch-event-glint:rgba(255,255,255,.33);
- --luch-event-edge:rgba(59,111,137,.075)
+                        inset 0 1px 0 rgba(255,255,255,.84)
 }
 html[data-theme="dark"]{
  --luch-panel-elevation:0 18px 42px rgba(0,0,0,.27),
                         0 4px 13px rgba(0,0,0,.12),
-                        inset 0 1px 0 rgba(223,247,255,.075);
- --luch-event-glint:rgba(255,255,255,.105);
- --luch-event-edge:rgba(188,221,235,.11)
+                        inset 0 1px 0 rgba(223,247,255,.075)
 }
 /* The existing workspace provides the one large outer glass panel. No
    extra wrapper, gaps, widths, row height, sticky offsets or transforms. */
@@ -1025,37 +1021,16 @@ html[data-theme="dark"] .workspace[data-panel="calendar"] .calendar tbody td.sti
   border-bottom-right-radius:13px
  }
 }
-/* Inset only the statuses that already have meaningful color. With
-   background-clip:content-box the original CSS paint color is reused as-is;
-   nothing is recalculated or hardcoded for final/chemo/lab/maintenance/skip.
-   The rest of the date grid remains flat, so there are no 'holes'. */
+/* LUCH event surface correction: preserve the flat, continuous radiation
+   grid. Do NOT turn normal, elapsed, final, maintenance-final or delivered
+   radiation fractions into small cards. These keep their original CSS colors,
+   spacing and full-cell paint. Only exceptional events are softly rounded.
+   No content-box clipping or decorative ::before frames / white gutters. */
 .workspace[data-panel="calendar"] .calendar tbody td.day:is(
- .elapsed.session,.final,.skip,.maintenance,.breakdown,.lab,.issued,
- .delivered,.maintenance-final,.has-lab-event,.has-chemo-event
+ .skip,.maintenance,.breakdown,.lab,.issued,.has-lab-event,.has-chemo-event
 ){
- border-radius:9px;
- background-clip:content-box
+ border-radius:6px;
+ background-clip:border-box
 }
-/* A faint light-catching lip makes the colored badges feel like independent
-   glass details rather than solid spreadsheet squares. This element is purely
-   decorative and never steals events, clicks or keyboard focus. */
-.workspace[data-panel="calendar"] .calendar tbody td.day:is(
- .elapsed.session,.final,.skip,.maintenance,.breakdown,.lab,.issued,
- .delivered,.maintenance-final,.has-lab-event,.has-chemo-event
-)::before{
- content:"";
- position:absolute;
- inset:2px 2px 3px;
- border:1px solid var(--luch-event-edge);
- border-radius:7px;
- pointer-events:none;
- box-shadow:inset 0 1px 0 var(--luch-event-glint);
-}
-/* Today uses ::after for its uninterrupted column rim. We never change it.
-   Selected / hovered event cells retain the existing outline and row wash. */
-@media(prefers-contrast:more),(forced-colors:active){
- .workspace[data-panel="calendar"] .calendar tbody td.day:is(
-  .elapsed.session,.final,.skip,.maintenance,.breakdown,.lab,.issued,
-  .delivered,.maintenance-final,.has-lab-event,.has-chemo-event
- )::before{display:none}
-}
+/* Today is drawn independently with ::after; hover, selection and every
+   clinical status color remain managed by the existing cascade. */
