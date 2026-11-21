@@ -22,12 +22,16 @@ function setupCalendarGlassHints(doc,win){
  hint.hidden=true;
  hint.setAttribute('role','tooltip');
  doc.body.appendChild(hint);
- let active=null,message='';
+ let active=null,message='',pending=null,pendingTimer=null;
+ const tooltipDelayMs=180;
  const getTarget=node=>{
   const target=node?.closest?.('[title],[data-glass-hint]');
   return target&&calendar.contains(target)?target:null;
  };
  function hide(){
+  if(pendingTimer!==null){win.clearTimeout(pendingTimer);pendingTimer=null;}
+  pending=null;
+  if(!active&&hint.hidden)return;
   if(active?.dataset?.glassHint===message){
    active.setAttribute('title',message);
    delete active.dataset.glassHint;
@@ -54,19 +58,29 @@ function setupCalendarGlassHints(doc,win){
   hint.style.left=at.left+'px';
   hint.style.top=at.top+'px';
  }
+ // Wait until the pointer has settled on a cell. Previously every pixel of
+ // movement read offsetWidth/offsetHeight (forced layout) and moved the hint.
+ // Now one measurement and one placement happen only after the hover delay.
  calendar.addEventListener('pointerover',event=>{
   if(event.pointerType!=='mouse'&&event.pointerType!=='pen')return;
   const target=getTarget(event.target);
   if(!target){hide();return;}
-  show(target);place(event.clientX,event.clientY);
- });
- calendar.addEventListener('pointermove',event=>{
-  if(!active)return;
-  if(!active.isConnected){hide();return;}
-  if(event.pointerType==='mouse'||event.pointerType==='pen')place(event.clientX,event.clientY);
+  if(active===target||pending===target)return;
+  hide();
+  if(!target.getAttribute('title'))return;
+  pending=target;
+  const x=event.clientX,y=event.clientY;
+  pendingTimer=win.setTimeout(()=>{
+   pendingTimer=null;
+   pending=null;
+   if(!target.isConnected||!calendar.contains(target))return;
+   show(target);
+   place(x,y);
+  },tooltipDelayMs);
  });
  calendar.addEventListener('pointerout',event=>{
-  if(getTarget(event.relatedTarget)===active)return;
+  const related=getTarget(event.relatedTarget);
+  if(related===active||related===pending)return;
   hide();
  });
  calendar.addEventListener('pointerdown',hide);
