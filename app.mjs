@@ -35,7 +35,7 @@ import {installImportedLabColors} from './demo-lab-colors.mjs?v=1';
 import {createFirebaseDemoSync} from './firebase-demo-state-ui.mjs';
 import {setupDischargeTextReportUI} from './discharge-text-ui.mjs?v=4';
 import {setupThemeUI} from './theme-ui.mjs';
-import {setupGlassUI,isGlassSuccessNotice} from './glass-ui.mjs?v=2';
+import {setupGlassUI,isGlassSuccessNotice} from './glass-ui.mjs?v=3';
 import {setupSidebarGlass} from './sidebar-glass.mjs?v=1';
 import {createMobileWeekUI} from './mobile-week-ui.mjs?v=2';
 import {setupMachineFilterGlass} from './calendar-machine-filter-glass.mjs?v=1';
@@ -58,6 +58,17 @@ state=syncCourseStartStatusesDraft(state,localToday()).state;
 // Persist safe migration of pending HLT blood dates; issued referrals are untouched.
 try { localStorage.setItem(store,JSON.stringify(state)); } catch {}
 let month=localToday().slice(0,7),view='calendar',selected=new Set(),anchor=null,filter='',patientSort='order';
+// Purely local visual focus, never persisted or synced to patient records.
+let highlightedCalendarPersonId=null;
+function syncCalendarPatientHighlight(){
+ const calendar=document.getElementById('calendar');
+ calendar.querySelectorAll('tbody tr[data-person-id]').forEach(row=>{
+  const focused=row.dataset.personId===highlightedCalendarPersonId;
+  row.classList.toggle('patient-row-active',focused);
+  if(focused)row.setAttribute('aria-selected','true');
+  else row.removeAttribute('aria-selected');
+ });
+}
 let phoneExpanded=initialPhoneExpanded(localStorage,window.matchMedia('(max-width:700px)').matches);
 const el=id=>document.getElementById(id);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -339,6 +350,7 @@ function renderCalendar(){
    const nameParts=calendarPatientNameParts(p.name);
    return '<tr data-person-id="'+esc(p.personId)+'" data-course-id="'+(p.noCourse?'':esc(p.id))+'"'+(p.noCourse?' class="calendar-no-course-row"':'')+'><td class="sticky id">'+esc(p.personId)+calendarElnIndicator(contact.eln)+'</td><td class="sticky name"><div class="calendar-patient-primary"><button type="button" class="patient-open" data-person-id="'+esc(p.personId)+'" title="'+esc(p.name)+'" aria-label="Открыть карточку пациента: '+esc(p.name)+'"><span class="patient-name-short" aria-hidden="true"><span class="patient-name-surname">'+esc(nameParts.surname)+'</span>'+(nameParts.compactRemainder?'<span class="patient-name-remainder">'+esc(nameParts.compactRemainder)+'</span>':'')+'</span><span class="patient-name-full" aria-hidden="true"><span class="patient-name-surname">'+esc(nameParts.surname)+'</span>'+(nameParts.fullRemainder?'<span class="patient-name-remainder">'+esc(nameParts.fullRemainder)+'</span>':'')+'</span></button>'+(p.treatmentType==='ХЛТ'?'<span class="type-tag">ХЛТ</span>':'')+'</div>'+patientMeta+'</td><td class="sticky machine">'+(p.noCourse?'<span class="calendar-empty">—</span>':machineAt(p,state,until)+(p.machine!==machineAt(p,state,until)?'<small>с '+p.machine+'</small>':''))+'</td><td class="sticky calendar-phone" title="'+esc(contact.phone)+'"><span class="calendar-phone-value">'+phone+'</span><span class="calendar-phone-icon" aria-hidden="true">'+(contact.phone?calendarPhoneHandsetIcon:'—')+'</span></td><td class="sticky calendar-notes"><button type="button" class="calendar-note-trigger" data-calendar-note-open title="'+esc(contact.notes||'Добавить примечание')+'" aria-label="Изменить примечание пациента: '+esc(p.name)+'">'+notes+'</button></td>'+tds+'<td class="calendar-tail" aria-hidden="true"></td></tr>';
  }).join('');
+ syncCalendarPatientHighlight();
  el('selected-count').textContent=selected.size?'Выбрано: '+selected.size:'Ничего не выбрано';
  el('clear-selected').classList.toggle('hidden',!selected.size);
  if(scroller)scroller.scrollLeft=previousLeft;
@@ -673,6 +685,18 @@ el('maint-form').onsubmit=e=>{
 };
 operations.setup();
 patientUI.setup();
+// Click patient data on the frozen side to highlight that person's entire
+// schedule. Repeat click clears it. Date-cell selection remains independent;
+// one delegated handler survives redraws and never runs on pointer movement.
+el('calendar').addEventListener('click',event=>{
+ const cell=event.target.closest('td.id,td.name,td.machine,td.calendar-phone');
+ const row=cell?.closest('tr[data-person-id]');
+ if(!row||!el('calendar').contains(row)||row.classList.contains('patient-dragging'))return;
+ if(event.target.closest('a,input,select,textarea,[contenteditable="true"]'))return;
+ const personId=row.dataset.personId;
+ highlightedCalendarPersonId=highlightedCalendarPersonId===personId?null:personId;
+ syncCalendarPatientHighlight();
+},true);
 el('calendar').addEventListener('contextmenu',event=>{
  const cell=event.target.closest('td.name'),row=cell?.closest('tr[data-person-id]');
  if(!row||!el('calendar').contains(row))return;
