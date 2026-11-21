@@ -546,123 +546,114 @@ html[data-theme="dark"] .sidebar.sidebar-glass-ready .nav::after{
  }
 }
 
-/* LUCH Glass Cells · subtle, static glass rims across the entire calendar.
-   We MUST keep the table border-spacing 0, td widths, sticky left offsets and
-   opaque frozen-column backgrounds. Never transform or clip frozen cells:
-   horizontal dates must continue sliding UNDER the patient details. */
+/* LUCH Glass Hybrid — one continuous opaque patient band on the left,
+   quiet date grid on the right. The previously separated glass tiles, rounded
+   cell corners and inset rims intentionally disappear. Sticky patient columns
+   MUST paint above scrolled date cells, never let date text bleed through. */
 :root{
- --glass-cell-rim:rgba(100,143,164,.30);
- --glass-cell-top:rgba(255,255,255,.66);
- --glass-cell-hover:rgba(42,144,180,.63);
- --glass-cell-shine:rgba(255,255,255,.13);
- --glass-cell-row:rgba(75,145,178,.39);
- --glass-frozen-edge:rgba(22,57,78,.25);
+ --glass-band-bg:#f8fbfd;
+ --glass-band-header:#eef4f8;
+ --glass-band-hover:#eaf3f9;
+ --glass-band-divider:rgba(92,137,160,.19);
+ --glass-frozen-edge:rgba(22,57,78,.20);
+ --glass-cell-hover:rgba(42,144,180,.50);
  --glass-today-rim:rgba(36,150,183,.65)
 }
 html[data-theme="dark"]{
- --glass-cell-rim:rgba(147,185,207,.22);
- --glass-cell-top:rgba(231,249,255,.11);
- --glass-cell-hover:rgba(132,205,238,.77);
- --glass-cell-shine:rgba(231,249,255,.06);
- --glass-cell-row:rgba(133,190,215,.32);
- --glass-frozen-edge:rgba(0,0,0,.56);
+ --glass-band-bg:#202c38;
+ --glass-band-header:#293946;
+ --glass-band-hover:#2c4150;
+ --glass-band-divider:rgba(143,187,211,.17);
+ --glass-frozen-edge:rgba(0,0,0,.55);
+ --glass-cell-hover:rgba(132,205,238,.67);
  --glass-today-rim:rgba(113,210,235,.75)
 }
+/* Keep border-spacing:0 from style.css, including in collapsed-phone mode.
+   No rounded corners or individual outlines between data fields. */
 .workspace[data-panel="calendar"] .calendar :is(thead th,tbody td.day,tbody td.sticky,tbody td.calendar-no-course-day){
- border-radius:6px;
+ border-radius:0
 }
-/* Frozen data and headers are solid: no backdrop blur, opacity or transforms.
-   Their existing position:sticky and z-index continue to hide scrolled dates. */
+/* Unbroken patient info band. Explicit opaque paint on EACH frozen cell
+   prevents moving dates from showing through while horizontal scrolling.
+   Existing sticky positions/left offsets remain owned by style.css. */
 .workspace[data-panel="calendar"] .calendar tbody td.sticky{
- box-shadow:inset 0 0 0 1px var(--glass-cell-rim),
-            inset 0 1px 0 var(--glass-cell-top);
- transition:box-shadow 175ms var(--glass-ease)
+ z-index:4;
+ background-color:var(--glass-band-bg);
+ border-right-color:var(--glass-band-divider);
+ box-shadow:none;
+ transition:background-color 175ms var(--glass-ease),border-color 175ms ease
 }
-.workspace[data-panel="calendar"] .calendar thead th{
- box-shadow:inset 0 0 0 1px var(--glass-cell-rim),
-            inset 0 1px 0 var(--glass-cell-top);
- transition:box-shadow 175ms var(--glass-ease)
+.workspace[data-panel="calendar"] .calendar thead th.sticky{
+ z-index:7;
+ background-color:var(--glass-band-header);
+ border-right-color:var(--glass-band-divider);
+ box-shadow:none
+}
+.workspace[data-panel="calendar"] .calendar tbody tr:hover td.sticky{
+ background-color:var(--glass-band-hover)
+}
+/* Do not override the existing inline notes editing background or stacking:
+   the editor must remain readable above every calendar cell. */
+.workspace[data-panel="calendar"] .calendar tbody td.calendar-notes.calendar-note-editing{
+ z-index:8;background-color:#f9fcfd
+}
+html[data-theme="dark"] .workspace[data-panel="calendar"] .calendar tbody td.calendar-notes.calendar-note-editing{
+ background-color:#2b4c57
+}
+/* The date half is a continuous grid: only standard 1px cell dividers,
+   no per-cell glass card rims/shadows or white gaps. Clinical backgrounds
+   (blood, chemo, skips, maintenance and completed sessions) are untouched. */
+.workspace[data-panel="calendar"] .calendar thead th:not(.sticky),
+.workspace[data-panel="calendar"] .calendar tbody :is(td.day,td.calendar-no-course-day){
+ box-shadow:none
 }
 .workspace[data-panel="calendar"] .calendar tbody :is(td.day,td.calendar-no-course-day){
- box-shadow:inset 0 0 0 1px var(--glass-cell-rim),
-            inset 0 1px 0 var(--glass-cell-top);
  transition:outline-color var(--luch-motion-fast,120ms) ease,
             box-shadow 175ms var(--glass-ease)
 }
-.workspace[data-panel="calendar"] .calendar tbody tr:hover td.sticky{
- box-shadow:inset 0 0 0 1px var(--glass-cell-row),
-            inset 0 1px 0 var(--glass-cell-top)
-}
-.workspace[data-panel="calendar"] .calendar tbody tr:hover td.day:not(:hover):not(.selected){
- box-shadow:inset 0 0 0 1px var(--glass-cell-row),
-            inset 0 1px 0 var(--glass-cell-shine)
-}
+/* Keep the good parts: a soft hover on exactly the active date cell,
+   a clear selected state, and today's lightly outlined date column. */
 .workspace[data-panel="calendar"] .calendar tbody td.day:hover{
- box-shadow:inset 0 0 0 2px var(--glass-cell-hover),
-            inset 0 1px 0 var(--glass-cell-top),
-            0 0 0 1px rgba(50,150,190,.10)
+ box-shadow:inset 0 0 0 2px var(--glass-cell-hover)
 }
 .workspace[data-panel="calendar"] .calendar tbody td.day.selected{
- box-shadow:inset 0 0 0 1px var(--glass-cell-hover),
-            inset 0 1px 0 var(--glass-cell-top)
+ box-shadow:inset 0 0 0 1px var(--glass-cell-hover)
 }
 .workspace[data-panel="calendar"] .calendar tbody td.day.selected:hover{
- box-shadow:inset 0 0 0 2px var(--glass-cell-hover),
-            inset 0 1px 0 var(--glass-cell-top)
+ box-shadow:inset 0 0 0 2px var(--glass-cell-hover)
 }
-/* Lightly outlined present-day column. Only presentation: the date is still
-   supplied by the existing localToday() and has no effect on clinical statuses. */
 .workspace[data-panel="calendar"] .calendar thead th.glass-today,
 .workspace[data-panel="calendar"] .calendar tbody td.day.glass-today:not(.selected){
- box-shadow:inset 0 0 0 1px var(--glass-today-rim),
-            inset 0 2px 0 var(--glass-cell-top)
+ box-shadow:inset 0 0 0 1px var(--glass-today-rim)
 }
 .workspace[data-panel="calendar"] .calendar thead th.glass-today{
- box-shadow:inset 0 0 0 1.5px var(--glass-today-rim),
-            inset 0 2px 0 var(--glass-cell-top)
+ box-shadow:inset 0 0 0 1.5px var(--glass-today-rim)
 }
 .workspace[data-panel="calendar"] .calendar tbody td.day.glass-today:hover{
- box-shadow:inset 0 0 0 2px var(--glass-cell-hover),
-            inset 0 1px 0 var(--glass-cell-top)
+ box-shadow:inset 0 0 0 2px var(--glass-cell-hover)
 }
-/* The right-most STICKY edge projects a tiny shadow over moving dates.
-   Under 1200px phone/notes scroll with dates: machine is the fixed boundary. */
+/* Layer boundary: frozen patient data cast a modest shadow OVER dates.
+   >1200px: notes end the fixed band; 701–1200px: machine ends the
+   fixed band while phone/notes scroll by the existing responsive rule. */
 @media(min-width:1201px){
  .workspace[data-panel="calendar"] .calendar :is(thead th,tbody td).calendar-notes{
-  box-shadow:inset 0 0 0 1px var(--glass-cell-rim),
-             inset 0 1px 0 var(--glass-cell-top),
-             8px 0 12px -5px var(--glass-frozen-edge)
- }
- .workspace[data-panel="calendar"] .calendar tbody tr:hover td.calendar-notes{
-  box-shadow:inset 0 0 0 1px var(--glass-cell-row),
-             inset 0 1px 0 var(--glass-cell-top),
-             8px 0 12px -5px var(--glass-frozen-edge)
+  box-shadow:8px 0 12px -6px var(--glass-frozen-edge)
  }
 }
 @media(min-width:701px) and (max-width:1200px){
  .workspace[data-panel="calendar"] .calendar :is(thead th,tbody td).machine{
-  box-shadow:inset 0 0 0 1px var(--glass-cell-rim),
-             inset 0 1px 0 var(--glass-cell-top),
-             8px 0 12px -5px var(--glass-frozen-edge)
- }
- .workspace[data-panel="calendar"] .calendar tbody tr:hover td.machine{
-  box-shadow:inset 0 0 0 1px var(--glass-cell-row),
-             inset 0 1px 0 var(--glass-cell-top),
-             8px 0 12px -5px var(--glass-frozen-edge)
+  box-shadow:8px 0 12px -6px var(--glass-frozen-edge)
  }
 }
-/* Maintain a coherent glass rim even for no-course date blanks; no hover
-   click affordance is added to cells that are intentionally read-only. */
+/* Empty-course cells are informational, not actionable. */
 .workspace[data-panel="calendar"] .calendar tbody tr.calendar-no-course-row td.calendar-no-course-day:hover{
- box-shadow:inset 0 0 0 1px var(--glass-cell-rim),
-            inset 0 1px 0 var(--glass-cell-top)
+ box-shadow:none
 }
 @media(prefers-reduced-motion:reduce){
  .workspace[data-panel="calendar"] .calendar :is(thead th,tbody td.sticky,tbody td.day,tbody td.calendar-no-course-day){
   transition:none!important
  }
 }
-
 
 /* LUCH Glass Floating Rows: only the dragged patient's snapshot is elevated.
    Source rows remain in document flow as a moving insertion slot, so all
