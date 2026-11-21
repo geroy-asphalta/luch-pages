@@ -1,5 +1,5 @@
 import {MACHINES,datesForMonth,monthShift,pretty,isWeekend,schedule,labAt,action,maintenanceAdd,maintenanceRemove,maintenanceFinalCandidates,maintenanceFinalDraft,machineAt,issueWeekDraft,weekBounds,addDays} from './planner.mjs';
-import {isWorkingDay,effectiveDay,effectiveDayLabel} from './work-calendar.mjs';
+import {isWorkingDay,effectiveDay} from './work-calendar.mjs';
 import {createWorkdayUI} from './workday-ui.mjs?v=2';
 import {createOperationalUI} from './operations-ui.mjs';
 import {ensurePatientModel} from './patient-model.mjs';
@@ -14,8 +14,8 @@ import {labSingleButtonDraft} from './lab-batch-preview.mjs';
 import {labButtonIntent,issueButtonIntent,skipButtonIntent,calendarActionIcon} from './calendar-action-ui.mjs?v=5';
 import {scrollCalendarToWeek,calendarWindowDates,enableCalendarHorizontalWheel} from './calendar-viewport.mjs?v=8';
 import {calendarContact} from './calendar-contact.mjs';
-import {setupCalendarInlineNotes} from './calendar-note-inline.mjs';
-import {calendarElnIndicator} from './calendar-eln-indicator.mjs';
+import {setupCalendarInlineNotes} from './calendar-note-inline.mjs?v=2';
+import {calendarElnIndicator} from './calendar-eln-indicator.mjs?v=2';
 import {calendarPatientNameParts} from './calendar-patient-name.mjs?v=2';
 import {notesColumnWidth} from './notes-column-width.mjs';
 import {initialPhoneExpanded,savePhoneExpanded,calendarPhoneHandsetIcon} from './calendar-phone-prefs.mjs?v=2';
@@ -35,7 +35,7 @@ import {installImportedLabColors} from './demo-lab-colors.mjs?v=1';
 import {createFirebaseDemoSync} from './firebase-demo-state-ui.mjs';
 import {setupDischargeTextReportUI} from './discharge-text-ui.mjs?v=4';
 import {setupThemeUI} from './theme-ui.mjs';
-import {setupGlassUI,isGlassSuccessNotice} from './glass-ui.mjs?v=3';
+import {setupGlassUI,isGlassSuccessNotice} from './glass-ui.mjs?v=4';
 import {setupSidebarGlass} from './sidebar-glass.mjs?v=1';
 import {createMobileWeekUI} from './mobile-week-ui.mjs?v=2';
 import {setupMachineFilterGlass} from './calendar-machine-filter-glass.mjs?v=1';
@@ -314,41 +314,34 @@ function renderCalendar(){
  const cells=dates.map(d=>{
    const holiday=effectiveDay(state,d),working=isWorkingDay(state,d);
    const weekend=isWeekend(d)&&!working;
-   return '<th data-date="'+d+'" class="'+(!working?'off ':'')+(weekend?'weekend-head ':'')+(holiday?.holiday?'holiday-head ':'')+(holiday?.working?'working-exception':'')+(d===todayForGlass?' glass-today':'')+'" title="'+esc(effectiveDayLabel(state,d))+'">'+pretty(d)+
+   return '<th data-date="'+d+'" class="'+(!working?'off ':'')+(weekend?'weekend-head ':'')+(holiday?.holiday?'holiday-head ':'')+(holiday?.working?'working-exception':'')+(d===todayForGlass?' glass-today':'')+'">'+pretty(d)+
     '<small>'+dow[(new Date(d+'T00:00:00Z').getUTCDay()+6)%7]+'</small>'+(holiday?'<small class="holiday-marker">'+(holiday.working?'●':'✳')+'</small>':'')+'</th>';
  }).join('');
- el('calendar').querySelector('thead').innerHTML='<tr><th class="id sticky">ID</th><th class="name sticky">Пациент</th><th class="machine sticky">Установка</th><th class="calendar-phone sticky"><button type="button" id="calendar-phone-toggle" class="calendar-phone-toggle" aria-expanded="'+phoneExpanded+'" aria-label="'+(phoneExpanded?'Свернуть телефоны':'Показать телефоны')+'" title="'+(phoneExpanded?'Свернуть телефоны':'Показать телефоны')+'"><span class="calendar-phone-toggle-label">Телефон</span>'+calendarPhoneHandsetIcon+'<svg class="calendar-phone-chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m15 18-6-6 6-6"/></svg></button></th><th class="calendar-notes sticky">Примечание</th>'+cells+'<th class="calendar-tail" aria-hidden="true"></th></tr>';
+ el('calendar').querySelector('thead').innerHTML='<tr><th class="id sticky">ID</th><th class="name sticky">Пациент</th><th class="machine sticky">Установка</th><th class="calendar-phone sticky"><button type="button" id="calendar-phone-toggle" class="calendar-phone-toggle" aria-expanded="'+phoneExpanded+'" aria-label="'+(phoneExpanded?'Свернуть телефоны':'Показать телефоны')+'"><span class="calendar-phone-toggle-label">Телефон</span>'+calendarPhoneHandsetIcon+'<svg class="calendar-phone-chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m15 18-6-6 6-6"/></svg></button></th><th class="calendar-notes sticky">Примечание</th>'+cells+'<th class="calendar-tail" aria-hidden="true"></th></tr>';
  const until=dates.at(-1);
  el('calendar').querySelector('tbody').innerHTML=tableRows.map(p=>{
    const plan=p.noCourse?new Map():schedule(p,state,until),contact=calendarContact(state,p);
    const phone=contact.phone?esc(contact.phone):'<span class="calendar-empty">—</span>';
    const ctvDisplay=p.noCourse?'':currentCtvName(state,p);
-   const patientMeta='<small class="calendar-patient-meta">'+(p.noCourse?'<span>Без курса</span>':ctvDisplay?'<span class="calendar-patient-ctv" title="'+esc(ctvDisplay)+'">'+esc(ctvDisplay)+'</span>':'')+'</small>';
-   const notes=contact.notes?'<span class="calendar-note-value" title="'+esc(contact.notes)+'">'+esc(contact.notes)+'</span>':'<span class="calendar-empty">—</span>';
+   const patientMeta='<small class="calendar-patient-meta">'+(p.noCourse?'<span>Без курса</span>':ctvDisplay?'<span class="calendar-patient-ctv">'+esc(ctvDisplay)+'</span>':'')+'</small>';
+   const notes=contact.notes?'<span class="calendar-note-value">'+esc(contact.notes)+'</span>':'<span class="calendar-empty">—</span>';
    const tds=dates.map(d=>{
-     if(p.noCourse)return '<td class="calendar-no-course-day'+(d===todayForGlass?' glass-today':'')+(isWeekend(d)&&!isWorkingDay(state,d)?' glass-rest-day':'')+'" title="Курс лечения пока не назначен"></td>';
-     const c=plan.get(d),sessionCompletion=radiationSessionCompletion(c,d,localToday()),elapsed=sessionCompletion.source==='calendar',lab=labAt(state,p.id,d),sourceLab=state.events.find(e=>e.patientId===p.id&&e.date===d&&e.type==='lab'&&e.status!=='cancelled'&&e.source==='talbichka-cell-color'),chemo=state.events.some(e=>e.patientId===p.id&&e.date===d&&e.type==='chemo'&&['planned','administered','given'].includes(e.status)),key=cellKey(p.id,d);
+     if(p.noCourse)return '<td class="calendar-no-course-day'+(d===todayForGlass?' glass-today':'')+(isWeekend(d)&&!isWorkingDay(state,d)?' glass-rest-day':'')+'"></td>';
+     const c=plan.get(d),sessionCompletion=radiationSessionCompletion(c,d,localToday()),elapsed=sessionCompletion.source==='calendar',lab=labAt(state,p.id,d),chemo=state.events.some(e=>e.patientId===p.id&&e.date===d&&e.type==='chemo'&&['planned','administered','given'].includes(e.status)),key=cellKey(p.id,d);
      const chemoEvent=state.events.find(e=>e.patientId===p.id&&e.date===d&&e.type==='chemo'&&e.source==='hlt');
      const chemoCancelled=chemoEvent?.status==='cancelled';
      const chemoOutcome=chemoAdministrationState(chemoEvent,localToday());
      const chemoMissed=chemoOutcome==='not-given'||chemoCancelled;
-     const chemoDescription={
-      assumed:' · ХТ выполнена автоматически по календарю (без подтверждения факта)',
-      confirmed:' · проведение ХТ подтверждено вручную',
-      'not-given':' · ХТ не проводилась (ручная отметка)',
-      planned:' · ХТ запланирована'
-     }[chemoOutcome]||'';
      const working=isWorkingDay(state,d),weekend=isWeekend(d)&&!working;
      const cl=['day',!working?'off':'',weekend?'weekend-day':'',effectiveDay(state,d)?.holiday?'holiday-day':'',c?.kind||'',c?.final?'final':'',c?.beforeMaintenance?'maintenance-final':'',c?.delivered?'delivered':'',elapsed?'elapsed':'',lab==='todo'?'lab':lab==='issued'?'issued':'',chemo?'chemo-day':'',lab||chemo?'has-treatment-event':'',lab?'has-lab-event':'',chemo?'has-chemo-event':'',chemoCancelled?'chemo-cancelled':'',selected.has(key)?'selected':'',d===todayForGlass?'glass-today':''].join(' ');
      const label=c?.label||'';
      const transfer=(state.transfers||[]).find(t=>t.patientId===p.id&&t.date===d);
-     const title=p.name+' · '+p.courseName+' · '+pretty(d)+' · '+machineAt(p,state,d)+(c?.kind==='breakdown'?' · АППАРАТ НЕ РАБОТАЕТ':'')+(c?.delivered?' · проведён до поломки':'')+(elapsed?' · ЛТ выполнена автоматически по календарю (без подтверждения факта)':'')+(transfer?' · перевод на '+transfer.to:'')+(c?.kind==='maintenance'?' · ТО':c?.kind==='skip'?' · пропуск':c?.kind==='session'?' · сеанс '+c.n:'')+(lab==='todo'?' · кровь назначена':lab==='issued'?' · направление выдано':'')+(sourceLab?' · отметка по цвету из «Талбички» — статус направления требуется подтвердить':'')+(chemo?' · запланировано введение ХТ':'')+chemoDescription+(chemoCancelled?' · введение ХТ отменено':'')+(chemoEvent?.originalDate&&chemoEvent.originalDate!==d?' · капельница перенесена с '+chemoEvent.originalDate:'')+(chemoEvent?.nominalDate&&chemoEvent.nominalDate!==d?' · по схеме '+chemoEvent.nominalDate+', перенос на ближайший рабочий день':'')+(c?.beforeMaintenance?' · последняя фракция утром до ТО (план, не факт проведения)':'')+(effectiveDay(state,d)?' · '+effectiveDayLabel(state,d):'');
      const treatmentContent=calendarTreatmentCellContent({label:c?.kind==='maintenance'?'':label,isSession:c?.kind==='session',isSkip:c?.kind==='skip',labStatus:lab,chemoPlanned:chemo||chemoCancelled,chemoNotGiven:chemoMissed});
      const cellContent=calendarMaintenanceCellContent({isMaintenance:c?.kind==='maintenance',hasTreatmentEvent:Boolean(lab||chemo||chemoCancelled),content:treatmentContent});
-     return '<td class="'+cl+'" data-id="'+p.id+'" data-date="'+d+'" title="'+esc(title)+'">'+cellContent+(c?.delivered?'<span class="delivered-mark">✓</span>':elapsed?'<span class="elapsed-mark">✓</span>':'')+(transfer?'<span class="transfer-mark">↗</span>':'')+(lab?'<i class="lab-dot"></i>':'')+(c?.beforeMaintenance?'<span class="maintfinal-mark">до ТО</span>':'')+'</td>';
+     return '<td class="'+cl+'" data-id="'+p.id+'" data-date="'+d+'">'+cellContent+(c?.delivered?'<span class="delivered-mark">✓</span>':elapsed?'<span class="elapsed-mark">✓</span>':'')+(transfer?'<span class="transfer-mark">↗</span>':'')+(lab?'<i class="lab-dot"></i>':'')+(c?.beforeMaintenance?'<span class="maintfinal-mark">до ТО</span>':'')+'</td>';
    }).join('');
    const nameParts=calendarPatientNameParts(p.name);
-   return '<tr data-person-id="'+esc(p.personId)+'" data-course-id="'+(p.noCourse?'':esc(p.id))+'"'+(p.noCourse?' class="calendar-no-course-row"':'')+'><td class="sticky id">'+esc(p.personId)+calendarElnIndicator(contact.eln)+'</td><td class="sticky name"><div class="calendar-patient-primary"><button type="button" class="patient-open" data-person-id="'+esc(p.personId)+'" title="'+esc(p.name)+'" aria-label="Открыть карточку пациента: '+esc(p.name)+'"><span class="patient-name-short" aria-hidden="true"><span class="patient-name-surname">'+esc(nameParts.surname)+'</span>'+(nameParts.compactRemainder?'<span class="patient-name-remainder">'+esc(nameParts.compactRemainder)+'</span>':'')+'</span><span class="patient-name-full" aria-hidden="true"><span class="patient-name-surname">'+esc(nameParts.surname)+'</span>'+(nameParts.fullRemainder?'<span class="patient-name-remainder">'+esc(nameParts.fullRemainder)+'</span>':'')+'</span></button>'+(p.treatmentType==='ХЛТ'?'<span class="type-tag">ХЛТ</span>':'')+'</div>'+patientMeta+'</td><td class="sticky machine">'+(p.noCourse?'<span class="calendar-empty">—</span>':machineAt(p,state,until)+(p.machine!==machineAt(p,state,until)?'<small>с '+p.machine+'</small>':''))+'</td><td class="sticky calendar-phone" title="'+esc(contact.phone)+'"><span class="calendar-phone-value">'+phone+'</span><span class="calendar-phone-icon" aria-hidden="true">'+(contact.phone?calendarPhoneHandsetIcon:'—')+'</span></td><td class="sticky calendar-notes"><button type="button" class="calendar-note-trigger" data-calendar-note-open title="'+esc(contact.notes||'Добавить примечание')+'" aria-label="Изменить примечание пациента: '+esc(p.name)+'">'+notes+'</button></td>'+tds+'<td class="calendar-tail" aria-hidden="true"></td></tr>';
+   return '<tr data-person-id="'+esc(p.personId)+'" data-course-id="'+(p.noCourse?'':esc(p.id))+'"'+(p.noCourse?' class="calendar-no-course-row"':'')+'><td class="sticky id">'+esc(p.personId)+calendarElnIndicator(contact.eln)+'</td><td class="sticky name"><div class="calendar-patient-primary"><button type="button" class="patient-open" data-person-id="'+esc(p.personId)+'" aria-label="Открыть карточку пациента: '+esc(p.name)+'"><span class="patient-name-short" aria-hidden="true"><span class="patient-name-surname">'+esc(nameParts.surname)+'</span>'+(nameParts.compactRemainder?'<span class="patient-name-remainder">'+esc(nameParts.compactRemainder)+'</span>':'')+'</span><span class="patient-name-full" aria-hidden="true"><span class="patient-name-surname">'+esc(nameParts.surname)+'</span>'+(nameParts.fullRemainder?'<span class="patient-name-remainder">'+esc(nameParts.fullRemainder)+'</span>':'')+'</span></button>'+(p.treatmentType==='ХЛТ'?'<span class="type-tag">ХЛТ</span>':'')+'</div>'+patientMeta+'</td><td class="sticky machine">'+(p.noCourse?'<span class="calendar-empty">—</span>':machineAt(p,state,until)+(p.machine!==machineAt(p,state,until)?'<small>с '+p.machine+'</small>':''))+'</td><td class="sticky calendar-phone"><span class="calendar-phone-value">'+phone+'</span><span class="calendar-phone-icon" aria-hidden="true">'+(contact.phone?calendarPhoneHandsetIcon:'—')+'</span></td><td class="sticky calendar-notes"><button type="button" class="calendar-note-trigger" data-calendar-note-open aria-label="Изменить примечание пациента: '+esc(p.name)+'">'+notes+'</button></td>'+tds+'<td class="calendar-tail" aria-hidden="true"></td></tr>';
  }).join('');
  syncCalendarPatientHighlight();
  el('selected-count').textContent=selected.size?'Выбрано: '+selected.size:'Ничего не выбрано';
@@ -363,7 +356,6 @@ function renderCalendar(){
   const button=el('calendar-phone-toggle');
   button.setAttribute('aria-expanded',String(phoneExpanded));
   button.setAttribute('aria-label',phoneExpanded?'Свернуть телефоны':'Показать телефоны');
-  button.title=button.getAttribute('aria-label');
   // Keep the SVG node mounted: CSS rotates it smoothly instead of swapping
   // the arrow glyph (which would make the rotation jump).
  };
