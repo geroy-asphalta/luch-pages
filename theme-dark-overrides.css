@@ -71,10 +71,14 @@ html[data-theme="dark"] .calendar .day.session.final{
 html[data-theme="dark"] .calendar .day.session.final.elapsed{background:#286e4e;color:#effff7}
 html[data-theme="dark"] .calendar .day.maintenance{background:#654632;color:#ffe0ba}
 html[data-theme="dark"] .calendar .day.breakdown{background:#663c36;color:#ffcec4}
-html[data-theme="dark"] .calendar .day.lab{background:#573345;color:#f4b7d2}
-html[data-theme="dark"] .calendar .day.issued{background:#793951;color:#fff3f8}
+/* Lab palette B: quiet muted pink for "assigned", brighter pink for "issued".
+   Keep both statuses in the same color family; leave other treatment statuses alone. */
+html[data-theme="dark"] .dot.lab{background:#553448;border-color:#8E6073}
+html[data-theme="dark"] .dot.issued{background:#B54876;border-color:#D67D9E}
+html[data-theme="dark"] .calendar .day.lab{background:#553448;color:#f4b7d2}
+html[data-theme="dark"] .calendar .day.issued{background:#B54876;color:#fff3f8}
 html[data-theme="dark"] .calendar .day.delivered{background:#285740;color:#d1f8e3}
-html[data-theme="dark"] .calendar td.day.has-lab-event:not(.issued):not(.final):not(.skip):not(.maintenance):not(.breakdown):not(.delivered){background:#513346}
+html[data-theme="dark"] .calendar td.day.has-lab-event:not(.issued):not(.final):not(.skip):not(.maintenance):not(.breakdown):not(.delivered){background:#553448}
 html[data-theme="dark"] .calendar td.day.has-chemo-event:not(.has-lab-event):not(.issued):not(.final):not(.skip):not(.maintenance):not(.breakdown):not(.delivered){background:#2b4a62}
 html[data-theme="dark"] .calendar td.day.has-lab-event.has-chemo-event:not(.issued):not(.final):not(.skip):not(.maintenance):not(.breakdown):not(.delivered){background:#503d60}
 html[data-theme="dark"] .calendar .day.maintenance-final{background:#345c48;color:#d4f8e7}
