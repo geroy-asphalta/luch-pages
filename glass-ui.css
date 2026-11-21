@@ -926,26 +926,6 @@ html[data-theme="dark"]{
   box-shadow:2px 0 5px -4px var(--glass-frozen-edge)
  }
 }
-/* Native dark browser tooltips are replaced by a quiet, non-interactive hint.
-   It does not live inside a sticky cell and cannot intercept scrolling/drag. */
-.calendar-glass-hint{
- position:fixed;z-index:1500;pointer-events:none;
- max-width:min(355px,calc(100vw - 20px));
- padding:8px 11px;border:1px solid rgba(113,156,184,.29);
- border-radius:11px;background:rgba(248,252,255,.97);
- color:#365368;font-size:11px;line-height:1.45;font-weight:550;
- white-space:normal;overflow-wrap:anywhere;
- box-shadow:0 7px 22px rgba(32,64,87,.14);
-}
-.calendar-glass-hint[hidden]{display:none!important}
-html[data-theme="dark"] .calendar-glass-hint{
- background:rgba(36,53,67,.98);color:#e6f1f8;
- border-color:rgba(149,194,222,.26);
- box-shadow:0 10px 26px rgba(0,0,0,.24)
-}
-@supports ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
- .calendar-glass-hint{-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
-}
 @media(prefers-reduced-motion:reduce){
  .workspace[data-panel="calendar"] .calendar tbody td.sticky,
  .workspace[data-panel="calendar"] .calendar tbody :is(td.day,td.calendar-no-course-day){
