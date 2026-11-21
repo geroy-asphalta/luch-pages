@@ -599,9 +599,6 @@ html[data-theme="dark"]{
  border-right-color:var(--glass-band-divider);
  box-shadow:none
 }
-.workspace[data-panel="calendar"] .calendar tbody tr:hover td.sticky{
- background-color:var(--glass-band-hover)
-}
 /* Do not override the existing inline notes editing background or stacking:
    the editor must remain readable above every calendar cell. */
 .workspace[data-panel="calendar"] .calendar tbody td.calendar-notes.calendar-note-editing{
@@ -618,19 +615,18 @@ html[data-theme="dark"] .workspace[data-panel="calendar"] .calendar tbody td.cal
  box-shadow:none
 }
 .workspace[data-panel="calendar"] .calendar tbody :is(td.day,td.calendar-no-course-day){
- transition:outline-color var(--luch-motion-fast,120ms) ease,
-            box-shadow 175ms var(--glass-ease)
+ transition:outline-color var(--luch-motion-fast,120ms) ease
 }
 /* Keep the good parts: a soft hover on exactly the active date cell,
    a clear selected state, and today's lightly outlined date column. */
 .workspace[data-panel="calendar"] .calendar tbody td.day:hover{
- box-shadow:inset 0 0 0 2px var(--glass-cell-hover)
+ outline-color:var(--glass-cell-hover)
 }
 .workspace[data-panel="calendar"] .calendar tbody td.day.selected{
- box-shadow:inset 0 0 0 1px var(--glass-cell-hover)
+ outline-color:var(--glass-cell-hover)
 }
 .workspace[data-panel="calendar"] .calendar tbody td.day.selected:hover{
- box-shadow:inset 0 0 0 2px var(--glass-cell-hover)
+ outline-color:var(--glass-cell-hover)
 }
 /* Today: a single continuous 1px outline, never a box around each day.
    No yellow weekend/holiday fill on TODAY. Other weekend dates stay yellow;
@@ -826,11 +822,11 @@ html[data-theme="dark"] .discharge-text-dialog:is(.luch-zoom-opening,.luch-zoom-
 }
 /* Avoid the boxed-cell look. Keep selected cells distinct and usable. */
 .workspace[data-panel="calendar"] .calendar tbody td.day:hover:not(.selected){
- box-shadow:inset 0 0 0 1px rgba(42,144,180,.26)
+ outline-color:rgba(42,144,180,.26)
 }
 .workspace[data-panel="calendar"] .calendar tbody td.day.selected,
 .workspace[data-panel="calendar"] .calendar tbody td.day.selected:hover{
- box-shadow:inset 0 0 0 1px var(--glass-cell-hover)
+ outline-color:var(--glass-cell-hover)
 }
 html[data-theme="dark"] .workspace[data-panel="calendar"] .calendar :is(th,td){
  border-right-color:rgba(153,192,213,.095);
@@ -841,7 +837,7 @@ html[data-theme="dark"] .workspace[data-panel="calendar"] .calendar tbody td.sti
  border-bottom-color:rgba(153,192,213,.18)
 }
 html[data-theme="dark"] .workspace[data-panel="calendar"] .calendar tbody td.day:hover:not(.selected){
- box-shadow:inset 0 0 0 1px rgba(132,205,238,.35)
+ outline-color:rgba(132,205,238,.35)
 }
 
 
@@ -878,7 +874,7 @@ html[data-theme="dark"]{
  border-right-color:var(--luch-patient-divider);
  border-bottom-color:var(--luch-grid-horizontal)
 }
-.workspace[data-panel="calendar"] .calendar tbody tr:is(:hover,:focus-within) > td.sticky:not(.calendar-note-editing){
+.workspace[data-panel="calendar"] .calendar tbody tr.patient-row-active > td.sticky:not(.calendar-note-editing){
  background-color:var(--luch-row-left)
 }
 /* The calendar is a single quiet surface: faint horizontal guides, nearly
@@ -891,15 +887,12 @@ html[data-theme="dark"]{
  border-right-color:var(--luch-grid-vertical);
  border-bottom-color:var(--luch-grid-horizontal)
 }
-/* One full-width blue hover band; the 999px inset wash is drawn INSIDE each
-   cell behind content and is animated by the existing box-shadow transition.
-   Semantic backgrounds, labels, and icons remain intact. */
-.workspace[data-panel="calendar"] .calendar tbody tr:is(:hover,:focus-within) > :is(td.day,td.calendar-no-course-day):not(.selected){
- box-shadow:inset 0 0 0 999px var(--luch-row-wash)
-}
-.workspace[data-panel="calendar"] .calendar tbody tr:is(:hover,:focus-within) > td.day.selected{
- box-shadow:inset 0 0 0 1px var(--glass-cell-hover),
-            inset 0 0 0 999px var(--luch-row-wash)
+/* Highlight one explicitly clicked patient (and any of their other
+   courses), not whichever row the pointer happens to cross. A single
+   low-cost background layer replaces enormous animated inset shadows.
+   Semantic cell backgrounds, treatment labels and selection remain intact. */
+.workspace[data-panel="calendar"] .calendar tbody tr.patient-row-active > :is(td.day,td.calendar-no-course-day,td.calendar-tail){
+ background-image:linear-gradient(var(--luch-row-wash),var(--luch-row-wash))
 }
 /* Selected and focused dates remain clearly visible independently of row hover. */
 .workspace[data-panel="calendar"] .calendar tbody td.day.selected{
