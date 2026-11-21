@@ -390,3 +390,158 @@ html[data-theme="dark"] .machine-filter-menu{
   transition:none!important;animation:none!important
  }
 }
+
+
+/* LUCH Glass Sidebar · 72 px when collapsed, 236 px when expanded.
+   Enhancement only: without JS, the original complete navigation is visible. */
+.sidebar.sidebar-glass-ready{
+ position:relative;z-index:8;flex:0 0 auto;
+ width:72px;min-width:72px;max-width:none;
+ padding:29px 13px;overflow:visible;
+ border-right:1px solid var(--glass-stroke);
+ background-image:linear-gradient(155deg,rgba(255,255,255,.3),transparent 70%);
+ box-shadow:inset -1px 0 0 rgba(255,255,255,.13);
+ transition:none
+}
+html[data-theme="dark"] .sidebar.sidebar-glass-ready{
+ background-image:linear-gradient(155deg,rgba(255,255,255,.065),transparent 70%)
+}
+.sidebar.sidebar-glass-ready.sidebar-glass-motion{
+ transition:width 270ms var(--glass-ease),background-color 240ms ease,
+            border-color 240ms ease,box-shadow 240ms ease
+}
+.sidebar.sidebar-glass-ready[data-expanded="true"]{width:236px}
+.sidebar.sidebar-glass-ready .sidebar-heading{
+ display:block;flex:none;min-height:14px;height:14px;
+ margin:0 4px 16px;overflow:hidden;white-space:nowrap;
+ opacity:0;transform:translateX(-6px);
+ transition:opacity 160ms ease,transform 200ms var(--glass-ease)
+}
+.sidebar.sidebar-glass-ready[data-expanded="true"] .sidebar-heading{
+ opacity:1;transform:translateX(0);transition-delay:80ms
+}
+.sidebar.sidebar-glass-ready .nav{
+ position:relative;z-index:1;
+ display:flex;align-items:center;justify-content:center;
+ flex:0 0 52px;min-height:52px;height:52px;
+ width:100%;padding:0;gap:0;
+ border-radius:14px;white-space:normal;
+ transition:padding 270ms var(--glass-ease),gap 270ms var(--glass-ease),
+            color 180ms ease,background-color 180ms ease
+}
+.sidebar.sidebar-glass-ready[data-expanded="true"] .nav{
+ padding:0 12px;gap:12px;justify-content:flex-start
+}
+.sidebar.sidebar-glass-ready .nav>span{
+ display:grid;place-items:center;flex:none;
+ width:24px;min-width:24px;height:24px;
+ font-size:20px;line-height:1
+}
+.sidebar.sidebar-glass-ready .nav b{
+ display:block;flex:0 1 auto;max-width:0;
+ overflow:hidden;white-space:nowrap;visibility:hidden;
+ opacity:0;transform:translateX(-6px);
+ font-size:12px;line-height:1.3;text-align:left;
+ transition:max-width 270ms var(--glass-ease),opacity 160ms ease,
+            transform 230ms var(--glass-ease),visibility 0s linear 170ms
+}
+.sidebar.sidebar-glass-ready[data-expanded="true"] .nav b{
+ max-width:165px;white-space:normal;visibility:visible;
+ opacity:1;transform:translateX(0);
+ transition-delay:0s,100ms,90ms,0s
+}
+/* The existing travelling active pill is allowed to grow with its nav item
+   while preserving its original vertical transition across sections. */
+.sidebar.sidebar-glass-ready .glass-nav-indicator{
+ width:calc(100% - 26px)!important
+}
+.sidebar.sidebar-glass-ready:not([data-expanded="true"]) .sidebar-note{display:none}
+.sidebar.sidebar-glass-ready[data-expanded="true"] .sidebar-note{
+ animation:sidebar-glass-note-in 230ms var(--glass-ease) both
+}
+@keyframes sidebar-glass-note-in{
+ from{opacity:0;transform:translateY(4px)}
+ to{opacity:1;transform:translateY(0)}
+}
+/* A discrete edge handle, never a hover-to-open trap. */
+.sidebar.sidebar-glass-ready .sidebar-glass-toggle{
+ position:absolute;top:30px;right:-17px;z-index:12;
+ display:grid;place-items:center;width:34px;height:34px;
+ min-width:34px;min-height:34px;padding:0;
+ border:1px solid var(--glass-stroke);border-radius:50%;
+ background:var(--glass-floating);color:#426d81;
+ box-shadow:0 7px 19px rgba(23,54,71,.2),inset 0 1px 0 var(--glass-top);
+ cursor:pointer;
+ transition:transform 180ms var(--glass-ease),border-color 180ms ease,
+            box-shadow 180ms ease,background-color 180ms ease
+}
+html[data-theme="dark"] .sidebar.sidebar-glass-ready .sidebar-glass-toggle{
+ color:#b7e5f4;box-shadow:0 9px 22px rgba(0,0,0,.4),inset 0 1px 0 var(--glass-top)
+}
+.sidebar.sidebar-glass-ready .sidebar-glass-toggle svg{
+ display:block;transform:rotate(0deg);
+ transition:transform 230ms var(--glass-ease)
+}
+.sidebar.sidebar-glass-ready[data-expanded="true"] .sidebar-glass-toggle svg{
+ transform:rotate(180deg)
+}
+@media(hover:hover) and (pointer:fine){
+ .sidebar.sidebar-glass-ready .sidebar-glass-toggle:hover{
+  transform:scale(1.065);border-color:var(--glass-stroke-hover);
+  box-shadow:var(--glass-shadow-hover)
+ }
+}
+.sidebar.sidebar-glass-ready .sidebar-glass-toggle:active{transform:scale(.95)}
+.sidebar.sidebar-glass-ready .sidebar-glass-toggle:focus-visible{
+ outline:2px solid var(--glass-focus);outline-offset:3px
+}
+@supports ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+ .sidebar.sidebar-glass-ready .sidebar-glass-toggle,
+ .sidebar.sidebar-glass-ready:not([data-expanded="true"]) .nav::after{
+  backdrop-filter:blur(14px) saturate(1.18);
+  -webkit-backdrop-filter:blur(14px) saturate(1.18)
+ }
+}
+/* A tooltip also appears on keyboard focus. It is not clipped by the aside. */
+.sidebar.sidebar-glass-ready:not([data-expanded="true"]) .nav::after{
+ content:attr(data-sidebar-tooltip);position:absolute;z-index:24;
+ left:calc(100% + 13px);top:50%;
+ width:max-content;max-width:min(260px,calc(100vw - 100px));
+ padding:9px 12px;border:1px solid var(--glass-stroke);border-radius:11px;
+ background:var(--glass-floating);color:#2e5265;
+ box-shadow:0 11px 28px rgba(21,45,59,.22),inset 0 1px 0 var(--glass-top);
+ font-size:12px;font-weight:650;line-height:1.3;text-align:left;
+ white-space:normal;pointer-events:none;visibility:hidden;opacity:0;
+ transform:translate(-5px,-50%);
+ transition:opacity 150ms ease,transform 170ms var(--glass-ease),visibility 0s linear 170ms
+}
+html[data-theme="dark"] .sidebar.sidebar-glass-ready .nav::after{
+ color:#e7f3f8;box-shadow:0 12px 32px rgba(0,0,0,.48)
+}
+.sidebar.sidebar-glass-ready:not([data-expanded="true"]) .nav:is(:hover,:focus-visible)::after{
+ opacity:1;visibility:visible;transform:translate(0,-50%);
+ transition-delay:0s
+}
+/* Keep 701–1000 px desktop windows usable, without affecting iPhone navigation. */
+@media(min-width:701px) and (max-width:1000px){
+ .sidebar.sidebar-glass-ready[data-expanded="true"]{width:224px}
+}
+@media(max-width:700px){
+ .sidebar.sidebar-glass-ready{display:none!important}
+}
+@media(prefers-reduced-transparency:reduce),(forced-colors:active),(prefers-contrast:more){
+ .sidebar.sidebar-glass-ready{background-image:none}
+ .sidebar.sidebar-glass-ready .sidebar-glass-toggle,
+ .sidebar.sidebar-glass-ready .nav::after{
+  -webkit-backdrop-filter:none!important;backdrop-filter:none!important
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ .sidebar.sidebar-glass-ready,.sidebar.sidebar-glass-ready .sidebar-heading,
+ .sidebar.sidebar-glass-ready .nav,.sidebar.sidebar-glass-ready .nav b,
+ .sidebar.sidebar-glass-ready .sidebar-glass-toggle,
+ .sidebar.sidebar-glass-ready .sidebar-glass-toggle svg,
+ .sidebar.sidebar-glass-ready .nav::after{
+  transition:none!important;animation:none!important
+ }
+}

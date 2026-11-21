@@ -36,11 +36,13 @@ import {createFirebaseDemoSync} from './firebase-demo-state-ui.mjs';
 import {setupDischargeTextReportUI} from './discharge-text-ui.mjs?v=3';
 import {setupThemeUI} from './theme-ui.mjs';
 import {setupGlassUI,isGlassSuccessNotice} from './glass-ui.mjs';
+import {setupSidebarGlass} from './sidebar-glass.mjs?v=1';
 import {createMobileWeekUI} from './mobile-week-ui.mjs?v=2';
 import {setupMachineFilterGlass} from './calendar-machine-filter-glass.mjs?v=1';
 
 setupThemeUI();
 const glassUI=setupGlassUI();
+setupSidebarGlass({onLayoutChange:()=>glassUI.syncNavigation()});
 
 const store='luch-demo-v1';
 let state;
