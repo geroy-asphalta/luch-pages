@@ -3,6 +3,7 @@
 import {addDays,weekBounds} from './planner.mjs';
 import {localToday} from './course-progress.mjs';
 import {dischargeTextReport,nextDischargeWeekStart} from './discharge-text-report.mjs';
+import {createDialogZoomMotion} from './dialog-zoom-motion.mjs?v=1';
 const el=id=>document.getElementById(id);
 const shortDate=date=>date.slice(8,10)+'.'+date.slice(5,7);
 
@@ -12,6 +13,7 @@ export function setupDischargeTextReportUI({
  doc=typeof document!=='undefined'?document:null
 }){
  const dialog=el('discharge-text-dialog');
+ const zoom=createDialogZoomMotion({dialog,button:el('discharge-text-open')});
  const dateInput=el('discharge-text-date');
  const weekLabel=el('discharge-text-week-label');
  const output=el('discharge-text-output');
@@ -42,11 +44,7 @@ export function setupDischargeTextReportUI({
   selectedWeek=week.start;
   render();
  }
- function showDialog(){
-  if(dialog.open)return;
-  if(typeof dialog.showModal==='function')dialog.showModal();
-  else dialog.setAttribute('open','');
- }
+ function showDialog(){zoom.open();}
  function open(){
   const next=nextDischargeWeekStart(getToday());
   if(!next){notice('Не удалось определить следующую неделю.');return;}
@@ -54,10 +52,7 @@ export function setupDischargeTextReportUI({
   render();
   showDialog();
  }
- function close(){
-  if(dialog.open&&typeof dialog.close==='function')dialog.close();
-  else dialog.removeAttribute('open');
- }
+ function close(){zoom.close();}
  function selectAll(){output.focus();output.select();}
  async function copy(){
   if(!generated){notice('Нет текста для копирования.');return;}
@@ -96,6 +91,6 @@ export function setupDischargeTextReportUI({
  el('discharge-text-default').addEventListener('click',()=>setWeek(nextDischargeWeekStart(getToday())));
  dateInput.addEventListener('change',()=>setWeek(dateInput.value));
  copyButton.addEventListener('click',copy);
- dialog.addEventListener('cancel',event=>{event.preventDefault();close();});
+ // Native Escape/backdrop closing is handled by the same reversible zoom.
  return {open,render,close,copyNextWeek};
 }

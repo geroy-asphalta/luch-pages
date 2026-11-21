@@ -728,3 +728,45 @@ html[data-theme="dark"] .calendar tbody tr.patient-dragging{
  border-color:var(--glass-stroke);background:var(--glass-floating);
  box-shadow:var(--glass-shadow-hover)
 }
+
+/* LUCH Glass · discharge report expands from its 46px toolbar button.
+   Native <dialog> remains in the top layer with its original modal semantics.
+   The WAAPI layer computes the precise source/target rectangles at runtime. */
+.discharge-text-dialog:is(.luch-zoom-opening,.luch-zoom-closing){
+ will-change:transform,opacity;
+ transform-origin:top left;
+ border-color:var(--glass-stroke-hover);
+ box-shadow:0 28px 76px rgba(17,48,65,.34),
+            0 9px 26px rgba(35,115,155,.13),
+            inset 0 1px 0 var(--glass-top)
+}
+html[data-theme="dark"] .discharge-text-dialog:is(.luch-zoom-opening,.luch-zoom-closing){
+ box-shadow:0 31px 82px rgba(0,0,0,.66),
+            0 10px 28px rgba(52,153,192,.14),
+            inset 0 1px 0 var(--glass-top)
+}
+@keyframes luch-discharge-backdrop-in{
+ from{opacity:0}
+ to{opacity:1}
+}
+@keyframes luch-discharge-backdrop-out{
+ from{opacity:1}
+ to{opacity:0}
+}
+.discharge-text-dialog.luch-zoom-opening::backdrop{
+ animation:luch-discharge-backdrop-in 410ms var(--glass-ease) both
+}
+.discharge-text-dialog.luch-zoom-closing::backdrop{
+ animation:luch-discharge-backdrop-out 330ms ease-in both
+}
+@media(prefers-reduced-motion:reduce){
+ .discharge-text-dialog:is(.luch-zoom-opening,.luch-zoom-closing),
+ .discharge-text-dialog:is(.luch-zoom-opening,.luch-zoom-closing)::backdrop{
+  animation:none!important;transition:none!important;will-change:auto
+ }
+}
+@media(prefers-reduced-transparency:reduce),(forced-colors:active),(prefers-contrast:more){
+ .discharge-text-dialog:is(.luch-zoom-opening,.luch-zoom-closing){
+  box-shadow:0 15px 38px rgba(0,0,0,.25);border-color:currentColor
+ }
+}

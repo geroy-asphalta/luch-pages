@@ -33,7 +33,7 @@ import {calendarRosterRows} from './calendar-roster-rows.mjs';
 import {syncCourseStartStatusesDraft} from './course-start-status.mjs';
 import {installImportedLabColors} from './demo-lab-colors.mjs?v=1';
 import {createFirebaseDemoSync} from './firebase-demo-state-ui.mjs';
-import {setupDischargeTextReportUI} from './discharge-text-ui.mjs?v=3';
+import {setupDischargeTextReportUI} from './discharge-text-ui.mjs?v=4';
 import {setupThemeUI} from './theme-ui.mjs';
 import {setupGlassUI,isGlassSuccessNotice} from './glass-ui.mjs';
 import {setupSidebarGlass} from './sidebar-glass.mjs?v=1';
