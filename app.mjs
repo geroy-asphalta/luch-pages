@@ -35,7 +35,7 @@ import {installImportedLabColors} from './demo-lab-colors.mjs?v=1';
 import {createFirebaseDemoSync} from './firebase-demo-state-ui.mjs';
 import {setupDischargeTextReportUI} from './discharge-text-ui.mjs?v=4';
 import {setupThemeUI} from './theme-ui.mjs';
-import {setupGlassUI,isGlassSuccessNotice} from './glass-ui.mjs';
+import {setupGlassUI,isGlassSuccessNotice} from './glass-ui.mjs?v=2';
 import {setupSidebarGlass} from './sidebar-glass.mjs?v=1';
 import {createMobileWeekUI} from './mobile-week-ui.mjs?v=2';
 import {setupMachineFilterGlass} from './calendar-machine-filter-glass.mjs?v=1';
@@ -315,7 +315,7 @@ function renderCalendar(){
    const patientMeta='<small class="calendar-patient-meta">'+(p.noCourse?'<span>Без курса</span>':ctvDisplay?'<span class="calendar-patient-ctv" title="'+esc(ctvDisplay)+'">'+esc(ctvDisplay)+'</span>':'')+'</small>';
    const notes=contact.notes?'<span class="calendar-note-value" title="'+esc(contact.notes)+'">'+esc(contact.notes)+'</span>':'<span class="calendar-empty">—</span>';
    const tds=dates.map(d=>{
-     if(p.noCourse)return '<td class="calendar-no-course-day'+(d===todayForGlass?' glass-today':'')+'" title="Курс лечения пока не назначен"></td>';
+     if(p.noCourse)return '<td class="calendar-no-course-day'+(d===todayForGlass?' glass-today':'')+(isWeekend(d)&&!isWorkingDay(state,d)?' glass-rest-day':'')+'" title="Курс лечения пока не назначен"></td>';
      const c=plan.get(d),sessionCompletion=radiationSessionCompletion(c,d,localToday()),elapsed=sessionCompletion.source==='calendar',lab=labAt(state,p.id,d),sourceLab=state.events.find(e=>e.patientId===p.id&&e.date===d&&e.type==='lab'&&e.status!=='cancelled'&&e.source==='talbichka-cell-color'),chemo=state.events.some(e=>e.patientId===p.id&&e.date===d&&e.type==='chemo'&&['planned','administered','given'].includes(e.status)),key=cellKey(p.id,d);
      const chemoEvent=state.events.find(e=>e.patientId===p.id&&e.date===d&&e.type==='chemo'&&e.source==='hlt');
      const chemoCancelled=chemoEvent?.status==='cancelled';
