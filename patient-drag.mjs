@@ -6,6 +6,72 @@ export function setupPatientReordering({container,onMove,getEnabled,notice}){
  const group=id=>rows().filter(row=>row.dataset.personId===id);
  const visibleIds=()=>[...new Set(rows().map(row=>row.dataset.personId))];
  const scrollBox=()=>container.closest('.patient-register-scroll,.scroll')||container;
+ // Moving only the SOURCE rows in the temporary DOM preview leaves the real
+ // table geometry, sticky offsets and horizontal scrolling untouched.
+ function repositionRows(moving,reference,{animate=true}={}){
+  const parent=moving?.[0]?.parentNode;
+  if(!parent||typeof parent.insertBefore!=='function')return false;
+  if(reference&&reference.parentNode!==parent)return false;
+  if(reference===moving[0]||reference===moving.at(-1).nextSibling)return false;
+  const remaining=rows().filter(row=>!moving.includes(row));
+  const before=new Map(remaining.map(row=>[row,row.getBoundingClientRect().top]));
+  for(const row of moving)parent.insertBefore(row,reference||null);
+  if(animate&&!window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches){
+   for(const row of remaining){
+    const delta=before.get(row)-row.getBoundingClientRect().top;
+    if(Math.abs(delta)>1&&typeof row.animate==='function'){
+     row.animate([
+      {transform:'translateY('+delta+'px)'},
+      {transform:'translateY(0)'}
+     ],{duration:190,easing:'cubic-bezier(.22,1,.36,1)'});
+    }
+   }
+  }
+  return true;
+ }
+ function restorePreview({animate=false}={}){
+  if(!active?.sourceRows?.length)return;
+  const reference=active.originalNext;
+  if(reference?.parentNode===active.sourceRows[0].parentNode){
+   repositionRows(active.sourceRows,reference,{animate});
+  }else if(!reference){
+   repositionRows(active.sourceRows,null,{animate});
+  }
+ }
+ function makeFloatingRow(){
+  const source=active?.sourceRows?.[0],table=source?.closest?.('table');
+  if(!table||!source.cloneNode)return null;
+  const wrapper=document.createElement('div');
+  wrapper.className='patient-drag-floating';
+  wrapper.setAttribute('aria-hidden','true');
+  const preview=document.createElement('table');
+  preview.className=table.className;
+  preview.style.cssText=table.style?.cssText||'';
+  preview.style.width=table.getBoundingClientRect().width+'px';
+  const body=document.createElement('tbody');
+  for(const row of active.sourceRows){
+   const clone=row.cloneNode(true);
+   clone.removeAttribute('id');
+   clone.classList.remove('patient-dragging');
+   // Do not put duplicate IDs, focus targets or editable content in the overlay.
+   clone.querySelectorAll('[id]').forEach(node=>node.removeAttribute('id'));
+   clone.querySelectorAll('button,a,input,select,textarea').forEach(node=>node.tabIndex=-1);
+   const originalCells=[...row.cells],cloneCells=[...clone.cells];
+   cloneCells.forEach((cell,index)=>{
+    const rect=originalCells[index]?.getBoundingClientRect();
+    if(rect)cell.style.width=rect.width+'px';
+   });
+   body.appendChild(clone);
+  }
+  preview.appendChild(body);
+  wrapper.appendChild(preview);
+  const scroller=scrollBox();
+  const rect=scroller.getBoundingClientRect();
+  wrapper.style.width=Math.min(rect.width,window.innerWidth-Math.max(0,rect.left)-8)+'px';
+  wrapper.style.height=active.sourceRows.reduce((sum,row)=>sum+row.getBoundingClientRect().height,0)+'px';
+  document.body.appendChild(wrapper);
+  return wrapper;
+ }
  const clearDrop=()=>{
   if(drop?.marker)drop.marker.classList.remove('patient-drop-before','patient-drop-after');
   drop=null;
@@ -17,7 +83,8 @@ export function setupPatientReordering({container,onMove,getEnabled,notice}){
   frame=0;
   clearDrop();
   if(active){
-   for(const row of group(active.source))row.classList.remove('patient-dragging');
+   restorePreview();
+   for(const row of active.sourceRows||group(active.source))row.classList.remove('patient-dragging');
    document.body.classList.remove('patient-row-is-moving');
   }
   active=null;
@@ -25,18 +92,26 @@ export function setupPatientReordering({container,onMove,getEnabled,notice}){
  };
  function showGhost(x,y){
   if(!ghost)return;
-  ghost.style.left=Math.min(x+16,window.innerWidth-ghost.offsetWidth-12)+'px';
-  ghost.style.top=Math.min(y+12,window.innerHeight-ghost.offsetHeight-12)+'px';
+  if(ghost.className==='patient-drag-floating'){
+   const box=scrollBox(),rect=box.getBoundingClientRect();
+   const left=Math.max(0,rect.left);
+   const top=y-(active?.grabY||0);
+   ghost.style.transform='translate3d('+Math.round(left)+'px,'+Math.round(top)+'px,0)';
+   ghost.scrollLeft=box.scrollLeft;
+  }else{
+   ghost.style.left=Math.max(8,Math.min(x+16,window.innerWidth-ghost.offsetWidth-12))+'px';
+   ghost.style.top=Math.max(8,Math.min(y+12,window.innerHeight-ghost.offsetHeight-12))+'px';
+  }
  }
  function refreshDrop(x,y){
   if(!active)return;
   const box=scrollBox(),rect=box.getBoundingClientRect();
   if(x<rect.left-20||x>rect.right+20||y<rect.top-25||y>rect.bottom+25){
-   clearDrop();return;
+   clearDrop();restorePreview({animate:true});return;
   }
   let hit=document.elementFromPoint(x,y)?.closest('tr[data-person-id]');
-  if(!hit||!container.contains(hit)){
-   // Permit dropping in the empty space just above/below a visible row.
+  if(!hit||!container.contains(hit)||hit.dataset.personId===active.source){
+   // Also handle the vacant placeholder: never let it block nearby targets.
    hit=rows().filter(row=>row.dataset.personId!==active.source)
     .sort((a,b)=>Math.abs((a.getBoundingClientRect().top+a.getBoundingClientRect().bottom)/2-y)-
                  Math.abs((b.getBoundingClientRect().top+b.getBoundingClientRect().bottom)/2-y))[0];
@@ -53,6 +128,10 @@ export function setupPatientReordering({container,onMove,getEnabled,notice}){
   clearDrop();
   marker.classList.add(before?'patient-drop-before':'patient-drop-after');
   drop={id:hit.dataset.personId,placement,marker};
+  // Open the insertion slot NOW, not on pointerup. Multi-course patients
+  // move as a contiguous group; cancel/up restores the original DOM order.
+  const reference=before?relatives[0]:relatives.at(-1).nextSibling;
+  repositionRows(active.sourceRows,reference,{animate:true});
  }
  function scrollFrame(){
   if(!active)return;
@@ -65,6 +144,7 @@ export function setupPatientReordering({container,onMove,getEnabled,notice}){
    const amount=y<edge?-fast:y>window.innerHeight-edge?fast:0;
    if(amount)window.scrollBy(0,amount);
   }
+  showGhost(active.x,active.y);
   refreshDrop(active.x,active.y);
   frame=requestAnimationFrame(scrollFrame);
  }
@@ -75,13 +155,20 @@ export function setupPatientReordering({container,onMove,getEnabled,notice}){
    clean();return;
   }
   active=pending;pending=null;
-  for(const row of group(active.source))row.classList.add('patient-dragging');
+  active.sourceRows=group(active.source);
+  active.originalNext=active.sourceRows.at(-1)?.nextSibling||null;
+  active.grabY=active.y-active.sourceRows[0].getBoundingClientRect().top;
+  ghost=makeFloatingRow();
+  for(const row of active.sourceRows)row.classList.add('patient-dragging');
   document.body.classList.add('patient-row-is-moving');
-  ghost=document.createElement('div');
-  ghost.className='patient-drag-ghost';
-  ghost.textContent=active.name+(group(active.source).length>1?' · '+group(active.source).length+' курса':'');
-  ghost.setAttribute('aria-hidden','true');
-  document.body.appendChild(ghost);
+  if(!ghost){
+   // Non-DOM harnesses and older browsers retain the original safe badge.
+   ghost=document.createElement('div');
+   ghost.className='patient-drag-ghost';
+   ghost.textContent=active.name+(active.sourceRows.length>1?' · '+active.sourceRows.length+' курса':'');
+   ghost.setAttribute('aria-hidden','true');
+   document.body.appendChild(ghost);
+  }
   showGhost(active.x,active.y);
   refreshDrop(active.x,active.y);
   frame=requestAnimationFrame(scrollFrame);
@@ -145,6 +232,12 @@ export function setupPatientReordering({container,onMove,getEnabled,notice}){
  },true);
  document.addEventListener('pointercancel',event=>{
   if((active||pending)?.pointerId===event.pointerId)clean();
+ },true);
+ document.addEventListener('keydown',event=>{
+  if(event.key==='Escape'&&active){
+   event.preventDefault();
+   clean(); // Discard the preview without saving any patient order.
+  }
  },true);
  document.addEventListener('click',event=>{
   if(!suppressClick)return;
