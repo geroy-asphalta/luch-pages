@@ -69,16 +69,18 @@ const badge=(mode)=>{
 };
 export function calendarActionIcon(which,mode){
  if(which==='skip'){
-  // Same calendar silhouette, stroke and 24px size as the adjacent calendar action.
-  // Only the colored status badge changes: X, undo arrow, or bidirectional arrows.
-  const color=mode==='unskip'?'#288A5E':mode==='mixed'?'#AF812D':'#C74F57';
-  const symbol=mode==='unskip'
-   ?'<path d="M20.8 17.5a2.4 2.4 0 1 1-1.3-2.2M17.9 15.3h1.6v1.6" stroke="'+color+'" stroke-width="1.6"/>'
+  // Matches the 24×24 circle-X geometry used for a skipped RT fraction in
+  // calendar cells. A small badge keeps undo and mixed selection distinguishable.
+  const ring='<circle cx="12" cy="12" r="8.2" stroke-width="2"/>'+
+   '<path d="M9.2 9.2l5.6 5.6m0-5.6-5.6 5.6" stroke-width="2"/>';
+  const status=mode==='unskip'
+   ?'<circle cx="19" cy="19" r="4.2" fill="#fff" stroke="#288A5E" stroke-width="1.3"/>'+
+    '<path d="M20.5 18.5a2.1 2.1 0 1 0-1.1 2M20.5 18.5v-1.5m0 1.5H19" stroke="#288A5E" stroke-width="1.15"/>'
    :mode==='mixed'
-    ?'<path d="M16.3 16.8h4.3m0 0-1.1-1.1m1.1 1.1-1.1 1.1M20.7 19.2h-4.3m0 0 1.1-1.1m-1.1 1.1 1.1 1.1" stroke="'+color+'" stroke-width="1.45"/>'
-    :'<path d="M16.8 16.3l3.4 3.4m0-3.4-3.4 3.4" stroke="'+color+'" stroke-width="1.9"/>';
-  return '<svg '+base+'><path d="M4 5h14a2 2 0 0 1 2 2v7M4 5v13a2 2 0 0 0 2 2h8M8 3v4M16 3v4M4 9h16M7.5 12.5h2M12 12.5h2M7.5 16h2" />'+
-   '<circle cx="18.5" cy="18" r="4.6" fill="#fff" stroke="'+color+'"/>'+symbol+'</svg>';
+    ?'<circle cx="19" cy="19" r="4.2" fill="#fff" stroke="#AF812D" stroke-width="1.3"/>'+
+     '<path d="M16.9 18h4.2m-1.2-1.1 1.2 1.1-1.2 1.1M21.1 20.3h-4.2m1.2-1.1-1.2 1.1 1.2 1.1" stroke="#AF812D" stroke-width="1.05"/>'
+    :'';
+  return '<svg '+base+'>'+ring+status+'</svg>';
  }
  if(which==='issue'&&mode==='week'){
   return '<svg '+base+'><path d="M4 5h14a2 2 0 0 1 2 2v7M4 5v13a2 2 0 0 0 2 2h8M8 3v4M16 3v4M4 9h16M7.5 12.5h2M12 12.5h2M7.5 16h2" />'+badge('issue')+'</svg>';
