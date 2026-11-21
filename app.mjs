@@ -19,7 +19,7 @@ import {calendarElnIndicator} from './calendar-eln-indicator.mjs';
 import {calendarPatientNameParts} from './calendar-patient-name.mjs?v=2';
 import {notesColumnWidth} from './notes-column-width.mjs';
 import {initialPhoneExpanded,savePhoneExpanded} from './calendar-phone-prefs.mjs';
-import {calendarTreatmentCellContent} from './calendar-event-icons.mjs?v=2';
+import {calendarTreatmentCellContent} from './calendar-event-icons.mjs?v=3';
 import {chemoAdministrationState,chemoAdministrationDraft} from './chemo-administration.mjs?v=2';
 import {calendarMaintenanceCellContent} from './calendar-maintenance-icon.mjs';
 import {setupCalendarRangeSelection,calendarClickSelection} from './calendar-range-select.mjs?v=2';
@@ -328,7 +328,7 @@ function renderCalendar(){
      const label=c?.label||'';
      const transfer=(state.transfers||[]).find(t=>t.patientId===p.id&&t.date===d);
      const title=p.name+' · '+p.courseName+' · '+pretty(d)+' · '+machineAt(p,state,d)+(c?.kind==='breakdown'?' · АППАРАТ НЕ РАБОТАЕТ':'')+(c?.delivered?' · проведён до поломки':'')+(elapsed?' · ЛТ выполнена автоматически по календарю (без подтверждения факта)':'')+(transfer?' · перевод на '+transfer.to:'')+(c?.kind==='maintenance'?' · ТО':c?.kind==='skip'?' · пропуск':c?.kind==='session'?' · сеанс '+c.n:'')+(lab==='todo'?' · кровь назначена':lab==='issued'?' · направление выдано':'')+(sourceLab?' · отметка по цвету из «Талбички» — статус направления требуется подтвердить':'')+(chemo?' · запланировано введение ХТ':'')+chemoDescription+(chemoCancelled?' · введение ХТ отменено':'')+(chemoEvent?.originalDate&&chemoEvent.originalDate!==d?' · капельница перенесена с '+chemoEvent.originalDate:'')+(chemoEvent?.nominalDate&&chemoEvent.nominalDate!==d?' · по схеме '+chemoEvent.nominalDate+', перенос на ближайший рабочий день':'')+(c?.beforeMaintenance?' · последняя фракция утром до ТО (план, не факт проведения)':'')+(effectiveDay(state,d)?' · '+effectiveDayLabel(state,d):'');
-     const treatmentContent=calendarTreatmentCellContent({label:c?.kind==='maintenance'?'':label,isSession:c?.kind==='session',labStatus:lab,chemoPlanned:chemo||chemoCancelled,chemoNotGiven:chemoMissed});
+     const treatmentContent=calendarTreatmentCellContent({label:c?.kind==='maintenance'?'':label,isSession:c?.kind==='session',isSkip:c?.kind==='skip',labStatus:lab,chemoPlanned:chemo||chemoCancelled,chemoNotGiven:chemoMissed});
      const cellContent=calendarMaintenanceCellContent({isMaintenance:c?.kind==='maintenance',hasTreatmentEvent:Boolean(lab||chemo||chemoCancelled),content:treatmentContent});
      return '<td class="'+cl+'" data-id="'+p.id+'" data-date="'+d+'" title="'+esc(title)+'">'+cellContent+(c?.delivered?'<span class="delivered-mark">✓</span>':elapsed?'<span class="elapsed-mark">✓</span>':'')+(transfer?'<span class="transfer-mark">↗</span>':'')+(lab?'<i class="lab-dot"></i>':'')+(c?.beforeMaintenance?'<span class="maintfinal-mark">до ТО</span>':'')+'</td>';
    }).join('');

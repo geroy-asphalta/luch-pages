@@ -420,6 +420,7 @@ html[data-theme="dark"] .calendar td.day.has-treatment-event.issued .calendar-fr
 html[data-theme="dark"] .calendar td.day.has-lab-event:not(.issued):not(.final):not(.skip):not(.maintenance):not(.breakdown):not(.delivered){background:#5c2640}
 html[data-theme="dark"] .calendar td.day.has-chemo-event:not(.has-lab-event):not(.issued):not(.final):not(.skip):not(.maintenance):not(.breakdown):not(.delivered){background:#224760}
 html[data-theme="dark"] .calendar td.day.has-lab-event.has-chemo-event:not(.issued):not(.final):not(.skip):not(.maintenance):not(.breakdown):not(.delivered){background:#402a58}
+html[data-theme="dark"] .calendar td.day.skip .calendar-skip-icon{color:#eff5f8}
 html[data-theme="dark"] .calendar tbody td.day.skip{background:#192935;color:#eff5f8}
 html[data-theme="dark"] .calendar tbody td.day.maintenance{background:#6c4b37;color:#eff5f8}
 html[data-theme="dark"] .calendar .calendar-maintenance-corner{background:#6c4b37;color:#eff5f8}

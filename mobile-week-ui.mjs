@@ -8,6 +8,7 @@ import {currentCtvName} from './ctv-display.mjs';
 import {courseProgress,localToday,radiationSessionCompletion} from './course-progress.mjs';
 import {tasksForDate,todayTasks} from './today-tasks.mjs';
 import {calendarCellContextActions} from './calendar-cell-context-menu.mjs';
+import {skippedFractionIcon} from './calendar-event-icons.mjs?v=3';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const weekDays=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
@@ -83,7 +84,7 @@ export function renderMobilePatientCards(state,rows,{weekDate=localToday(),selec
     (daySelected?', выделено':'') )+'" title="'+esc(data.title)+'">'+
     '<span class="mobile-date-weekday">'+weekDays[i]+'</span>'+
     '<span class="mobile-date-day">'+date.slice(8)+'</span>'+
-    '<span class="mobile-date-symbol">'+esc(data.label)+'</span>'+
+    '<span class="mobile-date-symbol">'+(data.kind==='skip'?skippedFractionIcon:esc(data.label))+'</span>'+
     (data.secondary?'<span class="mobile-date-secondary">'+esc(data.secondary)+'</span>':'')+'</button>';
   }).join('');
   return '<article class="mobile-patient-card" data-mobile-person-id="'+esc(course.personId)+'">'+

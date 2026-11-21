@@ -29,15 +29,22 @@ export const chemoInfusionMissedIcon=chemoInfusionIcon
  .replaceAll('#F4FCFE','#FFF7F8')
  .replaceAll('#A5DDEB','#E35E72');
 
+// One shared, presentation-only mark for a skipped RT fraction (desktop + iPhone).
+// The underlying planner still stores the original "Х" label.
+export const skippedFractionIcon='<svg class="calendar-skip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">'+
+ '<circle cx="12" cy="12" r="8.2"/>'+
+ '<path d="M9.2 9.2l5.6 5.6m0-5.6-5.6 5.6"/>'+
+ '</svg>';
+
 /**
  * Large icons take priority over a fraction number only for event days.
  * Non-event cells keep their previous label; "issued" referrals still show the tube.
  */
-export function calendarTreatmentCellContent({label='',isSession=false,labStatus=null,chemoPlanned=false,chemoNotGiven=false}={}){
- if(!labStatus&&!chemoPlanned)return escapeHtml(label);
+export function calendarTreatmentCellContent({label='',isSession=false,isSkip=false,labStatus=null,chemoPlanned=false,chemoNotGiven=false}={}){
+ if(!labStatus&&!chemoPlanned)return isSkip?skippedFractionIcon:escapeHtml(label);
  const icons=(labStatus?bloodTubeIcon:'')+(chemoPlanned?(chemoNotGiven?chemoInfusionMissedIcon:chemoInfusionIcon):'');
  const both=labStatus&&chemoPlanned?' calendar-treatment-events--both':'';
  const fraction=isSession&&label!==''?'<span class="calendar-fraction-small">'+escapeHtml(label)+'</span>':'';
- const statusLabel=!isSession&&label!==''?'<span class="calendar-event-status-label">'+escapeHtml(label)+'</span>':'';
+ const statusLabel=!isSession&&(label!==''||isSkip)?'<span class="calendar-event-status-label'+(isSkip?' calendar-event-status-skip':'')+'">'+(isSkip?skippedFractionIcon:escapeHtml(label))+'</span>':'';
  return '<span class="calendar-treatment-events'+both+'" aria-hidden="true">'+icons+'</span>'+fraction+statusLabel;
 }
