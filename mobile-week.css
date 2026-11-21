@@ -193,9 +193,9 @@
  .mobile-date-maintenance{background:#ac6741;color:#fff}
  .mobile-date-breakdown{background:#f3c9c2;color:#923e34}
  .mobile-date-skip{background:#444d58;color:#fff}
- /* Same white skip symbol as the desktop calendar, slightly larger for touch screens. */
+ /* Match the bolder desktop skip mark without expanding mobile day tiles. */
  .mobile-date-skip .calendar-skip-icon{
-  display:block;width:18px;height:18px;margin:auto;color:#fff
+  display:block;width:22px;height:22px;margin:auto;color:#fff
  }
 
  .mobile-date-lab{background:#f3d4e0;color:#8e456c}

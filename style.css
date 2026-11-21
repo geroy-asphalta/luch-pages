@@ -743,16 +743,19 @@ body.calendar-range-moving .calendar tbody td.day{cursor:crosshair}
 .calendar td.day.has-lab-event.has-chemo-event:not(.issued):not(.final):not(.skip):not(.maintenance):not(.breakdown):not(.delivered){background:#f0e9f8}
 /* Compact 46×42 px date cells are shared by desktop and mobile. */
 
-/* Readable skip cross without changing the compact 46×42 px calendar cell.
-   The larger SVG geometry increases the visible ring, not only its outer box. */
+/* Prominent skip cross inside the unchanged 46×42 px calendar cell.
+   For simultaneous HT/labs, keep the mark in a distinct lower-right badge
+   so the larger cross does not obscure the main treatment pictogram. */
 .calendar td.day.skip .calendar-skip-icon{
- display:block;width:18px;height:18px;margin:auto;color:#fff;flex:none
+ display:block;width:28px;height:28px;margin:auto;color:#fff;flex:none
 }
 .calendar td.day.skip.has-treatment-event .calendar-event-status-skip{
- display:flex;align-items:center;justify-content:center;bottom:1px;z-index:2
+ display:flex;align-items:center;justify-content:center;
+ left:auto;right:1px;bottom:1px;width:24px;height:24px;
+ border-radius:50%;background:inherit;z-index:2
 }
 .calendar td.day.skip.has-treatment-event .calendar-event-status-skip .calendar-skip-icon{
- width:16px;height:16px
+ width:22px;height:22px
 }
 /* Keep a skipped session graphite even if lab/issued event classes coexist. */
 .calendar tbody td.day.skip{background:#48515c;color:#fff}
