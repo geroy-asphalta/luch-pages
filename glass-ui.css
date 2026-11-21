@@ -557,7 +557,12 @@ html[data-theme="dark"] .sidebar.sidebar-glass-ready .nav::after{
  --glass-band-divider:rgba(92,137,160,.19);
  --glass-frozen-edge:rgba(22,57,78,.20);
  --glass-cell-hover:rgba(42,144,180,.50);
- --glass-today-rim:rgba(36,150,183,.65)
+ --glass-today-rim:rgba(36,150,183,.65);
+ --glass-today-header-bg:#f5f8fa;
+ --glass-today-header-ink:#697f90;
+ --glass-today-muted-ink:#a0aeb8;
+ --glass-today-rest-bg:#f4f6f8;
+ --glass-today-rest-ink:#b0bcc5
 }
 html[data-theme="dark"]{
  --glass-band-bg:#202c38;
@@ -566,7 +571,12 @@ html[data-theme="dark"]{
  --glass-band-divider:rgba(143,187,211,.17);
  --glass-frozen-edge:rgba(0,0,0,.55);
  --glass-cell-hover:rgba(132,205,238,.67);
- --glass-today-rim:rgba(113,210,235,.75)
+ --glass-today-rim:rgba(113,210,235,.75);
+ --glass-today-header-bg:#293946;
+ --glass-today-header-ink:#b9ccd9;
+ --glass-today-muted-ink:#9ab0bf;
+ --glass-today-rest-bg:#25333f;
+ --glass-today-rest-ink:#9fb3c2
 }
 /* Keep border-spacing:0 from style.css, including in collapsed-phone mode.
    No rounded corners or individual outlines between data fields. */
@@ -622,15 +632,43 @@ html[data-theme="dark"] .workspace[data-panel="calendar"] .calendar tbody td.cal
 .workspace[data-panel="calendar"] .calendar tbody td.day.selected:hover{
  box-shadow:inset 0 0 0 2px var(--glass-cell-hover)
 }
-.workspace[data-panel="calendar"] .calendar thead th.glass-today,
-.workspace[data-panel="calendar"] .calendar tbody td.day.glass-today:not(.selected){
- box-shadow:inset 0 0 0 1px var(--glass-today-rim)
-}
+/* Today: a single continuous 1px outline, never a box around each day.
+   No yellow weekend/holiday fill on TODAY. Other weekend dates stay yellow;
+   treatment, blood, chemo, completed and maintenance colors remain intact. */
 .workspace[data-panel="calendar"] .calendar thead th.glass-today{
- box-shadow:inset 0 0 0 1.5px var(--glass-today-rim)
+ background:var(--glass-today-header-bg);
+ color:var(--glass-today-header-ink);
+ box-shadow:none
 }
-.workspace[data-panel="calendar"] .calendar tbody td.day.glass-today:hover{
- box-shadow:inset 0 0 0 2px var(--glass-cell-hover)
+.workspace[data-panel="calendar"] .calendar thead th.glass-today small{
+ color:var(--glass-today-muted-ink)
+}
+/* Match the existing long weekend/holiday selectors in style.css (including
+   their :not(...) specificity), so Saturday's yellow really disappears only
+   today, also on dark theme. Every clinical event class remains excluded. */
+.workspace[data-panel="calendar"] .calendar tbody td.day.glass-today.weekend-day.off:not(.holiday-day):not(.session):not(.final):not(.skip):not(.maintenance):not(.breakdown):not(.lab):not(.issued):not(.chemo-day):not(.delivered):not(.maintenance-final),
+.workspace[data-panel="calendar"] .calendar tbody td.day.glass-today.holiday-day.off:not(.session):not(.final):not(.skip):not(.maintenance):not(.breakdown):not(.lab):not(.issued):not(.chemo-day):not(.delivered):not(.maintenance-final){
+ background:var(--glass-today-rest-bg);
+ color:var(--glass-today-rest-ink)
+}
+/* The border is drawn as side lines within each cell; only the header has
+   a top line and only the last row has a bottom line. No horizontal stripes.
+   An independent overlay keeps the existing hover and selected appearance. */
+.workspace[data-panel="calendar"] .calendar tbody td.calendar-no-course-day.glass-today{
+ position:relative
+}
+.workspace[data-panel="calendar"] .calendar thead th.glass-today::after,
+.workspace[data-panel="calendar"] .calendar tbody td.glass-today::after{
+ content:"";position:absolute;inset:0;box-sizing:border-box;
+ border-left:1px solid var(--glass-today-rim);
+ border-right:1px solid var(--glass-today-rim);
+ pointer-events:none;z-index:2
+}
+.workspace[data-panel="calendar"] .calendar thead th.glass-today::after{
+ border-top:1px solid var(--glass-today-rim)
+}
+.workspace[data-panel="calendar"] .calendar tbody tr:last-child td.glass-today::after{
+ border-bottom:1px solid var(--glass-today-rim)
 }
 /* Layer boundary: frozen patient data cast a modest shadow OVER dates.
    >1200px: notes end the fixed band; 701–1200px: machine ends the
