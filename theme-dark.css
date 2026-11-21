@@ -228,7 +228,6 @@ html[data-theme="dark"] .hlt-plan-item{background:#202c38}
 html[data-theme="dark"] .hlt-plan-item span{color:#c7d5df}
 html[data-theme="dark"] .hlt-preview{background:#2a5058;border:1px solid #418295}
 html[data-theme="dark"] .hlt-alert{border-left:3px solid #956f41;background:#614c21;color:#e0bf94}
-html[data-theme="dark"] .calendar .day.chemo-day{box-shadow:inset 0 -2px 0 #000000}
 html[data-theme="dark"] .calendar .day .chemo-mark{color:#93c6e1;background:#23485f}
 html[data-theme="dark"] .calendar .day.issued .chemo-mark{background:#5a283b;color:#e8f0f5}
 html[data-theme="dark"] .legend .dot.chemo{background:#38556b;border-color:#417195}

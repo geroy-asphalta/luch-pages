@@ -240,7 +240,6 @@ main{padding:32px 29px;flex:1;min-width:0}.head{display:flex;justify-content:spa
 .hlt-preview>p{margin:7px 0}
 .hlt-alert{border-left:3px solid #ce8b39;background:#fff8ea;padding:8px 12px;color:#95672b;margin:9px 0;font-size:11px}
 .hlt-alert p{margin:7px 0}
-.calendar .day.chemo-day{box-shadow:inset 0 -2px 0 #5c8cb0}
 .calendar .day .chemo-mark{position:absolute;left:2px;top:2px;line-height:1;border-radius:3px;padding:2px 3px;font-size:8px;font-weight:800;letter-spacing:-.025em;color:#266789;background:#e3f1fa;pointer-events:none}
 .calendar .day.issued .chemo-mark{background:#f9e9ef;color:#914864}
 @media(max-width:700px){.hlt-fields{grid-template-columns:1fr;padding:11px}.hlt-fields h4,.hlt-fields .hlt-auto-note,.hlt-fields .hlt-reanchor,.hlt-fields p.wide{grid-column:1}.hlt-plan-grid{grid-template-columns:1fr}}
