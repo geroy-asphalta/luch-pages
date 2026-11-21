@@ -1,6 +1,5 @@
 // Read-only UI state for the calendar's appointment/referral buttons.
 import {labAt} from './planner.mjs';
-import {bloodTubeIcon} from './calendar-event-icons.mjs?v=2';
 
 function eligibleCells(state,selection){
  const active=new Set((state.patients||[]).filter(p=>
@@ -57,8 +56,12 @@ export function skipButtonIntent(state,selection){
 }
 
 const base='viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" focusable="false" aria-hidden="true"';
-// The same pink lab test tube is drawn in date cells and in the toolbar.
-const toolbarTubeDrawing=bloodTubeIcon.replace(/^<svg[^>]*>/,'').replace(/<\/svg>$/,'');
+// White, neutral toolbar tube. Calendar cell blood-test colors remain unchanged.
+// A dark currentColor outline keeps the white tube visible on the light button.
+const toolbarTubeDrawing='<rect x="8" y="3" width="16" height="5.5" rx="2.5" fill="#fff" stroke="currentColor" stroke-width="2.4"/>'+
+ '<path d="M10 8.5v23a6 6 0 0 0 12 0v-23" fill="#fff" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>'+
+ '<path d="M10 23q3-2.5 6 0t6 0v8.5a6 6 0 0 1-12 0Z" fill="#E9F1F5"/>'+
+ '<path d="M17 27h3M17 31h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>';
 const badge=(mode)=>{
  if(mode==='locked')return '<circle cx="18.5" cy="18" r="4.6" fill="#fff" stroke="#7D858D"/><path d="M16.9 17.4v-1a1.6 1.6 0 0 1 3.2 0v1M16.7 17.4h3.6v3h-3.6z" stroke="#7D858D" fill="#fff"/>';
  const color=mode==='remove'||mode==='undo'?'#C74F57':'#288A5E';
