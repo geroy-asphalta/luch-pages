@@ -40,7 +40,7 @@ export function setupCalendarInlineNotes({
   td.innerHTML='<form class="calendar-note-inline-form" data-calendar-note-form>'+
    '<label class="calendar-note-edit-label">Примечание пациента'+
    '<textarea name="patientNotes" rows="3" maxlength="500" spellcheck="true" placeholder="Добавить примечание…">'+esc(active.text)+'</textarea></label>'+
-   (courseNote?'<small class="calendar-note-course-hint" title="'+esc(courseNote)+'">К курсу (только просмотр): '+esc(courseNote)+'</small>':'')+
+   (courseNote?'<small class="calendar-note-course-hint">К курсу (только просмотр): '+esc(courseNote)+'</small>':'')+
    '<div class="calendar-note-form-actions">'+
    '<button type="submit" class="calendar-note-save">Сохранить</button>'+
    '<button type="button" data-calendar-note-cancel>Отмена</button></div>'+
