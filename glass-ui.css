@@ -949,6 +949,11 @@ html[data-theme="dark"] .workspace[data-panel="calendar"]{
  color:var(--luch-lg-head-ink);font-weight:650;
  letter-spacing:.005em
 }
+/* The empty-selection hint adds visual clutter. Keep the status/selection
+   counter visible once cells are selected, without changing selection logic. */
+.workspace[data-panel="calendar"] .toolbar .filters #selected-count:has(+ #clear-selected.hidden){
+ display:none
+}
 /* A crisp frosted HEADER behind dates, not 70 separate glass capsules.
    Weekend and holiday headers keep their existing palette and priority. */
 .workspace[data-panel="calendar"] .calendar thead th:not(.sticky):not(.off):not(.weekend-head):not(.holiday-head){
@@ -1452,7 +1457,7 @@ html[data-theme="dark"] .workspace[data-panel="calendar"] > .toolbar{
  display:flex;
  align-items:center;
  justify-content:center;
- gap:7px;
+ gap:4px;
  flex:0 0 auto;
  width:auto;
  padding:0;
@@ -1465,9 +1470,9 @@ html[data-theme="dark"] .workspace[data-panel="calendar"] > .toolbar{
    is decorative; the accessible live date and all existing controls remain. */
 .workspace[data-panel="calendar"] .calendar-toolbar-right #month{
  display:block;
- min-width:126px;
+ min-width:112px;
  margin:0;
- padding:0 9px;
+ padding:0 3px;
  color:#253d40;
  text-align:center;
  font-size:12.5px;
@@ -1521,16 +1526,21 @@ html[data-theme="dark"] .workspace[data-panel="calendar"] > .toolbar{
  padding:0 12px;
  margin-left:2px;
  border-radius:999px;
- background:#f4f7f4;
- border-color:rgba(157,177,166,.35);
- color:#526b63;
+ background:#fcfdfb;
+ border-color:rgba(150,168,161,.30);
+ color:#49645e;
  font-size:10.5px;
  font-weight:700;
  letter-spacing:0
 }
 .workspace[data-panel="calendar"] .calendar-toolbar-right #reset-month:is(:hover,:focus-visible){
- background:#e9f2ec;
- color:#245d4c
+ background:#f2f7f4;
+ border-color:rgba(113,154,136,.48);
+ color:#2a6753
+}
+.workspace[data-panel="calendar"] .calendar-toolbar-right #reset-month:focus-visible{
+ outline:2px solid #6ba78d;
+ outline-offset:2px
 }
 /* Explicit dark material: suppress earlier blue glass capsule/controls. */
 html[data-theme="dark"] .workspace[data-panel="calendar"] .calendar-toolbar-right .month-controls{
@@ -1557,13 +1567,14 @@ html[data-theme="dark"] .workspace[data-panel="calendar"] .calendar-toolbar-righ
  color:#e6ffef
 }
 html[data-theme="dark"] .workspace[data-panel="calendar"] .calendar-toolbar-right #reset-month{
- background:#354940;
- border-color:rgba(148,190,164,.32);
- color:#d0e7d8
+ background:#314044;
+ border-color:rgba(157,183,169,.27);
+ color:#d4e8df
 }
 html[data-theme="dark"] .workspace[data-panel="calendar"] .calendar-toolbar-right #reset-month:is(:hover,:focus-visible){
- background:#40604f;
- color:#f1fff6
+ background:#3c534d;
+ border-color:rgba(166,214,185,.46);
+ color:#ebfff2
 }
 @media(max-width:700px){
  .workspace[data-panel="calendar"] .calendar-toolbar-right .month-controls{
