@@ -1,5 +1,5 @@
 import {MACHINES,datesForMonth,monthShift,pretty,isWeekend,schedule,labAt,action,maintenanceAdd,maintenanceRemove,maintenanceFinalCandidates,maintenanceFinalDraft,machineAt,issueWeekDraft,weekBounds,addDays} from './planner.mjs';
-import {isWorkingDay,effectiveDay} from './work-calendar.mjs';
+import {isWorkingDay,effectiveDay,effectiveDayLabel} from './work-calendar.mjs';
 import {createWorkdayUI} from './workday-ui.mjs?v=2';
 import {createOperationalUI} from './operations-ui.mjs';
 import {ensurePatientModel} from './patient-model.mjs';
