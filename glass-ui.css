@@ -1033,67 +1033,67 @@ html[data-theme="dark"] .workspace[data-panel="calendar"] .calendar tbody td.cal
 }
 
 
-/* LUCH Liquid Glass v5 — approved Nov 2026 visual concept.
+/* LUCH Liquid Glass v5.1 — pearl/graphite palette based on screenshot feedback.
    Keep ONE continuous grid with an opaque frozen patient band. This is a
    presentation-only update: no layout geometry, scrolling handlers, blur,
    backdrop-filter, cell transforms, animation or medical status overrides. */
 :root{
- --luch-v5-canvas:#f4f7fc;
- --luch-v5-shell-edge:rgba(196,212,236,.86);
- --luch-v5-shell-glow:rgba(211,224,253,.54);
- --luch-v5-surface:#f9fbff;
- --luch-v5-toolbar-first:#eff6ff;
- --luch-v5-toolbar-mid:#eef3ff;
- --luch-v5-toolbar-last:#e8efff;
+ --luch-v5-canvas:#f8f8f6;
+ --luch-v5-shell-edge:rgba(188,195,198,.64);
+ --luch-v5-shell-glow:rgba(220,219,215,.34);
+ --luch-v5-surface:#fbfcfa;
+ --luch-v5-toolbar-first:#ffffff;
+ --luch-v5-toolbar-mid:#f7f7f5;
+ --luch-v5-toolbar-last:#f2f4f1;
  --luch-v5-control-top:#ffffff;
- --luch-v5-control-bottom:#edf3fd;
- --luch-v5-control-stroke:rgba(169,190,223,.46);
- --luch-v5-head-bg:#e8f0fc;
- --luch-v5-head-ink:#365a78;
- --luch-v5-left-bg:#eaf3fc;
- --luch-v5-left-alt:#e5effa;
- --luch-v5-left-head:#e3eefc;
- --luch-v5-left-hover:#daeafa;
- --luch-v5-left-ink:#274664;
- --luch-v5-left-muted:#69839d;
- --luch-v5-rail:rgba(123,161,200,.28);
- --luch-v5-line:rgba(126,159,199,.14);
- --luch-v5-date-line:rgba(127,168,205,.095);
+ --luch-v5-control-bottom:#f4f5f2;
+ --luch-v5-control-stroke:rgba(172,181,184,.42);
+ --luch-v5-head-bg:#f1f3f1;
+ --luch-v5-head-ink:#53616a;
+ --luch-v5-left-bg:#f7f8f6;
+ --luch-v5-left-alt:#f2f4f1;
+ --luch-v5-left-head:#eff2ef;
+ --luch-v5-left-hover:#eaf0eb;
+ --luch-v5-left-ink:#2c424b;
+ --luch-v5-left-muted:#79868a;
+ --luch-v5-rail:rgba(135,150,151,.23);
+ --luch-v5-line:rgba(142,154,154,.14);
+ --luch-v5-date-line:rgba(145,155,155,.095);
  --luch-v5-weekend-head:#f4e7d6;
  --luch-v5-weekend-body:#fcf3e6;
  --luch-v5-weekend-ink:#84715b;
- --luch-v5-focus-left:#cddff6;
- --luch-v5-focus-wash:rgba(103,157,219,.072);
- --luch-v5-focus-rail:#6da5d7
+ --luch-v5-focus-left:#dfece4;
+ --luch-v5-focus-wash:rgba(91,141,112,.052);
+ --luch-v5-focus-rail:#6ca88e
 }
 html[data-theme="dark"]{
- --luch-v5-canvas:#16242f;
- --luch-v5-shell-edge:rgba(131,164,199,.35);
- --luch-v5-shell-glow:rgba(45,71,104,.17);
- --luch-v5-surface:#1f303e;
- --luch-v5-toolbar-first:#33485b;
- --luch-v5-toolbar-mid:#2b3e54;
- --luch-v5-toolbar-last:#2b3a50;
+ --luch-v5-canvas:#202529;
+ --luch-v5-shell-edge:rgba(145,158,164,.28);
+ --luch-v5-shell-glow:rgba(83,86,84,.15);
+ --luch-v5-surface:#252c31;
+ --luch-v5-toolbar-first:#343d42;
+ --luch-v5-toolbar-mid:#2e373c;
+ --luch-v5-toolbar-last:#2b3439;
  --luch-v5-control-top:#35495b;
- --luch-v5-control-bottom:#293a4b;
- --luch-v5-control-stroke:rgba(122,158,189,.39);
- --luch-v5-head-bg:#30465b;
- --luch-v5-head-ink:#cfe1ef;
- --luch-v5-left-bg:#273c4e;
- --luch-v5-left-alt:#2a4054;
- --luch-v5-left-head:#30485b;
- --luch-v5-left-hover:#345269;
- --luch-v5-left-ink:#e6f1fa;
- --luch-v5-left-muted:#aac3d4;
- --luch-v5-rail:rgba(129,168,200,.35);
- --luch-v5-line:rgba(124,162,194,.18);
- --luch-v5-date-line:rgba(124,162,194,.10);
+ --luch-v5-control-bottom:#303a40;
+ --luch-v5-control-stroke:rgba(143,157,163,.38);
+ --luch-v5-head-bg:#364148;
+ --luch-v5-head-ink:#d3dfe2;
+ --luch-v5-left-bg:#2a3439;
+ --luch-v5-left-alt:#303b40;
+ --luch-v5-left-head:#354147;
+ --luch-v5-left-hover:#3a4d48;
+ --luch-v5-left-ink:#edf2f0;
+ --luch-v5-left-muted:#b8c6c6;
+ --luch-v5-rail:rgba(141,160,161,.32);
+ --luch-v5-line:rgba(149,164,165,.17);
+ --luch-v5-date-line:rgba(142,157,161,.10);
  --luch-v5-weekend-head:#534b46;
  --luch-v5-weekend-body:#3b3a3c;
  --luch-v5-weekend-ink:#f0d7b3;
- --luch-v5-focus-left:#375c79;
- --luch-v5-focus-wash:rgba(121,178,228,.10);
- --luch-v5-focus-rail:#99d8f0
+ --luch-v5-focus-left:#38554a;
+ --luch-v5-focus-wash:rgba(130,189,155,.09);
+ --luch-v5-focus-rail:#91cfb1
 }
 /* Static illuminated shell. Depth belongs to the OUTSIDE of the timetable,
    not to thousands of individual fraction cells. */
@@ -1111,7 +1111,7 @@ html[data-theme="dark"] .workspace[data-panel="calendar"]{
             0 0 0 3px var(--luch-v5-shell-glow),
             inset 0 1px 0 rgba(232,246,255,.16)
 }
-/* Pearlescent tint on the STATIC toolbar only. */
+/* Warm pearl tint on the STATIC toolbar only. */
 .workspace[data-panel="calendar"] > .toolbar{
  background:linear-gradient(112deg,
    var(--luch-v5-toolbar-first) 0%,
@@ -1137,7 +1137,7 @@ html[data-theme="dark"] .workspace[data-panel="calendar"] .toolbar .filters > :i
  box-shadow:inset 0 1px 0 rgba(226,244,255,.13),
             0 2px 7px rgba(0,0,0,.12)
 }
-/* A single cool-blue header plane, leaving Saturdays and holidays distinct. */
+/* One neutral pearl header plane; weekends and holidays remain distinct. */
 .workspace[data-panel="calendar"] .calendar thead th:not(.sticky):not(.off):not(.weekend-head):not(.holiday-head){
  background:var(--luch-v5-head-bg);
  color:var(--luch-v5-head-ink)
