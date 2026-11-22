@@ -304,7 +304,12 @@ export function createMobileWeekUI({
    '<p class="mobile-empty">По выбранным условиям пациентов нет</p>';
  }
  root.addEventListener('change',event=>{
-  if(event.target.id==='mobile-filter'){onFilter(event.target.value);render();}
+  if(event.target.id==='mobile-filter'){
+   // After a native iOS picker choice, release focus to restore page scale.
+   const select=event.target;
+   onFilter(select.value);render();
+   requestAnimationFrame(()=>select.blur());
+  }
   else if(event.target.id==='mobile-week-date'&&/^\d{4}-\d\d-\d\d$/.test(event.target.value)){
    weekDate=event.target.value;render();
   }else if(event.target.id==='mobile-task-date'&&/^\d{4}-\d\d-\d\d$/.test(event.target.value)&&event.target.value<=today()){

@@ -503,8 +503,16 @@
   width:100%!important;max-width:none!important;min-width:0!important;
   height:100%!important;margin:0!important;padding:0!important;
   border:0!important;border-radius:50%;background:transparent!important;
-  box-shadow:none!important;opacity:0!important;cursor:pointer;
-  -webkit-appearance:none;appearance:none;font-size:16px!important
+  box-shadow:none!important;opacity:1!important;cursor:pointer;
+  color:transparent!important;-webkit-text-fill-color:transparent!important;
+  -webkit-appearance:none;appearance:none;font-size:16px!important;
+  touch-action:manipulation
+ }
+ /* Safari should see a normal visible select (not opacity:0) while the
+    monochrome LINAC drawing stays visible through its transparent text.
+    Native option labels remain readable inside the iOS picker. */
+ #mobile-filter option{
+  color:var(--mobile-text);-webkit-text-fill-color:var(--mobile-text)
  }
  .mobile-linac-filter:focus-within{
   outline:2px solid var(--mobile-accent);outline-offset:2px
