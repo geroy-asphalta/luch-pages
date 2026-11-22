@@ -230,7 +230,13 @@ export function createMobileWeekUI({
   cards.hidden=tab==='tasks'||tab==='more';tasks.hidden=tab!=='tasks';more.hidden=tab!=='more';
   $('#mobile-page-title').textContent=tab==='tasks'?'Задачи':tab==='more'?'Ещё':tab==='calendar'?'Календарь':'Пациенты';
   $('#mobile-search').value=search;
-  $('#mobile-filter').value=getFilter();
+  const filterValue=getFilter(),filterSelect=$('#mobile-filter');
+  filterSelect.value=filterValue;
+  const filterControl=$('#mobile-filter-control');
+  const filterName=filterSelect.selectedOptions[0]?.textContent?.trim()||'Все установки';
+  filterControl.classList.toggle('is-filtered',Boolean(filterValue));
+  filterControl.title=filterName;
+  filterSelect.setAttribute('aria-label','Фильтр установок: '+filterName);
   $('#mobile-week-range').textContent=two(dates()[0])+' — '+two(dates()[6]);
   $('#mobile-week-date').value=weekDate;
   const count=selected.size;

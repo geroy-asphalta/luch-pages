@@ -451,7 +451,7 @@
  .mobile-patient-header{padding:4px 2px 11px}
  .mobile-search-row{
   display:flex;align-items:center;position:relative;gap:8px;
-  min-height:46px;margin-bottom:13px;--mobile-filter-width:116px
+  min-height:46px;margin-bottom:13px;--mobile-filter-width:46px
  }
  .mobile-search-expandable{
   position:absolute;z-index:3;top:0;left:0;flex:none;
@@ -485,34 +485,51 @@
  .mobile-date-jump{overflow:hidden;font-size:0}
  .mobile-date-jump svg{width:18px;height:18px;display:block}
  .mobile-date-jump input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer}
+ /* Approved icon 1: monochrome linear accelerator, like the search lens.
+    The original native select remains stretched over the circular icon. */
+ .mobile-linac-filter{
+  position:relative;display:grid;place-items:center;
+  flex:0 0 46px;width:46px;height:46px;min-width:46px;
+  border:1px solid var(--mobile-border);border-radius:50%;
+  background:var(--mobile-surface);box-shadow:var(--mobile-shadow);
+  color:var(--mobile-text);-webkit-tap-highlight-color:transparent
+ }
+ .mobile-linac-icon{
+  display:block;width:29px;height:29px;flex:none;
+  pointer-events:none;stroke-width:1.85
+ }
  #mobile-filter{
-  flex:0 0 var(--mobile-filter-width);max-width:var(--mobile-filter-width);
-  width:var(--mobile-filter-width);height:46px;min-width:0;
-  border:1px solid var(--mobile-border);border-radius:16px;
-  padding:0 5px;background:var(--mobile-surface);box-shadow:var(--mobile-shadow);
-  color:var(--mobile-text);font-size:12px;letter-spacing:-.45px;
-  font-weight:730;line-height:1.1;white-space:nowrap
+  position:absolute;inset:0;z-index:1;display:block;
+  width:100%!important;max-width:none!important;min-width:0!important;
+  height:100%!important;margin:0!important;padding:0!important;
+  border:0!important;border-radius:50%;background:transparent!important;
+  box-shadow:none!important;opacity:0!important;cursor:pointer;
+  -webkit-appearance:none;appearance:none;font-size:16px!important
+ }
+ .mobile-linac-filter:focus-within{
+  outline:2px solid var(--mobile-accent);outline-offset:2px
+ }
+ .mobile-linac-filter.is-filtered{
+  border-color:var(--mobile-accent)
+ }
+ .mobile-linac-filter.is-filtered::after{
+  content:"";position:absolute;bottom:2px;right:2px;
+  width:7px;height:7px;border-radius:50%;
+  border:2px solid var(--mobile-surface);
+  background:var(--mobile-accent);pointer-events:none;z-index:2
  }
 }
 @media(min-width:366px) and (max-width:390px){
- .mobile-search-row{--mobile-filter-width:108px}
- #mobile-filter{max-width:108px;width:108px}
  .mobile-week-navigation>button,.mobile-date-jump{flex-basis:26px;width:26px}
  .mobile-week-navigation>span{font-size:9.5px}
 }
 @media(max-width:365px){
- .mobile-search-row{min-height:96px;--mobile-filter-width:114px}
+ .mobile-search-row{min-height:46px;--mobile-filter-width:46px}
  .mobile-search-row .mobile-week-navigation{
-  position:absolute;top:50px;left:0;right:0;margin:0
+  position:static;left:auto;right:auto;top:auto;margin:0 0 0 54px
  }
- #mobile-filter{position:absolute;right:0;top:0;width:114px;max-width:114px}
- .mobile-search-row:has(.mobile-search-expandable.is-open){min-height:46px}
- .mobile-search-expandable.is-open~.mobile-week-navigation{opacity:0;pointer-events:none}
-}
-@supports (-webkit-touch-callout:none){
- @media(max-width:700px){
-  #mobile-filter{font-size:12px!important}
- }
+ .mobile-week-navigation>button,.mobile-date-jump{flex-basis:25px;width:25px}
+ .mobile-week-navigation>span{font-size:9px}
 }
 @media(prefers-reduced-motion:reduce){
  @media(max-width:700px){.mobile-week-navigation{transition:none!important}}
