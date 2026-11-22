@@ -701,5 +701,6 @@ export function createPatientUI({getState,commitState,renderApp,notice,onDischar
    edit('person-create');
  }
  function reset(){earlyUI?.close();selectedId=null;search='';statusFilter='all';el('patient-search').value='';el('patient-status-filter').value='all';el('patient-sort').value='order';closeEditor();}
- return {setup,render,selectPerson,createNew,openContextMenu:(request)=>earlyUI?.openMenu(request),reset};
+ return {setup,render,selectPerson,createNew,openContextMenu:(request)=>earlyUI?.openMenu(request),reset,
+  isEditing:()=>Boolean(editor||pending)};
 }
