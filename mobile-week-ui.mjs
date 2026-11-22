@@ -105,11 +105,11 @@ export function renderMobilePatientCards(state,rows,{weekDate=localToday(),selec
 export function createMobileWeekUI({
  root,tabbar,actionsDialog,getState,getRows,getSelected,getFilter=()=>'',onFilter=()=>{},
  onSelect,onPatient,onAdd,onOpenRegister,onOpenExport,onOpenCloud,onOpenView,onOpenDesktop,onReset,onClearSelection,
- onAction,onToggleTask,onCopyDischarge=()=>{},onNotice=()=>{},isMobile=()=>window.matchMedia('(max-width:700px)').matches,
+ onAction,onToggleTask,onCopyDischarge=()=>{},onNotice=()=>{},onCalendarShown=()=>{},isMobile=()=>window.matchMedia('(max-width:700px)').matches,
  today=localToday
 }){
  if(!root||!tabbar||!actionsDialog)throw new Error('Мобильный интерфейс ЛУЧ не найден.');
- let tab='patients',weekDate=today(),search='',taskDate=today(),lastCell=null,actionCell=null,desktop=false,activeView='calendar';
+ let tab='patients',weekDate=today(),search='',taskDate=today(),lastCell=null,actionCell=null,desktop=false,fullDesktop=false,calendarAligned=false,activeView='calendar';
  const $=selector=>root.querySelector(selector);
  const searchControl=$('#mobile-search-expandable'),searchInput=$('#mobile-search');
  const searchToggle=$('#mobile-search-toggle'),searchClose=$('#mobile-search-close');
@@ -130,10 +130,19 @@ export function createMobileWeekUI({
  const fullDate=date=>new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'long',year:'numeric'}).format(new Date(date+'T12:00:00'));
  function tabTo(next){
   tab=next;
-  desktop=false;
-  document.body.classList.remove('mobile-desktop-table');
+  // The "Календарь" tab shows the EXISTING desktop grid, not a second copy
+  // of schedule logic. The patient tab keeps its touch-friendly cards.
+  desktop=next==='calendar';
+  fullDesktop=false;
   if(activeView!=='calendar')onOpenView('calendar');
   render();
+  if(desktop&&!calendarAligned){
+   calendarAligned=true;
+   // The grid is measurable only after its scroll container becomes visible.
+   requestAnimationFrame(()=>{
+    if(desktop&&tab==='calendar'&&activeView==='calendar')onCalendarShown();
+   });
+  }
  }
  function mobileActions(){
   const selected=[...getSelected()].map(key=>{
@@ -187,6 +196,7 @@ export function createMobileWeekUI({
    b.classList.toggle('is-current',active);b.setAttribute('aria-current',active?'page':'false');
   });
   document.body.classList.toggle('mobile-desktop-table',desktop&&activeView==='calendar');
+  document.body.classList.toggle('mobile-full-table',fullDesktop&&desktop&&activeView==='calendar');
   if(!mobilePanel)return; // never repaint card lists beneath other sections
   const cards=$('#mobile-card-view'),tasks=$('#mobile-task-view'),more=$('#mobile-more-view');
   cards.hidden=tab==='tasks'||tab==='more';tasks.hidden=tab!=='tasks';more.hidden=tab!=='more';
@@ -245,7 +255,7 @@ export function createMobileWeekUI({
    else if(cmd==='today'){weekDate=today();tab='patients';render();}
    else if(cmd==='week'){tab='calendar';render();}
    else if(cmd==='tasks-today'){taskDate=today();render();}
-   else if(cmd==='desktop'){desktop=true;onOpenDesktop();render();}
+   else if(cmd==='desktop'){desktop=true;fullDesktop=true;onOpenDesktop();render();}
   }
  });
  root.addEventListener('input',event=>{
@@ -301,9 +311,9 @@ export function createMobileWeekUI({
  },{passive:true});
  function syncView(next){
   activeView=next;
-  if(next!=='calendar')desktop=false;
+  if(next!=='calendar'){desktop=false;fullDesktop=false;}
   render();
  }
- function exitDesktop(){desktop=false;tab='patients';document.body.classList.remove('mobile-desktop-table');render();}
+ function exitDesktop(){tabTo('patients');}
  return {render,syncView,exitDesktop,setTab:tabTo,selectedCount:()=>getSelected().size};
 }

@@ -38,7 +38,7 @@ import {setupDischargeTextReportUI} from './discharge-text-ui.mjs?v=4';
 import {setupThemeUI} from './theme-ui.mjs';
 import {setupGlassUI,isGlassSuccessNotice} from './glass-ui.mjs?v=4';
 import {setupSidebarGlass} from './sidebar-glass.mjs?v=1';
-import {createMobileWeekUI} from './mobile-week-ui.mjs?v=3';
+import {createMobileWeekUI} from './mobile-week-ui.mjs?v=4';
 import {setupMachineFilterGlass} from './calendar-machine-filter-glass.mjs?v=1';
 
 setupThemeUI();
@@ -746,6 +746,7 @@ mobileUI=createMobileWeekUI({
  onOpenCloud:()=>el('cloud-open').click(),
  onOpenView:next=>setView(next),
  onOpenDesktop:()=>setView('calendar'),
+ onCalendarShown:()=>scrollCalendarToWeek(el('calendar'),weekBounds(localToday())?.start),
  onClearSelection:()=>{selected.clear();anchor=null;hideWeekPreview();render();},
  onAction:handleCalendarContextAction,
  onToggleTask:(id,date)=>{

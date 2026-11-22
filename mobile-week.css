@@ -42,11 +42,40 @@
  body.mobile-desktop-table .workspace[data-panel="calendar"]>.toolbar{
   display:flex!important;background:var(--mobile-surface);border-radius:14px
  }
- body.mobile-desktop-table .workspace[data-panel="calendar"]>.scroll{display:block!important}
+ body.mobile-desktop-table .workspace[data-panel="calendar"]>.scroll{
+  display:block!important;
+  height:calc(100dvh - 270px - env(safe-area-inset-bottom,0px));
+  min-height:270px;max-height:calc(100dvh - 150px);
+  overflow:auto;overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;touch-action:pan-x pan-y
+ }
+ /* Reuse the original table and frozen patient columns; only the mobile
+    container changes. No transforms/blur on the scroller or sticky cells. */
+ body.mobile-desktop-table .workspace[data-panel="calendar"]>.toolbar{
+  gap:7px;padding:8px!important
+ }
+ body.mobile-desktop-table .workspace[data-panel="calendar"]>.toolbar .stats{display:none!important}
+ body.mobile-desktop-table .workspace[data-panel="calendar"]>.toolbar .filters{
+  width:100%;display:flex;align-items:center;flex-wrap:wrap;gap:7px
+ }
+ body.mobile-desktop-table .workspace[data-panel="calendar"]>.toolbar .calendar-toolbar-right{
+  width:100%;margin:0;display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:6px
+ }
+ body.mobile-desktop-table .workspace[data-panel="calendar"]>.toolbar .month-controls{flex:1;min-width:180px}
+ body.mobile-desktop-table .workspace[data-panel="calendar"]>.toolbar .actions{
+  width:auto;display:flex;flex:0 0 auto;gap:6px
+ }
+ body.mobile-desktop-table .workspace[data-panel="calendar"]>.toolbar .actions button{
+  flex:0 0 auto;min-width:40px
+ }
  body.mobile-desktop-table .workspace[data-panel="calendar"]>#calendar-cell-menu:not(.hidden){display:block!important}
  body.mobile-desktop-table #mobile-patient-shell{display:none!important}
  #mobile-exit-desktop{display:none}
- body.mobile-desktop-table #mobile-exit-desktop{
+ /* The bottom tab bar is the way back from the Calendar tab.
+    The separate return button is only for "Ещё → Полная таблица ПК". */
+ body.mobile-desktop-table #mobile-exit-desktop{display:none}
+ body.mobile-desktop-table.mobile-full-table #mobile-exit-desktop{
   display:block;position:fixed;z-index:105;bottom:calc(82px + env(safe-area-inset-bottom,0px));
   left:50%;transform:translateX(-50%);width:max-content;max-width:90vw;
   background:#176f6a;color:white;border:1px solid #70b6a5;
