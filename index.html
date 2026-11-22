@@ -20,7 +20,7 @@
 <link rel="stylesheet" href="./style.css?v=1.62">
 <link rel="stylesheet" href="./catalog-ui.css?v=3">
 <link rel="stylesheet" href="./theme-dark.css?v=4">
-<link rel="stylesheet" href="./glass-ui.css?v=17">
+<link rel="stylesheet" href="./glass-ui.css?v=18">
 <link rel="stylesheet" href="./mobile-week.css?v=3">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" type="image/svg+xml" href="./icon.svg">
@@ -417,6 +417,17 @@
   <button type="button" id="cloud-retry" hidden>Повторить отправку</button>
   <button type="button" id="cloud-export">Скачать локальную копию JSON</button>
  </div>
+ <div class="cloud-start-recovery">
+  <h3>Восстановление исчезнувших дат ЛТ</h3>
+  <p class="muted">Только из ранее сохранённой истории и локальных копий. Никакие даты не придумываются.</p>
+  <div class="discharge-actions">
+   <button type="button" id="cloud-recover-dates">Найти прежние даты ЛТ</button>
+   <label class="cloud-recovery-import">Или выбрать JSON-копию
+    <input id="cloud-recovery-file" type="file" accept=".json,application/json">
+   </label>
+  </div>
+  <div id="cloud-recovery-preview" class="course-recovery-preview" aria-live="polite" hidden></div>
+ </div>
  <p class="cloud-explain">На втором устройстве подключись под тем же тестовым аккаунтом и нажми «Принять облачную версию». После этого изменения начнут приходить автоматически. Одновременные несовместимые правки не объединяются: при конфликте запись блокируется, локальная копия сохраняется.</p>
 </dialog>
 <nav id="mobile-bottom-nav" class="mobile-only mobile-bottom-nav" aria-label="Навигация по приложению">
@@ -434,5 +445,5 @@
  <p class="mobile-actions-footnote">Изменения расписания не являются клиническим подтверждением проведения процедур.</p>
 </dialog>
 <div role="status" aria-live="polite" id="toast" class="toast"></div>
-<script type="module" src="./app.mjs?v=1.88"></script>
+<script type="module" src="./app.mjs?v=1.89"></script>
 </body></html>
