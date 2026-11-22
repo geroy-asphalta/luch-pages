@@ -38,7 +38,7 @@ import {setupDischargeTextReportUI} from './discharge-text-ui.mjs?v=4';
 import {setupThemeUI} from './theme-ui.mjs';
 import {setupGlassUI,isGlassSuccessNotice} from './glass-ui.mjs?v=4';
 import {setupSidebarGlass} from './sidebar-glass.mjs?v=1';
-import {createMobileWeekUI} from './mobile-week-ui.mjs?v=5';
+import {createMobileWeekUI} from './mobile-week-ui.mjs?v=6';
 import {setupMachineFilterGlass} from './calendar-machine-filter-glass.mjs?v=1';
 
 setupThemeUI();
@@ -262,6 +262,9 @@ function renderStats(){
  const active=activePatientCount(state);
  el('calendar-active-count').textContent=String(active);
  el('calendar-add-patient').setAttribute('aria-label','Добавить пациента. Активных пациентов: '+active);
+ // iPhone badge mirrors the existing desktop active-patient counter.
+ el('mobile-top-active-count').textContent=String(active);
+ el('mobile-top-add').setAttribute('aria-label','Добавить пациента. Активных пациентов: '+active);
  const completedCount=completedTasks.length;
  // The toolbar badge ALWAYS counts today's open tasks, even while viewing history.
  const todayPending=taskViewDate===today?pending:todayTasks(state,today).filter(task=>!task.done).length;
@@ -732,6 +735,7 @@ setupCalendarCellContextMenu({
  },
  onAction:handleCalendarContextAction
 });
+el('mobile-top-add').onclick=()=>patientUI.createNew();
 mobileUI=createMobileWeekUI({
  root:el('mobile-patient-shell'),tabbar:el('mobile-bottom-nav'),
  actionsDialog:el('mobile-actions-dialog'),

@@ -237,12 +237,9 @@ export function createMobileWeekUI({
   $('#mobile-selection').hidden=count===0;
   $('#mobile-selection-count').textContent=count===1?'1 ячейка':'Выбрано: '+count;
   const rows=mobileVisibleRows(appState,getRows(),{filter:getFilter(),search,today:today()});
-  $('#mobile-patient-count').textContent='Пациентов: '+rows.length;
   $('#mobile-card-list').innerHTML=renderMobilePatientCards(appState,rows,{weekDate,selected,today:today()})||
    '<p class="mobile-empty">По выбранным условиям пациентов нет</p>';
   const pending=todayTasks(appState,today()).filter(x=>!x.done).length;
-  $('#mobile-task-count').textContent=String(pending);
-  $('#mobile-task-count').classList.toggle('has-pending',pending>0);
   tabbar.querySelector('#mobile-tab-tasks-count').textContent=pending?String(pending):'';
   renderTasks();
  }
@@ -297,7 +294,6 @@ export function createMobileWeekUI({
  },{passive:true});
  function renderCardsOnly(){
   const rows=mobileVisibleRows(getState(),getRows(),{filter:getFilter(),search,today:today()});
-  $('#mobile-patient-count').textContent='Пациентов: '+rows.length;
   $('#mobile-card-list').innerHTML=renderMobilePatientCards(getState(),rows,{weekDate,selected:getSelected(),today:today()})||
    '<p class="mobile-empty">По выбранным условиям пациентов нет</p>';
  }

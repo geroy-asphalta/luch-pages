@@ -21,7 +21,7 @@
 <link rel="stylesheet" href="./catalog-ui.css?v=3">
 <link rel="stylesheet" href="./theme-dark.css?v=4">
 <link rel="stylesheet" href="./glass-ui.css?v=28">
-<link rel="stylesheet" href="./mobile-week.css?v=6">
+<link rel="stylesheet" href="./mobile-week.css?v=7">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" type="image/svg+xml" href="./icon.svg">
 <title>ЛУЧ · Календарь</title>
@@ -30,6 +30,10 @@
 <div class="app">
 <header class="topbar">
  <div class="logo"><span class="mark brand-glass-mark" aria-hidden="true"><svg class="brand-rays" viewBox="0 0 40 40" width="29" height="29" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true"><g class="brand-rays-glow" stroke="#75F6D7" stroke-width="5" stroke-linecap="round"><path d="M20 7V33M7 20H33M10.8 10.8L29.2 29.2M29.2 10.8L10.8 29.2"/></g><g class="brand-rays-core" stroke="#8DF7D9" stroke-width="2.9" stroke-linecap="round"><path d="M20 7V33M7 20H33M10.8 10.8L29.2 29.2M29.2 10.8L10.8 29.2"/></g></svg></span><span><b>ЛУЧ</b><small>Календарь отделения</small></span></div>
+ <button type="button" id="mobile-top-add" class="mobile-top-add" aria-label="Добавить пациента. Активных пациентов: 0">
+  <span class="mobile-top-add-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7.3" r="3.2"/><path d="M3.4 20v-2a5.6 5.6 0 0 1 11.2 0v2"/><path d="M18.5 10.5v8M14.5 14.5h8"/></svg></span>
+  <span id="mobile-top-active-count" class="mobile-top-active-count" aria-hidden="true">0</span>
+ </button>
  <div class="demo"><span>ДЕМО</span><span class="topbar-demo-extra"> · ВЫМЫШЛЕННЫЕ ПАЦИЕНТЫ</span></div>
  <button id="cloud-open" type="button" aria-label="Настройки синхронизации" title="Синхронизация вымышленных данных"><span aria-hidden="true">☁</span> <span class="topbar-cloud-label">Синхронизация</span></button>
  <div class="theme-switcher">
@@ -88,10 +92,6 @@
 <section id="mobile-patient-shell" class="mobile-only mobile-patient-shell" aria-label="Мобильный календарь пациентов">
  <header class="mobile-patient-header">
   <div><span class="mobile-eyebrow">ЛУЧ · Календарь отделения</span><h2 id="mobile-page-title">Пациенты</h2></div>
-  <div class="mobile-header-actions">
-   <button type="button" data-mobile-command="add" class="mobile-add-button" aria-label="Добавить пациента">＋</button>
-   <button type="button" data-mobile-tab-shortcut="tasks" class="mobile-header-tasks" aria-label="Задачи на сегодня"><span aria-hidden="true">☑</span><span id="mobile-task-count">0</span></button>
-  </div>
  </header>
  <div id="mobile-card-view">
   <div class="mobile-search-row">
@@ -102,18 +102,14 @@
     <input id="mobile-search" type="search" placeholder="Поиск пациента…" autocomplete="off" aria-label="Поиск пациентов" disabled>
     <button type="button" id="mobile-search-close" class="mobile-search-close" aria-label="Свернуть и очистить поиск" disabled>×</button>
    </div>
+   <div class="mobile-week-navigation" role="group" aria-label="Выбор недели">
+    <button type="button" data-mobile-week-shift="-1" aria-label="Предыдущая неделя">‹</button>
+    <span id="mobile-week-range" aria-live="polite"></span>
+    <button type="button" data-mobile-week-shift="1" aria-label="Следующая неделя">›</button>
+    <label class="mobile-date-jump" for="mobile-week-date" title="Выбрать дату"><svg class="mobile-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="17" rx="2"/><path d="M7.5 2.5v4M16.5 2.5v4M2.5 9h19"/></svg><input type="date" id="mobile-week-date" aria-label="Дата для просмотра недели"></label>
+   </div>
    <select id="mobile-filter" aria-label="Фильтр установок"><option value="">Все установки</option></select>
   </div>
-  <div class="mobile-week-toolbar">
-   <span id="mobile-patient-count" class="mobile-patient-count"></span>
-  </div>
-  <div class="mobile-week-navigation">
-   <button type="button" data-mobile-week-shift="-1" aria-label="Предыдущая неделя">‹</button>
-   <span id="mobile-week-range" aria-live="polite"></span>
-   <button type="button" data-mobile-week-shift="1" aria-label="Следующая неделя">›</button>
-   <label class="mobile-date-jump" for="mobile-week-date" title="Выбрать дату">▦<input type="date" id="mobile-week-date" aria-label="Дата для просмотра недели"></label>
-  </div>
-  <p class="mobile-mobile-hint">Нажми на день, чтобы выбрать его. Можно выбрать несколько дней и открыть действия.</p>
   <div id="mobile-card-list" class="mobile-card-list" aria-live="off"></div>
  </div>
  <section id="mobile-task-view" class="mobile-secondary-screen" aria-label="Мои задачи" hidden>
@@ -447,5 +443,5 @@
  <p class="mobile-actions-footnote">Изменения расписания не являются клиническим подтверждением проведения процедур.</p>
 </dialog>
 <div role="status" aria-live="polite" id="toast" class="toast"></div>
-<script type="module" src="./app.mjs?v=1.95"></script>
+<script type="module" src="./app.mjs?v=1.96"></script>
 </body></html>
