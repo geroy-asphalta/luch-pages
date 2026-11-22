@@ -12,7 +12,7 @@ import {orderedPersonIds,comparePatientEntries,reorderPatientDraft} from './pati
 import {setupPatientReordering} from './patient-drag.mjs?v=2';
 import {labSingleButtonDraft} from './lab-batch-preview.mjs';
 import {labButtonIntent,issueButtonIntent,skipButtonIntent,calendarActionIcon} from './calendar-action-ui.mjs?v=5';
-import {scrollCalendarToWeek,calendarWindowDates,enableCalendarHorizontalWheel} from './calendar-viewport.mjs?v=9';
+import {scrollCalendarToWeek,calendarWindowDates,enableCalendarHorizontalWheel} from './calendar-viewport.mjs?v=8';
 import {calendarContact} from './calendar-contact.mjs';
 import {setupCalendarInlineNotes} from './calendar-note-inline.mjs?v=2';
 import {calendarElnIndicator} from './calendar-eln-indicator.mjs?v=2';
@@ -61,21 +61,6 @@ try { localStorage.setItem(store,JSON.stringify(state)); } catch {}
 let month=localToday().slice(0,7),view='calendar',selected=new Set(),anchor=null,filter='',patientSort='order';
 // Purely local visual focus, never persisted or synced to patient records.
 let highlightedCalendarPersonId=null;
-let calendarDateCellIndex=new Map();
-// Selection is a visual UI state. Update only changed cells and action buttons;
-// never rebuild the whole roster and every clinical status just to tick a day.
-function paintCalendarSelection(previous){
- for(const key of previous)if(!selected.has(key))calendarDateCellIndex.get(key)?.classList.remove('selected');
- for(const key of selected)if(!previous.has(key))calendarDateCellIndex.get(key)?.classList.add('selected');
- el('selected-count').textContent=selected.size?'Выбрано: '+selected.size:'Ничего не выбрано';
- el('clear-selected').classList.toggle('hidden',!selected.size);
- renderActionButtons();
-}
-function commitCalendarVisualSelection(previous){
- // The mobile week UI has separate computed panels and needs its own redraw.
- if(window.matchMedia('(max-width:700px)').matches)render();
- else paintCalendarSelection(previous);
-}
 function syncCalendarPatientHighlight(){
  const calendar=document.getElementById('calendar');
  calendar.querySelectorAll('tbody tr[data-person-id]').forEach(row=>{
@@ -180,7 +165,6 @@ function issueWeekClick(){
 }
 function selectCell(id,date,event){
  hideWeekPreview();
- const previouslySelected=new Set(selected);
  const key=cellKey(id,date);
  if(event.shiftKey && anchor){
    const [startId,startDate]=anchor.split('|');
@@ -200,7 +184,7 @@ function selectCell(id,date,event){
  // An empty selection should have no shift-range anchor. If one of several
  // selected cells was removed, keep the anchor on a cell that remains.
  anchor=selected.size?(selected.has(key)?key:[...selected].at(-1)):null;
- commitCalendarVisualSelection(previouslySelected);
+ render();
 }
 function previewCalendarRange(keys){
  el('selected-count').textContent=keys.size?'Выбрано: '+keys.size:'Ничего не выбрано';
@@ -208,10 +192,9 @@ function previewCalendarRange(keys){
 }
 function commitCalendarRange(keys,start){
  hideWeekPreview();
- const previouslySelected=new Set(selected);
  selected=new Set(keys);
  anchor=cellKey(start.patientId,start.date);
- commitCalendarVisualSelection(previouslySelected);
+ render();
 }
 function visiblePatients(){
  const dates=calendarWindowDates(month);
@@ -345,10 +328,10 @@ function renderCalendar(){
    const notes=contact.notes?'<span class="calendar-note-value">'+esc(contact.notes)+'</span>':'<span class="calendar-empty">—</span>';
    const tds=dates.map(d=>{
      if(p.noCourse)return '<td class="calendar-no-course-day'+(d===todayForGlass?' glass-today':'')+(isWeekend(d)&&!isWorkingDay(state,d)?' glass-rest-day':'')+'"></td>';
-     const c=plan.get(d),sessionCompletion=radiationSessionCompletion(c,d,todayForGlass),elapsed=sessionCompletion.source==='calendar',lab=labAt(state,p.id,d),chemo=state.events.some(e=>e.patientId===p.id&&e.date===d&&e.type==='chemo'&&['planned','administered','given'].includes(e.status)),key=cellKey(p.id,d);
+     const c=plan.get(d),sessionCompletion=radiationSessionCompletion(c,d,localToday()),elapsed=sessionCompletion.source==='calendar',lab=labAt(state,p.id,d),chemo=state.events.some(e=>e.patientId===p.id&&e.date===d&&e.type==='chemo'&&['planned','administered','given'].includes(e.status)),key=cellKey(p.id,d);
      const chemoEvent=state.events.find(e=>e.patientId===p.id&&e.date===d&&e.type==='chemo'&&e.source==='hlt');
      const chemoCancelled=chemoEvent?.status==='cancelled';
-     const chemoOutcome=chemoAdministrationState(chemoEvent,todayForGlass);
+     const chemoOutcome=chemoAdministrationState(chemoEvent,localToday());
      const chemoMissed=chemoOutcome==='not-given'||chemoCancelled;
      const working=isWorkingDay(state,d),weekend=isWeekend(d)&&!working;
      const cl=['day',!working?'off':'',weekend?'weekend-day':'',effectiveDay(state,d)?.holiday?'holiday-day':'',c?.kind||'',c?.final?'final':'',c?.beforeMaintenance?'maintenance-final':'',c?.delivered?'delivered':'',elapsed?'elapsed':'',lab==='todo'?'lab':lab==='issued'?'issued':'',chemo?'chemo-day':'',lab||chemo?'has-treatment-event':'',lab?'has-lab-event':'',chemo?'has-chemo-event':'',chemoCancelled?'chemo-cancelled':'',selected.has(key)?'selected':'',d===todayForGlass?'glass-today':''].join(' ');
@@ -361,12 +344,11 @@ function renderCalendar(){
    const nameParts=calendarPatientNameParts(p.name);
    return '<tr data-person-id="'+esc(p.personId)+'" data-course-id="'+(p.noCourse?'':esc(p.id))+'"'+(p.noCourse?' class="calendar-no-course-row"':'')+'><td class="sticky id">'+esc(p.personId)+calendarElnIndicator(contact.eln)+'</td><td class="sticky name"><div class="calendar-patient-primary"><button type="button" class="patient-open" data-person-id="'+esc(p.personId)+'" aria-label="Открыть карточку пациента: '+esc(p.name)+'"><span class="patient-name-short" aria-hidden="true"><span class="patient-name-surname">'+esc(nameParts.surname)+'</span>'+(nameParts.compactRemainder?'<span class="patient-name-remainder">'+esc(nameParts.compactRemainder)+'</span>':'')+'</span><span class="patient-name-full" aria-hidden="true"><span class="patient-name-surname">'+esc(nameParts.surname)+'</span>'+(nameParts.fullRemainder?'<span class="patient-name-remainder">'+esc(nameParts.fullRemainder)+'</span>':'')+'</span></button>'+(p.treatmentType==='ХЛТ'?'<span class="type-tag">ХЛТ</span>':'')+'</div>'+patientMeta+'</td><td class="sticky machine">'+(p.noCourse?'<span class="calendar-empty">—</span>':machineAt(p,state,until)+(p.machine!==machineAt(p,state,until)?'<small>с '+p.machine+'</small>':''))+'</td><td class="sticky calendar-phone"><span class="calendar-phone-value">'+phone+'</span><span class="calendar-phone-icon" aria-hidden="true">'+(contact.phone?calendarPhoneHandsetIcon:'—')+'</span></td><td class="sticky calendar-notes"><button type="button" class="calendar-note-trigger" data-calendar-note-open aria-label="Изменить примечание пациента: '+esc(p.name)+'">'+notes+'</button></td>'+tds+'<td class="calendar-tail" aria-hidden="true"></td></tr>';
  }).join('');
- calendarDateCellIndex=new Map([...el('calendar').querySelectorAll('td.day[data-id][data-date]')]
-  .map(td=>[cellKey(td.dataset.id,td.dataset.date),td]));
  syncCalendarPatientHighlight();
  el('selected-count').textContent=selected.size?'Выбрано: '+selected.size:'Ничего не выбрано';
  el('clear-selected').classList.toggle('hidden',!selected.size);
  if(scroller)scroller.scrollLeft=previousLeft;
+ el('calendar').querySelectorAll('td.day').forEach(td=>td.addEventListener('click',e=>selectCell(td.dataset.id,td.dataset.date,e)));
  el('calendar').querySelectorAll('.patient-open').forEach(btn=>btn.onclick=()=>patientUI.selectPerson(btn.dataset.personId));
  el('calendar-phone-toggle').onclick=()=>{
   phoneExpanded=!phoneExpanded;
@@ -669,11 +651,7 @@ el('next').onclick=()=>{hideWeekPreview();month=monthShift(month,1);selected.cle
 el('reset-month').onclick=showCurrentWeek;
 el('assign').onclick=applyLabAction;
 el('issue').onclick=issueWeekClick;
-el('clear-selected').onclick=()=>{
- const previouslySelected=new Set(selected);
- selected.clear();anchor=null;hideWeekPreview();
- commitCalendarVisualSelection(previouslySelected);
-};
+el('clear-selected').onclick=()=>{selected.clear();anchor=null;hideWeekPreview();render();};
 el('issue-week-options').onchange=e=>{if(e.target.value!=='custom'){el('issue-week-date').value=e.target.value;renderWeekPreview();}};
 el('issue-week-date').onchange=renderWeekPreview;
 el('issue-week-confirm').onclick=()=>{
@@ -785,11 +763,6 @@ setupCalendarRangeSelection({
  getSelected:()=>selected,
  onPreview:previewCalendarRange,
  onCommit:commitCalendarRange
-});
-// A single delegated listener covers the full date grid even after redraws.
-el('calendar').addEventListener('click',event=>{
- const td=event.target?.closest?.('td.day[data-id][data-date]');
- if(td&&el('calendar').contains(td))selectCell(td.dataset.id,td.dataset.date,event);
 });
 enableCalendarHorizontalWheel(el('calendar'));
 catalogUI.setup();
