@@ -563,6 +563,20 @@
   border-color:var(--mobile-border);
   box-shadow:0 10px 25px rgba(28,59,76,.12)
  }
+ /* ХЛТ: amethyst outline and restrained glow, with no extra icon or
+    layout change. Keep the highlight both collapsed and expanded. */
+ .mobile-patient-card.is-chemoradiation,
+ .mobile-patient-card.is-chemoradiation.is-expanded{
+  border-color:#a076d9;
+  background:linear-gradient(110deg,rgba(137,88,207,.075),var(--mobile-surface) 70%);
+  box-shadow:0 0 0 1px rgba(137,88,207,.34),0 6px 18px rgba(115,76,168,.13)
+ }
+ html[data-theme="dark"] .mobile-patient-card.is-chemoradiation,
+ html[data-theme="dark"] .mobile-patient-card.is-chemoradiation.is-expanded{
+  border-color:#b899f0;
+  background:linear-gradient(110deg,rgba(137,88,207,.2),var(--mobile-surface) 78%);
+  box-shadow:0 0 0 1px rgba(184,153,240,.32),0 6px 18px rgba(55,28,86,.28)
+ }
  .mobile-patient-summary{
   display:flex;align-items:center;gap:5px;min-width:0
  }
@@ -645,4 +659,16 @@
 @media(prefers-reduced-motion:reduce){
  .mobile-patient-expansion,.mobile-patient-expansion-content,
  .mobile-patient-card{transition:none!important}
+}
+@media(max-width:700px) and (prefers-contrast:more){
+ .mobile-patient-card.is-chemoradiation,
+ .mobile-patient-card.is-chemoradiation.is-expanded{
+  border-color:#8958cf;box-shadow:none
+ }
+}
+@media(max-width:700px) and (forced-colors:active){
+ .mobile-patient-card.is-chemoradiation,
+ .mobile-patient-card.is-chemoradiation.is-expanded{
+  border-color:Highlight;box-shadow:none
+ }
 }

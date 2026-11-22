@@ -95,11 +95,12 @@ export function renderMobilePatientCards(state,rows,{weekDate=localToday(),selec
     (data.secondary?'<span class="mobile-date-secondary">'+esc(data.secondary)+'</span>':'')+'</button>';
   }).join('');
   const isExpanded=expanded.has(course.id),patientName=esc(course.name);
+  const isChemoradiation=!course.noCourse&&course.treatmentType==='ХЛТ';
   const elnActive=contact.eln==='Да';
   const callIcon='<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.2 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.96.34 1.91.67 2.83a2 2 0 0 1-.45 2.11L8.06 9.94a16 16 0 0 0 6 6l1.28-1.27a2 2 0 0 1 2.11-.45c.92.33 1.87.55 2.83.67A2 2 0 0 1 22 16.92z"/></svg>';
   const call=phoneDigits?'<a class="mobile-summary-call" href="tel:'+esc(phoneDigits)+'" aria-label="Позвонить пациенту: '+patientName+'" title="Позвонить">'+callIcon+'</a>':
    '<span class="mobile-summary-call is-unavailable" aria-label="Телефон не указан">'+callIcon+'</span>';
-  return '<article class="mobile-patient-card'+(isExpanded?' is-expanded':'')+'" data-mobile-course-id="'+esc(course.id)+'" data-mobile-person-id="'+esc(course.personId)+'">'+
+  return '<article class="mobile-patient-card'+(isExpanded?' is-expanded':'')+(isChemoradiation?' is-chemoradiation':'')+'" data-mobile-course-id="'+esc(course.id)+'" data-mobile-person-id="'+esc(course.personId)+'">'+
    '<div class="mobile-patient-summary">'+
     '<button type="button" class="mobile-summary-toggle" data-mobile-expand="'+esc(course.id)+'" aria-expanded="'+isExpanded+'" aria-controls="mobile-detail-'+esc(course.id)+'" aria-label="'+(isExpanded?'Свернуть':'Развернуть')+' пациента '+patientName+'. СТВ: '+esc(ctv)+(progress?'. ЛТ: '+progress.completed+' из '+progress.total:'')+(elnActive?'. ЭЛН оформлен':'')+'">'+
      '<span class="mobile-summary-name" title="'+patientName+'">'+esc(compactPatientName(course.name))+'</span>'+
