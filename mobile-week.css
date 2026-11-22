@@ -672,3 +672,86 @@
   border-color:Highlight;box-shadow:none
  }
 }
+
+/* Expanding iPhone patient header: keep the name in place; fade compact
+   badges away and crossfade the phone action into the actual edit form. */
+@media(max-width:700px){
+ .mobile-summary-name{
+  flex:1 1 0;min-width:0;max-width:100%;overflow:hidden;
+  font-weight:800;line-height:1.24
+ }
+ .mobile-summary-name-short,.mobile-summary-name-full{
+  display:block;overflow:hidden;transform:translateY(0);
+  transition:max-height .34s cubic-bezier(.22,1,.36,1),
+    opacity .22s ease,transform .32s cubic-bezier(.22,1,.36,1)
+ }
+ .mobile-summary-name-short{
+  max-height:30px;opacity:1;white-space:nowrap;text-overflow:ellipsis
+ }
+ .mobile-summary-name-full{
+  max-height:0;opacity:0;white-space:normal;overflow-wrap:anywhere;
+  font-size:15px;line-height:1.26;transform:translateY(5px)
+ }
+ .mobile-patient-card.is-expanded .mobile-summary-name-short{
+  max-height:0;opacity:0;transform:translateY(-6px)
+ }
+ .mobile-patient-card.is-expanded .mobile-summary-name-full{
+  max-height:100px;opacity:1;transform:translateY(0)
+ }
+ .mobile-summary-extras{
+  display:flex;flex:0 1 auto;align-items:center;gap:5px;
+  min-width:0;max-width:245px;overflow:hidden;white-space:nowrap;opacity:1;
+  transition:max-width .36s cubic-bezier(.22,1,.36,1),opacity .23s ease
+ }
+ .mobile-patient-card.is-expanded .mobile-summary-extras{
+  max-width:0;opacity:0;pointer-events:none
+ }
+ .mobile-summary-action{
+  display:block;position:relative;flex:0 0 42px;width:42px;height:42px
+ }
+ .mobile-summary-action .mobile-summary-call,.mobile-summary-edit{
+  position:absolute;inset:0;display:grid;place-items:center;
+  width:42px;height:42px;border-radius:50%;
+  border:1px solid var(--mobile-border);
+  background:var(--mobile-accent-soft);color:var(--mobile-accent);
+  -webkit-tap-highlight-color:transparent;
+  transition:opacity .28s ease,transform .34s cubic-bezier(.22,1,.36,1)
+ }
+ .mobile-summary-action .mobile-summary-call{opacity:1;transform:scale(1) rotate(0deg)}
+ .mobile-summary-action .mobile-summary-call.is-unavailable{opacity:.4}
+ .mobile-summary-edit{
+  opacity:0;transform:scale(.7) rotate(-18deg);pointer-events:none
+ }
+ .mobile-summary-edit svg{display:block;width:20px;height:20px}
+ .mobile-patient-card.is-expanded .mobile-summary-action .mobile-summary-call{
+  opacity:0;transform:scale(.7) rotate(16deg);pointer-events:none
+ }
+ .mobile-patient-card.is-expanded .mobile-summary-edit{
+  opacity:1;transform:scale(1) rotate(0deg);pointer-events:auto
+ }
+ .mobile-summary-edit:focus-visible,.mobile-patient-phone:focus-visible{
+  outline:2px solid var(--mobile-accent);outline-offset:2px
+ }
+ .mobile-patient-expansion .mobile-patient-details{margin-top:3px}
+ .mobile-patient-expansion .mobile-patient-phone{
+  display:inline-flex;align-items:center;min-height:35px;
+  font-weight:750;color:var(--mobile-accent);
+  text-decoration:underline;text-decoration-thickness:1px;
+  text-underline-offset:3px;text-decoration-color:currentColor;
+  -webkit-tap-highlight-color:transparent
+ }
+ .mobile-patient-expansion .mobile-patient-details .mobile-eln{
+  color:#ac2941;background:#ffe5e9;border-color:#e5a2b0
+ }
+ html[data-theme="dark"] .mobile-patient-expansion .mobile-patient-details .mobile-eln{
+  color:#ffc2ce;background:#66313e;border-color:#af586b
+ }
+}
+@media(max-width:370px){
+ .mobile-summary-extras{gap:3px}
+ .mobile-summary-name-full{font-size:14px}
+}
+@media(prefers-reduced-motion:reduce){
+ .mobile-summary-name-short,.mobile-summary-name-full,.mobile-summary-extras,
+ .mobile-summary-action .mobile-summary-call,.mobile-summary-edit{transition:none!important}
+}

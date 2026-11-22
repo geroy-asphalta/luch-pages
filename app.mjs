@@ -3,7 +3,7 @@ import {isWorkingDay,effectiveDay,effectiveDayLabel} from './work-calendar.mjs';
 import {createWorkdayUI} from './workday-ui.mjs?v=2';
 import {createOperationalUI} from './operations-ui.mjs';
 import {ensurePatientModel} from './patient-model.mjs';
-import {createPatientUI} from './patient-ui.mjs?v=12';
+import {createPatientUI} from './patient-ui.mjs?v=13';
 import {createCatalogUI} from './catalog-ui.mjs';
 import {currentCtvName} from './ctv-display.mjs';
 import {courseProgress,localToday,radiationSessionCompletion,dischargeCandidates,dischargeBatchDraft} from './course-progress.mjs?v=3';
@@ -38,7 +38,7 @@ import {setupDischargeTextReportUI} from './discharge-text-ui.mjs?v=4';
 import {setupThemeUI} from './theme-ui.mjs';
 import {setupGlassUI,isGlassSuccessNotice} from './glass-ui.mjs?v=4';
 import {setupSidebarGlass} from './sidebar-glass.mjs?v=1';
-import {createMobileWeekUI} from './mobile-week-ui.mjs?v=11';
+import {createMobileWeekUI} from './mobile-week-ui.mjs?v=12';
 import {setupMachineFilterGlass} from './calendar-machine-filter-glass.mjs?v=1';
 
 setupThemeUI();
@@ -742,7 +742,7 @@ mobileUI=createMobileWeekUI({
  getState:()=>state,getRows:()=>visiblePatients(),getSelected:()=>selected,getFilter:()=>filter,
  onFilter:value=>{hideWeekPreview();filter=value;el('filter').value=value;selected.clear();anchor=null;render();},
  onSelect:(id,date,event)=>selectCell(id,date,event),
- onPatient:personId=>patientUI.selectPerson(personId),
+ onPatient:personId=>patientUI.editPerson(personId),
  onAdd:()=>patientUI.createNew(),
  onOpenRegister:()=>{cardDrawer.open();el('patient-card-register-toggle').click();},
  onReset:()=>el('reset').click(),
