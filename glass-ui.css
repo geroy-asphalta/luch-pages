@@ -1430,3 +1430,15 @@ html[data-theme="dark"] .workspace[data-panel="calendar"] > .toolbar{
  .workspace[data-panel="calendar"]{box-shadow:none}
  .workspace[data-panel="calendar"] > .toolbar{background:var(--clinical-surface)}
 }
+
+
+/* Clinical Glass toolbar tooltips — stacking regression fix.
+   The frozen calendar header is z-index:7, while style.css left the toolbar at
+   z-index:6. The two :hover/:focus-visible button tooltips therefore appeared
+   UNDER the header instead of floating over the first patient row.
+   Lift only the existing toolbar as one stacking context. Keep the workspace
+   clipping/scrolling, clinical cells and tooltip pointer behavior untouched. */
+.workspace[data-panel="calendar"] > .toolbar{
+ position:relative;
+ z-index:12
+}
