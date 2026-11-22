@@ -33,6 +33,7 @@ import {calendarRosterRows} from './calendar-roster-rows.mjs';
 import {syncCourseStartStatusesDraft} from './course-start-status.mjs';
 import {installImportedLabColors} from './demo-lab-colors.mjs?v=1';
 import {createFirebaseDemoSync} from './firebase-demo-state-ui.mjs';
+import {setupCourseStartRecovery} from './course-start-recovery-ui.mjs';
 import {setupDischargeTextReportUI} from './discharge-text-ui.mjs?v=4';
 import {setupThemeUI} from './theme-ui.mjs';
 import {setupGlassUI,isGlassSuccessNotice} from './glass-ui.mjs?v=4';
@@ -446,6 +447,12 @@ const workdayUI=createWorkdayUI({getState:()=>state,commitState:next=>{state=nex
 inlineNotesUI=setupCalendarInlineNotes({calendar:el('calendar'),getState:()=>state,
  commitState:next=>{state=next;save();},renderApp:()=>render(),notice,
  onClosed:()=>cloudUI?.checkRemote()});
+const recoveryUI=setupCourseStartRecovery({
+ getState:()=>state,
+ commitState:next=>{state=next;save();},
+ renderApp:()=>render(),
+ notice
+});
 cloudUI=createFirebaseDemoSync({
  getState:()=>state,
  replaceState:(next,payload)=>{
@@ -457,7 +464,8 @@ cloudUI=createFirebaseDemoSync({
    hideWeekPreview();render();
   }finally{applyingRemoteState=false;}
  },
- canApplyRemote:()=>!inlineNotesUI?.isEditing()&&![...document.querySelectorAll('dialog')]
+ canApplyRemote:()=>!patientUI.isEditing()&&!recoveryUI.hasDraft()&&
+  !inlineNotesUI?.isEditing()&&![...document.querySelectorAll('dialog')]
   .some(d=>d.open&&d.id!=='cloud-dialog')
 });
 // The final-fraction question is grouped by day. A single explicit action
