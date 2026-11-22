@@ -263,7 +263,8 @@
   transform:translateX(-50%);z-index:99;width:min(calc(100vw - 28px),480px);
   display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2px;
   background:var(--mobile-glass);border:1px solid var(--mobile-border);
-  border-radius:23px;padding:4px;box-shadow:0 8px 24px #112e3b33;
+  border-radius:23px;padding:4px;box-shadow:none;
+  overflow:hidden;isolation:isolate;background-clip:padding-box;
   -webkit-backdrop-filter:blur(17px) saturate(1.2);
   backdrop-filter:blur(17px) saturate(1.2)
  }
