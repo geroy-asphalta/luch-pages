@@ -577,36 +577,34 @@
   outline:2px solid var(--mobile-accent);outline-offset:1px
  }
  .mobile-summary-name{
-  display:block;flex:1 1 0;min-width:0;
+  display:block;flex:0 1 auto;min-width:0;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   font-size:12.5px;font-weight:800;letter-spacing:-.32px;
  }
  .mobile-summary-ctv{
-  display:block;flex:0 1 82px;min-width:0;max-width:82px;
+  display:block;flex:0 1 70px;min-width:0;max-width:70px;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   border-radius:8px;padding:4px 5px;
   color:var(--mobile-muted);background:var(--mobile-surface-2);
   border:1px solid var(--mobile-border);
   font-size:9px;font-weight:700;line-height:1.05
  }
+ .mobile-summary-progress{
+  flex:none;min-width:36px;border-radius:8px;padding:4px 5px;
+  color:var(--mobile-text);background:var(--mobile-surface-2);
+  border:1px solid var(--mobile-border);font-size:10px;
+  line-height:1.05;font-weight:800;white-space:nowrap;
+  text-align:center;font-variant-numeric:tabular-nums
+ }
  .mobile-summary-eln{
   flex:none;border-radius:8px;padding:4px 5px;
-  font-size:9px;line-height:1.05;font-weight:750;
-  color:var(--mobile-muted);border:1px solid var(--mobile-border);
-  white-space:nowrap;background:var(--mobile-surface-2)
+  font-size:9px;line-height:1.05;font-weight:800;
+  color:#ac2941;border:1px solid #e5a2b0;
+  white-space:nowrap;background:#ffe5e9
  }
- .mobile-summary-eln.is-active{
-  background:#d6f4db;border-color:#98d9a8;color:#226e40
+ html[data-theme="dark"] .mobile-summary-eln{
+  background:#66313e;color:#ffc2ce;border-color:#af586b
  }
- html[data-theme="dark"] .mobile-summary-eln.is-active{
-  background:#2b573d;border-color:#437b55;color:#b9f0c8
- }
- .mobile-summary-chevron{
-  flex:none;font-size:19px;line-height:1;
-  color:var(--mobile-muted);transform:rotate(0);
-  transition:transform .28s cubic-bezier(.2,.8,.2,1)
- }
- .mobile-patient-card.is-expanded .mobile-summary-chevron{transform:rotate(180deg)}
  .mobile-summary-call{
   display:grid;place-items:center;flex:0 0 42px;
   width:42px;height:42px;border-radius:50%;
@@ -640,10 +638,11 @@
 @media(max-width:370px){
  .mobile-summary-toggle{gap:3px;padding-left:5px}
  .mobile-summary-name{font-size:11.5px}
- .mobile-summary-ctv{flex-basis:64px;max-width:64px}
+ .mobile-summary-ctv{flex-basis:62px;max-width:62px;font-size:8.6px}
+ .mobile-summary-progress{font-size:9px;min-width:32px;padding:4px 3px}
  .mobile-summary-eln{font-size:8.5px;padding:4px 3px}
 }
 @media(prefers-reduced-motion:reduce){
  .mobile-patient-expansion,.mobile-patient-expansion-content,
- .mobile-patient-card,.mobile-summary-chevron{transition:none!important}
+ .mobile-patient-card{transition:none!important}
 }

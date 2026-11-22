@@ -101,11 +101,12 @@ export function renderMobilePatientCards(state,rows,{weekDate=localToday(),selec
    '<span class="mobile-summary-call is-unavailable" aria-label="Телефон не указан">'+callIcon+'</span>';
   return '<article class="mobile-patient-card'+(isExpanded?' is-expanded':'')+'" data-mobile-course-id="'+esc(course.id)+'" data-mobile-person-id="'+esc(course.personId)+'">'+
    '<div class="mobile-patient-summary">'+
-    '<button type="button" class="mobile-summary-toggle" data-mobile-expand="'+esc(course.id)+'" aria-expanded="'+isExpanded+'" aria-controls="mobile-detail-'+esc(course.id)+'" aria-label="'+(isExpanded?'Свернуть':'Развернуть')+' пациента '+patientName+'. СТВ: '+esc(ctv)+'. ЭЛН: '+(elnActive?'да':'нет')+'">'+
+    '<button type="button" class="mobile-summary-toggle" data-mobile-expand="'+esc(course.id)+'" aria-expanded="'+isExpanded+'" aria-controls="mobile-detail-'+esc(course.id)+'" aria-label="'+(isExpanded?'Свернуть':'Развернуть')+' пациента '+patientName+'. СТВ: '+esc(ctv)+(progress?'. ЛТ: '+progress.completed+' из '+progress.total:'')+(elnActive?'. ЭЛН оформлен':'')+'">'+
      '<span class="mobile-summary-name" title="'+patientName+'">'+esc(compactPatientName(course.name))+'</span>'+
      '<span class="mobile-summary-ctv" title="СТВ: '+esc(ctv)+'">'+esc(ctv)+'</span>'+
-     '<span class="mobile-summary-eln'+(elnActive?' is-active':'')+'" title="'+(elnActive?'ЭЛН оформлен':'ЭЛН нет')+'">ЭЛН'+(elnActive?' ✓':' —')+'</span>'+
-     '<span class="mobile-summary-chevron" aria-hidden="true">⌄</span></button>'+
+     (progress?'<span class="mobile-summary-progress" title="Сеансов ЛТ: '+progress.completed+' из '+progress.total+'">'+progress.completed+'/'+progress.total+'</span>':'')+
+     (elnActive?'<span class="mobile-summary-eln" title="ЭЛН оформлен">ЭЛН</span>':'')+
+     '</button>'+
     call+'</div>'+
    '<div class="mobile-patient-expansion" id="mobile-detail-'+esc(course.id)+'" aria-hidden="'+(!isExpanded)+'"'+(isExpanded?'':' inert')+'>'+
     '<div class="mobile-patient-expansion-content">'+
