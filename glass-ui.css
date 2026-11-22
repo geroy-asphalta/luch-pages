@@ -599,6 +599,9 @@ html[data-theme="dark"]{
  border-right-color:var(--glass-band-divider);
  box-shadow:none
 }
+.workspace[data-panel="calendar"] .calendar tbody tr:hover td.sticky{
+ background-color:var(--glass-band-hover)
+}
 /* Do not override the existing inline notes editing background or stacking:
    the editor must remain readable above every calendar cell. */
 .workspace[data-panel="calendar"] .calendar tbody td.calendar-notes.calendar-note-editing{
@@ -615,18 +618,19 @@ html[data-theme="dark"] .workspace[data-panel="calendar"] .calendar tbody td.cal
  box-shadow:none
 }
 .workspace[data-panel="calendar"] .calendar tbody :is(td.day,td.calendar-no-course-day){
- transition:outline-color var(--luch-motion-fast,120ms) ease
+ transition:outline-color var(--luch-motion-fast,120ms) ease,
+            box-shadow 175ms var(--glass-ease)
 }
 /* Keep the good parts: a soft hover on exactly the active date cell,
    a clear selected state, and today's lightly outlined date column. */
 .workspace[data-panel="calendar"] .calendar tbody td.day:hover{
- outline-color:var(--glass-cell-hover)
+ box-shadow:inset 0 0 0 2px var(--glass-cell-hover)
 }
 .workspace[data-panel="calendar"] .calendar tbody td.day.selected{
- outline-color:var(--glass-cell-hover)
+ box-shadow:inset 0 0 0 1px var(--glass-cell-hover)
 }
 .workspace[data-panel="calendar"] .calendar tbody td.day.selected:hover{
- outline-color:var(--glass-cell-hover)
+ box-shadow:inset 0 0 0 2px var(--glass-cell-hover)
 }
 /* Today: a single continuous 1px outline, never a box around each day.
    No yellow weekend/holiday fill on TODAY. Other weekend dates stay yellow;
@@ -822,11 +826,11 @@ html[data-theme="dark"] .discharge-text-dialog:is(.luch-zoom-opening,.luch-zoom-
 }
 /* Avoid the boxed-cell look. Keep selected cells distinct and usable. */
 .workspace[data-panel="calendar"] .calendar tbody td.day:hover:not(.selected){
- outline-color:rgba(42,144,180,.26)
+ box-shadow:inset 0 0 0 1px rgba(42,144,180,.26)
 }
 .workspace[data-panel="calendar"] .calendar tbody td.day.selected,
 .workspace[data-panel="calendar"] .calendar tbody td.day.selected:hover{
- outline-color:var(--glass-cell-hover)
+ box-shadow:inset 0 0 0 1px var(--glass-cell-hover)
 }
 html[data-theme="dark"] .workspace[data-panel="calendar"] .calendar :is(th,td){
  border-right-color:rgba(153,192,213,.095);
@@ -837,176 +841,9 @@ html[data-theme="dark"] .workspace[data-panel="calendar"] .calendar tbody td.sti
  border-bottom-color:rgba(153,192,213,.18)
 }
 html[data-theme="dark"] .workspace[data-panel="calendar"] .calendar tbody td.day:hover:not(.selected){
- outline-color:rgba(132,205,238,.35)
+ box-shadow:inset 0 0 0 1px rgba(132,205,238,.35)
 }
 
-
-/* LUCH unified patient surface v2 — approved desktop mockup.
-   The frozen patient columns remain independent, OPAQUE sticky layers.
-   Only non-clinical empty weekend fills and interactive decoration change. */
-:root{
- --luch-row-wash:rgba(78,153,201,.115);
- --luch-row-left:#e8f3fa;
- --luch-weekend-head:#f4f0e7;
- --luch-weekend-body:#faf6ee;
- --luch-weekend-ink:#736b5b;
- --luch-grid-horizontal:rgba(85,125,151,.105);
- --luch-grid-vertical:rgba(85,125,151,.034);
- --luch-patient-divider:rgba(76,116,145,.032)
-}
-html[data-theme="dark"]{
- --luch-row-wash:rgba(124,192,225,.15);
- --luch-row-left:#30495a;
- --luch-weekend-head:#343a3d;
- --luch-weekend-body:#2b333b;
- --luch-weekend-ink:#d0c4ad;
- --luch-grid-horizontal:rgba(145,185,210,.17);
- --luch-grid-vertical:rgba(145,185,210,.065);
- --luch-patient-divider:rgba(145,185,210,.055)
-}
-/* The row, not each data field, is the visual unit. */
-.workspace[data-panel="calendar"] .calendar tbody td.sticky{
- border-right-color:var(--luch-patient-divider);
- border-bottom-color:var(--luch-grid-horizontal);
- background-color:var(--glass-band-bg)
-}
-.workspace[data-panel="calendar"] .calendar thead th.sticky{
- border-right-color:var(--luch-patient-divider);
- border-bottom-color:var(--luch-grid-horizontal)
-}
-.workspace[data-panel="calendar"] .calendar tbody tr.patient-row-active > td.sticky:not(.calendar-note-editing){
- background-color:var(--luch-row-left)
-}
-/* The calendar is a single quiet surface: faint horizontal guides, nearly
-   invisible vertical rules. Do not touch width, padding, position or z-index. */
-.workspace[data-panel="calendar"] .calendar thead th:not(.sticky){
- border-right-color:var(--luch-grid-vertical);
- border-bottom-color:var(--luch-grid-horizontal)
-}
-.workspace[data-panel="calendar"] .calendar tbody > tr > :is(td.day,td.calendar-no-course-day,td.calendar-tail){
- border-right-color:var(--luch-grid-vertical);
- border-bottom-color:var(--luch-grid-horizontal)
-}
-/* Highlight one explicitly clicked patient (and any of their other
-   courses), not whichever row the pointer happens to cross. A single
-   low-cost background layer replaces enormous animated inset shadows.
-   Semantic cell backgrounds, treatment labels and selection remain intact. */
-.workspace[data-panel="calendar"] .calendar tbody tr.patient-row-active > :is(td.day,td.calendar-no-course-day,td.calendar-tail){
- background-image:linear-gradient(var(--luch-row-wash),var(--luch-row-wash))
-}
-/* Selected and focused dates remain clearly visible independently of row hover. */
-.workspace[data-panel="calendar"] .calendar tbody td.day.selected{
- outline-color:#2588b0
-}
-/* Weekend shading: apply only to empty non-working cells, never to clinical
-   sessions, CT, labs, chemotherapy, technical maintenance or missed doses. */
-.workspace[data-panel="calendar"] .calendar thead th.weekend-head:not(.holiday-head):not(.glass-today){
- background:var(--luch-weekend-head);
- color:var(--luch-weekend-ink)
-}
-.workspace[data-panel="calendar"] .calendar thead th.weekend-head:not(.holiday-head):not(.glass-today) small{
- color:var(--luch-weekend-ink)
-}
-.workspace[data-panel="calendar"] .calendar tbody td.day.weekend-day.off:not(.holiday-day):not(.glass-today):not(.session):not(.final):not(.skip):not(.maintenance):not(.breakdown):not(.lab):not(.issued):not(.chemo-day):not(.delivered):not(.maintenance-final){
- background:var(--luch-weekend-body);
- color:var(--luch-weekend-ink)
-}
-.workspace[data-panel="calendar"] .calendar tbody tr.calendar-no-course-row td.calendar-no-course-day.glass-rest-day:not(.glass-today){
- background:var(--luch-weekend-body)
-}
-/* An almost invisible join, never a large gray gutter. The frozen half still
-   has the higher z-index and opaque paint while the dates scroll under it. */
-@media(min-width:1201px){
- .workspace[data-panel="calendar"] .calendar :is(thead th,tbody td).calendar-notes{
-  box-shadow:2px 0 5px -4px var(--glass-frozen-edge)
- }
-}
-@media(min-width:701px) and (max-width:1200px){
- .workspace[data-panel="calendar"] .calendar :is(thead th,tbody td).machine{
-  box-shadow:2px 0 5px -4px var(--glass-frozen-edge)
- }
-}
-@media(prefers-reduced-motion:reduce){
- .workspace[data-panel="calendar"] .calendar tbody td.sticky,
- .workspace[data-panel="calendar"] .calendar tbody :is(td.day,td.calendar-no-course-day){
-  transition:none!important
- }
-}
-
-
-/* LUCH Glass event surfaces v3: preserve the exact semantic backgrounds.
-   Only colored calendar cells get a rounded, inset-painted surface;
-   regular empty cells and calendar spacing stay exactly as before. */
-:root{
- --luch-panel-elevation:0 17px 42px rgba(31,66,91,.105),
-                        0 3px 12px rgba(33,73,93,.045),
-                        inset 0 1px 0 rgba(255,255,255,.84)
-}
-html[data-theme="dark"]{
- --luch-panel-elevation:0 18px 42px rgba(0,0,0,.27),
-                        0 4px 13px rgba(0,0,0,.12),
-                        inset 0 1px 0 rgba(223,247,255,.075)
-}
-/* The existing workspace provides the one large outer glass panel. No
-   extra wrapper, gaps, widths, row height, sticky offsets or transforms. */
-.workspace[data-panel="calendar"]{
- border-color:rgba(151,180,199,.22);
- box-shadow:var(--luch-panel-elevation)
-}
-html[data-theme="dark"] .workspace[data-panel="calendar"]{
- border-color:rgba(148,187,212,.17)
-}
-.workspace[data-panel="calendar"] .toolbar{
- background-image:linear-gradient(170deg,rgba(255,255,255,.50),rgba(233,244,252,.17) 73%,transparent)
-}
-html[data-theme="dark"] .workspace[data-panel="calendar"] .toolbar{
- background-image:linear-gradient(170deg,rgba(222,245,255,.055),transparent 79%)
-}
-/* Patient data remains an opaque *single band* above the scrolling date grid.
-   A consistent very soft top-to-bottom sheen is shared across all five cells. */
-.workspace[data-panel="calendar"] .calendar tbody td.sticky{
- background-image:linear-gradient(180deg,rgba(255,255,255,.15),rgba(227,240,248,.08));
-}
-html[data-theme="dark"] .workspace[data-panel="calendar"] .calendar tbody td.sticky{
- background-image:linear-gradient(180deg,rgba(223,247,255,.035),rgba(23,42,57,.025))
-}
-/* Rounded OUTER corners only — not separate rectangles around each name,
-   machine, phone or notes value. */
-.workspace[data-panel="calendar"] .calendar thead th.id.sticky{
- border-top-left-radius:13px
-}
-.workspace[data-panel="calendar"] .calendar tbody tr:last-child > td.id.sticky{
- border-bottom-left-radius:13px
-}
-@media(min-width:1201px){
- .workspace[data-panel="calendar"] .calendar thead th.calendar-notes.sticky{
-  border-top-right-radius:13px
- }
- .workspace[data-panel="calendar"] .calendar tbody tr:last-child > td.calendar-notes.sticky{
-  border-bottom-right-radius:13px
- }
-}
-@media(min-width:701px) and (max-width:1200px){
- .workspace[data-panel="calendar"] .calendar thead th.machine.sticky{
-  border-top-right-radius:13px
- }
- .workspace[data-panel="calendar"] .calendar tbody tr:last-child > td.machine.sticky{
-  border-bottom-right-radius:13px
- }
-}
-/* LUCH event surface correction: preserve the flat, continuous radiation
-   grid. Do NOT turn normal, elapsed, final, maintenance-final or delivered
-   radiation fractions into small cards. These keep their original CSS colors,
-   spacing and full-cell paint. Only exceptional events are softly rounded.
-   No content-box clipping or decorative ::before frames / white gutters. */
-.workspace[data-panel="calendar"] .calendar tbody td.day:is(
- .skip,.maintenance,.breakdown,.lab,.issued,.has-lab-event,.has-chemo-event
-){
- border-radius:6px;
- background-clip:border-box
-}
-/* Today is drawn independently with ::after; hover, selection and every
-   clinical status color remain managed by the existing cascade. */
 
 /* LUCH Glass brand: an exactly centered, font-independent eight-ray mark.
    Use a fixed 40×40 SVG viewBox; four crossing paths form eight equal rays.
@@ -1047,7 +884,6 @@ html[data-theme="dark"] .topbar .logo .brand-glass-mark{
  .topbar .logo .brand-rays-glow{display:none}
  .topbar .logo .brand-rays-core{filter:none}
 }
-
 
 /* Restoration controls share the existing cloud dialog, never overlay the
    calendar or modify its scrolling and frozen-column composition. */
