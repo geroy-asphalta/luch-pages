@@ -97,9 +97,14 @@ export function createFirebaseDemoSync({getState,replaceState,canApplyRemote}){
   if(!canApply()){status('Закрой карточки и окна редактирования, прежде чем принимать облачную версию.','download');return;}
   const before=localPayload();
   try{
-   // Always create a recoverable LOCAL backup, even for automatic downloads.
-   if(manual&&before!==remote.payload){backupLocal();fileBackup(before);}
+   // Preserve the previous local timeline BEFORE EVERY cloud replacement.
+   // A remote update may contain an older date from another device; the
+   // previous state must remain recoverable even on automatic downloads.
    const parsed=decodeDemoState(remote.payload);
+   if(before!==remote.payload){
+    backupLocal();
+    if(manual)fileBackup(before);
+   }
    replaceState(parsed,remote.payload);
    saveAck(remote);
    paused=false;
