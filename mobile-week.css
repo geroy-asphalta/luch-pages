@@ -22,7 +22,7 @@
  .mobile-only{display:block}
  .layout{display:block;min-height:calc(100dvh - 60px)}
  .sidebar{display:none!important}
- main{padding:0 0 calc(106px + env(safe-area-inset-bottom,0px));min-width:0}
+ main{padding:0 0 calc(88px + env(safe-area-inset-bottom,0px));min-width:0}
  .topbar{height:60px;min-height:60px;padding:0 14px;gap:10px}
  .topbar .logo{margin-right:auto}
  .topbar .mark{width:32px;height:32px;font-size:23px;border-radius:10px}
@@ -77,7 +77,7 @@
     The separate return button is only for "Ещё → Полная таблица ПК". */
  body.mobile-desktop-table #mobile-exit-desktop{display:none}
  body.mobile-desktop-table.mobile-full-table #mobile-exit-desktop{
-  display:block;position:fixed;z-index:105;bottom:calc(82px + env(safe-area-inset-bottom,0px));
+  display:block;position:fixed;z-index:105;bottom:calc(69px + env(safe-area-inset-bottom,0px));
   left:50%;transform:translateX(-50%);width:max-content;max-width:90vw;
   background:#176f6a;color:white;border:1px solid #70b6a5;
   border-radius:24px;padding:11px 17px;font-size:13px;font-weight:750;
@@ -256,33 +256,37 @@
  }
  .mobile-empty,.mobile-hint{padding:25px 12px;border:1px dashed var(--mobile-border);
   border-radius:16px;color:var(--mobile-muted);font-size:12px;text-align:center;line-height:1.5}
- /* Touch-friendly native navigation. Only the floating chrome gets blurred. */
+ /* Telegram-inspired compact glass capsule, preserving >=44px touch targets.
+    The calendar scroller itself stays blur-free for performance. */
  .mobile-bottom-nav{
   position:fixed;bottom:max(7px,env(safe-area-inset-bottom,0px));left:50%;
-  transform:translateX(-50%);z-index:99;width:min(calc(100vw - 20px),540px);
-  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3px;
+  transform:translateX(-50%);z-index:99;width:min(calc(100vw - 28px),480px);
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2px;
   background:var(--mobile-glass);border:1px solid var(--mobile-border);
-  border-radius:24px;padding:7px;box-shadow:0 10px 34px #112e3b40;
-  -webkit-backdrop-filter:blur(15px);backdrop-filter:blur(15px)
+  border-radius:23px;padding:4px;box-shadow:0 8px 24px #112e3b33;
+  -webkit-backdrop-filter:blur(17px) saturate(1.2);
+  backdrop-filter:blur(17px) saturate(1.2)
  }
  .mobile-bottom-nav button{
   display:flex;align-items:center;flex-direction:column;justify-content:center;
-  min-width:0;min-height:57px;gap:3px;border-radius:18px;padding:5px 2px;
+  min-width:0;height:46px;min-height:46px;gap:1px;border-radius:18px;padding:3px 2px 2px;
   background:transparent;border:0;color:var(--mobile-muted);
-  font-size:10px;font-weight:700;position:relative
+  font-size:9.5px;line-height:1.05;font-weight:700;position:relative;
+  transition:background-color .18s ease,color .18s ease,box-shadow .18s ease
  }
- .mobile-bottom-nav .mobile-tab-icon{display:block;width:23px;height:23px;flex:none;stroke-width:1.85}
+ .mobile-bottom-nav .mobile-tab-icon{display:block;width:21px;height:21px;flex:none;stroke-width:1.85}
  .mobile-bottom-nav button.is-current{
-  color:var(--mobile-accent);background:var(--mobile-accent-soft)
+  color:var(--mobile-accent);background:var(--mobile-accent-soft);
+  box-shadow:inset 0 1px 0 #ffffff42
  }
  #mobile-tab-tasks-count{
-  position:absolute;top:2px;right:17%;
+  position:absolute;top:0;right:calc(50% - 22px);
   background:#b6384f;color:white;border-radius:50%;
   min-width:16px;height:16px;display:grid;place-items:center;font-size:9px
  }
  #mobile-tab-tasks-count:empty{display:none}
  .mobile-selection{
-  position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom,0px));
+  position:fixed;left:50%;bottom:calc(69px + env(safe-area-inset-bottom,0px));
   transform:translateX(-50%);z-index:101;
   display:flex;align-items:center;gap:7px;width:min(calc(100vw - 28px),510px);
   padding:9px 10px;background:var(--mobile-glass);border:1px solid var(--mobile-border);
@@ -384,7 +388,7 @@
  :is(.discharge-text-dialog,.issue-dialog,.discharge-dialog,.cloud-dialog,.chemo-change-dialog){
   max-height:92dvh;overflow:auto;width:min(calc(100vw - 18px),620px);border-radius:22px;padding:15px
  }
- .toast{bottom:calc(98px + env(safe-area-inset-bottom,0px));left:12px;right:12px;
+ .toast{bottom:calc(78px + env(safe-area-inset-bottom,0px));left:12px;right:12px;
   width:fit-content;max-width:calc(100vw - 24px);margin:auto}
 }
 @media(max-width:370px){
