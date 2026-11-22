@@ -65,7 +65,14 @@ export function mobileVisibleRows(state,scheduled,{filter='',search='',today=loc
    .some(v=>String(v??'').toLocaleLowerCase('ru').includes(q));
  });
 }
-export function renderMobilePatientCards(state,rows,{weekDate=localToday(),selected=new Set(),today=localToday()}={}){
+// Keep surname and initials readable in the one-row compact iPhone card.
+// Full name remains accessible in aria-label and in the expanded detail.
+export function compactPatientName(name){
+ const parts=String(name??'').trim().split(/\s+/).filter(Boolean);
+ if(parts.length<2)return parts[0]||'Пациент';
+ return parts[0]+' '+parts.slice(1,3).map(part=>part.charAt(0).toLocaleUpperCase('ru')+'.').join(' ');
+}
+export function renderMobilePatientCards(state,rows,{weekDate=localToday(),selected=new Set(),expanded=new Set(),today=localToday()}={}){
  const dates=mobileWeekDates(weekDate),end=dates.at(-1);
  return rows.map(course=>{
   const contact=calendarContact(state,course);
@@ -87,19 +94,33 @@ export function renderMobilePatientCards(state,rows,{weekDate=localToday(),selec
     '<span class="mobile-date-symbol">'+(data.kind==='skip'?skippedFractionIcon:esc(data.label))+'</span>'+
     (data.secondary?'<span class="mobile-date-secondary">'+esc(data.secondary)+'</span>':'')+'</button>';
   }).join('');
-  return '<article class="mobile-patient-card" data-mobile-person-id="'+esc(course.personId)+'">'+
-   '<button type="button" class="mobile-patient-name" data-mobile-patient="'+esc(course.personId)+'" aria-label="Открыть карточку: '+esc(course.name)+'">'+
-    '<span>'+esc(course.name)+'</span><span aria-hidden="true">›</span></button>'+
-   '<div class="mobile-patient-details"><span class="mobile-person-id">'+esc(course.personId)+'</span>'+
-   (contact.eln==='Да'?'<span class="mobile-eln">ЭЛН</span>':'')+
-   (course.treatmentType==='ХЛТ'?'<span class="mobile-hlt">ХЛТ</span>':'')+
-   (progress?'<span class="mobile-patient-progress">ЛТ '+progress.completed+'/'+progress.total+'</span>':'')+
-   '</div><div class="mobile-patient-description">'+esc(ctv)+'</div>'+
-   '<div class="mobile-patient-meta"><span>'+esc(machine)+'</span>'+
-   (phoneDigits?'<a href="tel:'+esc(phoneDigits)+'" aria-label="Позвонить пациенту: '+esc(course.name)+'">☎ '+esc(contact.phone)+'</a>':'')+
-   '</div><div class="mobile-patient-week" role="group" aria-label="Неделя пациента: '+esc(course.name)+'">'+cells+'</div>'+
-   (contact.notes?'<p class="mobile-patient-note" title="'+esc(contact.notes)+'">'+esc(contact.notes)+'</p>':'')+
-  '</article>';
+  const isExpanded=expanded.has(course.id),patientName=esc(course.name);
+  const elnActive=contact.eln==='Да';
+  const callIcon='<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.2 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.96.34 1.91.67 2.83a2 2 0 0 1-.45 2.11L8.06 9.94a16 16 0 0 0 6 6l1.28-1.27a2 2 0 0 1 2.11-.45c.92.33 1.87.55 2.83.67A2 2 0 0 1 22 16.92z"/></svg>';
+  const call=phoneDigits?'<a class="mobile-summary-call" href="tel:'+esc(phoneDigits)+'" aria-label="Позвонить пациенту: '+patientName+'" title="Позвонить">'+callIcon+'</a>':
+   '<span class="mobile-summary-call is-unavailable" aria-label="Телефон не указан">'+callIcon+'</span>';
+  return '<article class="mobile-patient-card'+(isExpanded?' is-expanded':'')+'" data-mobile-course-id="'+esc(course.id)+'" data-mobile-person-id="'+esc(course.personId)+'">'+
+   '<div class="mobile-patient-summary">'+
+    '<button type="button" class="mobile-summary-toggle" data-mobile-expand="'+esc(course.id)+'" aria-expanded="'+isExpanded+'" aria-controls="mobile-detail-'+esc(course.id)+'" aria-label="'+(isExpanded?'Свернуть':'Развернуть')+' пациента '+patientName+'. СТВ: '+esc(ctv)+'. ЭЛН: '+(elnActive?'да':'нет')+'">'+
+     '<span class="mobile-summary-name" title="'+patientName+'">'+esc(compactPatientName(course.name))+'</span>'+
+     '<span class="mobile-summary-ctv" title="СТВ: '+esc(ctv)+'">'+esc(ctv)+'</span>'+
+     '<span class="mobile-summary-eln'+(elnActive?' is-active':'')+'" title="'+(elnActive?'ЭЛН оформлен':'ЭЛН нет')+'">ЭЛН'+(elnActive?' ✓':' —')+'</span>'+
+     '<span class="mobile-summary-chevron" aria-hidden="true">⌄</span></button>'+
+    call+'</div>'+
+   '<div class="mobile-patient-expansion" id="mobile-detail-'+esc(course.id)+'" aria-hidden="'+(!isExpanded)+'"'+(isExpanded?'':' inert')+'>'+
+    '<div class="mobile-patient-expansion-content">'+
+     '<button type="button" class="mobile-patient-name" data-mobile-patient="'+esc(course.personId)+'" aria-label="Открыть полную карточку: '+patientName+'">'+
+      '<span>'+patientName+'</span><span aria-hidden="true">›</span></button>'+
+     '<div class="mobile-patient-details"><span class="mobile-person-id">'+esc(course.personId)+'</span>'+
+      (elnActive?'<span class="mobile-eln">ЭЛН</span>':'')+
+      (course.treatmentType==='ХЛТ'?'<span class="mobile-hlt">ХЛТ</span>':'')+
+      (progress?'<span class="mobile-patient-progress">ЛТ '+progress.completed+'/'+progress.total+'</span>':'')+
+     '</div><div class="mobile-patient-description">'+esc(ctv)+'</div>'+
+     '<div class="mobile-patient-meta"><span>'+esc(machine)+'</span>'+
+      (contact.phone?'<span class="mobile-patient-phone">'+esc(contact.phone)+'</span>':'')+
+     '</div><div class="mobile-patient-week" role="group" aria-label="Неделя пациента: '+patientName+'">'+cells+'</div>'+
+     (contact.notes?'<p class="mobile-patient-note" title="'+esc(contact.notes)+'">'+esc(contact.notes)+'</p>':'')+
+    '</div></div></article>';
  }).join('');
 }
 /* Use the exact icon nodes already mounted in the desktop UI.
@@ -137,6 +158,7 @@ export function createMobileWeekUI({
 }){
  if(!root||!tabbar||!actionsDialog)throw new Error('Мобильный интерфейс ЛУЧ не найден.');
  let tab='patients',weekDate=today(),search='',taskDate=today(),lastCell=null,actionCell=null,desktop=false,fullDesktop=false,calendarAligned=false,activeView='calendar';
+ const expandedCards=new Set();
  const $=selector=>root.querySelector(selector);
  copyDesktopMoreIcons(root);
  const searchControl=$('#mobile-search-expandable'),searchInput=$('#mobile-search');
@@ -243,7 +265,7 @@ export function createMobileWeekUI({
   $('#mobile-selection').hidden=count===0;
   $('#mobile-selection-count').textContent=count===1?'1 ячейка':'Выбрано: '+count;
   const rows=mobileVisibleRows(appState,getRows(),{filter:getFilter(),search,today:today()});
-  $('#mobile-card-list').innerHTML=renderMobilePatientCards(appState,rows,{weekDate,selected,today:today()})||
+  $('#mobile-card-list').innerHTML=renderMobilePatientCards(appState,rows,{weekDate,selected,expanded:expandedCards,today:today()})||
    '<p class="mobile-empty">По выбранным условиям пациентов нет</p>';
   const pending=todayTasks(appState,today()).filter(x=>!x.done).length;
   tabbar.querySelector('#mobile-tab-tasks-count').textContent=pending?String(pending):'';
@@ -255,11 +277,21 @@ export function createMobileWeekUI({
    return;
   }
   if(event.target.closest('#mobile-search-close')){setSearchOpen(false,{clear:true});return;}
-  const target=event.target.closest('button[data-mobile-cell],button[data-mobile-patient],button[data-mobile-action-open],button[data-mobile-command],button[data-mobile-task],button[data-mobile-copy-discharge],button[data-mobile-section],button[data-mobile-week-shift],button[data-mobile-task-shift],button[data-mobile-tab-shortcut]');
+  const target=event.target.closest('button[data-mobile-cell],button[data-mobile-expand],button[data-mobile-patient],button[data-mobile-action-open],button[data-mobile-command],button[data-mobile-task],button[data-mobile-copy-discharge],button[data-mobile-section],button[data-mobile-week-shift],button[data-mobile-task-shift],button[data-mobile-tab-shortcut]');
   if(!target)return;
   if(target.dataset.mobileCell!==undefined){
    lastCell={patientId:target.dataset.courseId,date:target.dataset.date};
    onSelect(lastCell.patientId,lastCell.date,{metaKey:true,ctrlKey:false,shiftKey:false});
+  }else if(target.dataset.mobileExpand!==undefined){
+   const id=target.dataset.mobileExpand,card=target.closest('.mobile-patient-card');
+   if(!card)return;
+   const open=!expandedCards.has(id);
+   if(open)expandedCards.add(id);else expandedCards.delete(id);
+   card.classList.toggle('is-expanded',open);
+   target.setAttribute('aria-expanded',String(open));
+   target.setAttribute('aria-label',(open?'Свернуть':'Развернуть')+' пациента '+(card.querySelector('.mobile-patient-name span')?.textContent||''));
+   const detail=card.querySelector('.mobile-patient-expansion');
+   if(detail){detail.inert=!open;detail.setAttribute('aria-hidden',String(!open));}
   }else if(target.dataset.mobilePatient){onPatient(target.dataset.mobilePatient);}
   else if(target.dataset.mobileActionOpen!==undefined)mobileActions();
   else if(target.dataset.mobileCopyDischarge){
