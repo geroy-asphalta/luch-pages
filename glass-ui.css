@@ -869,3 +869,165 @@ html[data-theme="dark"] .topbar .logo .brand-glass-mark{
  .course-recovery-row{grid-template-columns:1fr;gap:4px}
  .cloud-recovery-import{width:100%}
 }
+
+
+
+/* LUCH Liquid Glass / Calendar v4
+   An optically frosted ONE-PIECE workspace, not a collection of glass cards.
+   Important for Chrome on Windows: zero backdrop-filter, zero filters or
+   transforms on the scroll container, sticky cells or date cells; no new
+   row-hover paint on the scrolling half of the table. All treatments retain
+   their existing semantic background colors. */
+:root{
+ --luch-lg-shell:#f8fbfd;
+ --luch-lg-shell-edge:rgba(123,165,190,.43);
+ --luch-lg-shell-top:rgba(255,255,255,.94);
+ --luch-lg-toolbar-a:#ffffff;
+ --luch-lg-toolbar-b:#eaf5fb;
+ --luch-lg-toolbar-c:#f6fbfe;
+ --luch-lg-toolbar-rule:rgba(119,163,190,.28);
+ --luch-lg-head:#ebf5fa;
+ --luch-lg-head-ink:#46677e;
+ --luch-lg-head-rule:rgba(113,163,192,.25);
+ --luch-lg-row-rule:rgba(105,147,170,.15);
+ --luch-lg-col-rule:rgba(108,157,184,.075);
+ --luch-lg-name:#274b63;
+ --luch-lg-name-muted:#668296;
+ --luch-lg-selected-left:#dceff8;
+ --luch-lg-selected-wash:rgba(68,164,204,.085);
+ --luch-lg-selected-rail:#4caacb;
+ --luch-lg-scroll-thumb:#b5cddb
+}
+html[data-theme="dark"]{
+ --luch-lg-shell:#1e2d39;
+ --luch-lg-shell-edge:rgba(123,170,195,.28);
+ --luch-lg-shell-top:rgba(212,245,255,.13);
+ --luch-lg-toolbar-a:#2d4050;
+ --luch-lg-toolbar-b:#253847;
+ --luch-lg-toolbar-c:#223543;
+ --luch-lg-toolbar-rule:rgba(125,179,207,.21);
+ --luch-lg-head:#304756;
+ --luch-lg-head-ink:#c1dbe7;
+ --luch-lg-head-rule:rgba(128,179,204,.22);
+ --luch-lg-row-rule:rgba(120,168,194,.20);
+ --luch-lg-col-rule:rgba(123,167,190,.09);
+ --luch-lg-name:#e4f2f8;
+ --luch-lg-name-muted:#afc7d4;
+ --luch-lg-selected-left:#375a6b;
+ --luch-lg-selected-wash:rgba(112,198,228,.12);
+ --luch-lg-selected-rail:#79d5e8;
+ --luch-lg-scroll-thumb:#537386
+}
+/* One illuminated slab: all depth is outside the grid, never per fraction. */
+.workspace[data-panel="calendar"]{
+ background-color:var(--luch-lg-shell);
+ border:1px solid var(--luch-lg-shell-edge);
+ border-radius:20px;
+ box-shadow:0 14px 36px rgba(27,65,88,.15),
+            0 3px 10px rgba(27,65,88,.06),
+            inset 0 1px 0 var(--luch-lg-shell-top)
+}
+html[data-theme="dark"] .workspace[data-panel="calendar"]{
+ box-shadow:0 18px 44px rgba(0,0,0,.32),
+            0 3px 10px rgba(0,0,0,.15),
+            inset 0 1px 0 var(--luch-lg-shell-top)
+}
+/* Opalescent control shelf. One static gradient; no live blur/compositing. */
+.workspace[data-panel="calendar"] > .toolbar{
+ background:linear-gradient(116deg,var(--luch-lg-toolbar-a) 0%,
+    var(--luch-lg-toolbar-b) 52%,var(--luch-lg-toolbar-c) 100%);
+ border-bottom:1px solid var(--luch-lg-toolbar-rule);
+ box-shadow:inset 0 1px 0 var(--luch-lg-shell-top)
+}
+.workspace[data-panel="calendar"] .month-controls{
+ background:var(--glass-control);
+ border-color:var(--glass-stroke);
+ box-shadow:inset 0 1px 0 var(--luch-lg-shell-top),
+            0 2px 7px rgba(36,86,110,.06)
+}
+.workspace[data-panel="calendar"] .toolbar #selected-count{
+ color:var(--luch-lg-head-ink);font-weight:650;
+ letter-spacing:.005em
+}
+/* A crisp frosted HEADER behind dates, not 70 separate glass capsules.
+   Weekend and holiday headers keep their existing palette and priority. */
+.workspace[data-panel="calendar"] .calendar thead th:not(.sticky):not(.off):not(.weekend-head):not(.holiday-head){
+ background-color:var(--luch-lg-head);
+ color:var(--luch-lg-head-ink)
+}
+.workspace[data-panel="calendar"] .calendar thead th[data-date]{
+ font-weight:750;letter-spacing:.012em;
+ border-bottom-color:var(--luch-lg-head-rule)
+}
+.workspace[data-panel="calendar"] .calendar thead th.sticky{
+ background-color:var(--glass-band-header);
+ color:var(--luch-lg-head-ink);
+ border-bottom-color:var(--luch-lg-head-rule)
+}
+/* The left patient panel is an OPAQUE icy glass tint so dates never shine
+   through when scrolled underneath. Do not change sticky offsets/z-index. */
+.workspace[data-panel="calendar"]{
+ --glass-band-bg:#edf6fb;
+ --glass-band-header:#e4f1f8;
+ --glass-band-hover:#e5f2f9
+}
+html[data-theme="dark"] .workspace[data-panel="calendar"]{
+ --glass-band-bg:#253b49;
+ --glass-band-header:#2a4252;
+ --glass-band-hover:#304b5a
+}
+.workspace[data-panel="calendar"] .calendar tbody td.sticky{
+ background-color:var(--glass-band-bg);
+ border-bottom-color:var(--luch-lg-row-rule)
+}
+.workspace[data-panel="calendar"] .calendar tbody tr:hover td.sticky{
+ background-color:var(--glass-band-hover)
+}
+.workspace[data-panel="calendar"] .calendar tbody td.sticky.name .patient-name-surname{
+ color:var(--luch-lg-name)
+}
+.workspace[data-panel="calendar"] .calendar tbody td.sticky.name .calendar-patient-ctv{
+ color:var(--luch-lg-name-muted)
+}
+/* A continuous, hairline grid; no card gaps, rounded fraction tiles or
+   background filters. Semantic status fills remain owned by style.css. */
+.workspace[data-panel="calendar"] .calendar :is(th,td){
+ border-right-color:var(--luch-lg-col-rule);
+ border-bottom-color:var(--luch-lg-row-rule)
+}
+.workspace[data-panel="calendar"] > .scroll{
+ background-color:var(--luch-lg-shell);
+ scrollbar-color:var(--luch-lg-scroll-thumb) transparent
+}
+/* Whole-patient focus is CLICK-ONLY (existing JS sets patient-row-active).
+   Tint uses one static lightweight background per cell in ONE selected row;
+   on-hover does not wash the entire schedule or animate a giant shadow. */
+.workspace[data-panel="calendar"] .calendar tbody tr.patient-row-active > td.sticky:not(.calendar-note-editing){
+ background-color:var(--luch-lg-selected-left)
+}
+.workspace[data-panel="calendar"] .calendar tbody tr.patient-row-active > td.id.sticky{
+ box-shadow:inset 3px 0 0 var(--luch-lg-selected-rail)
+}
+.workspace[data-panel="calendar"] .calendar tbody tr.patient-row-active > :is(td.day,td.calendar-no-course-day,td.calendar-tail){
+ background-image:linear-gradient(var(--luch-lg-selected-wash),var(--luch-lg-selected-wash))
+}
+/* Never overlay editing controls or replace user-selected fraction outlines. */
+.workspace[data-panel="calendar"] .calendar tbody td.calendar-notes.calendar-note-editing{
+ z-index:8;background-color:#f9fcfd
+}
+html[data-theme="dark"] .workspace[data-panel="calendar"] .calendar tbody td.calendar-notes.calendar-note-editing{
+ background-color:#2b4c57
+}
+@media(max-width:700px){
+ .workspace[data-panel="calendar"]{border-radius:15px}
+}
+@media(prefers-reduced-transparency:reduce),(forced-colors:active),(prefers-contrast:more){
+ .workspace[data-panel="calendar"] > .toolbar{background:var(--luch-lg-toolbar-c)}
+ .workspace[data-panel="calendar"]{
+  border-color:currentColor;
+  box-shadow:none
+ }
+ .workspace[data-panel="calendar"] .calendar tbody tr.patient-row-active > :is(td.day,td.calendar-no-course-day,td.calendar-tail){
+  background-image:none
+ }
+}
