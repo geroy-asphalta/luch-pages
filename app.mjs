@@ -311,11 +311,10 @@ function renderCalendar(){
  el('calendar').style.setProperty('--notes-column-width',notesColumnWidth(tableRows.map(p=>calendarContact(state,p).notes))+'px');
  el('calendar').classList.toggle('calendar-phone-collapsed',!phoneExpanded);
  const dow=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
- const todayForGlass=localToday();
  const cells=dates.map(d=>{
    const holiday=effectiveDay(state,d),working=isWorkingDay(state,d);
    const weekend=isWeekend(d)&&!working;
-   return '<th data-date="'+d+'" class="'+(!working?'off ':'')+(weekend?'weekend-head ':'')+(holiday?.holiday?'holiday-head ':'')+(holiday?.working?'working-exception':'')+(d===todayForGlass?' glass-today':'')+'">'+pretty(d)+
+   return '<th data-date="'+d+'" class="'+(!working?'off ':'')+(weekend?'weekend-head ':'')+(holiday?.holiday?'holiday-head ':'')+(holiday?.working?'working-exception':'')+'">'+pretty(d)+
     '<small>'+dow[(new Date(d+'T00:00:00Z').getUTCDay()+6)%7]+'</small>'+(holiday?'<small class="holiday-marker">'+(holiday.working?'●':'✳')+'</small>':'')+'</th>';
  }).join('');
  el('calendar').querySelector('thead').innerHTML='<tr><th class="id sticky">ID</th><th class="name sticky">Пациент</th><th class="machine sticky">Установка</th><th class="calendar-phone sticky"><button type="button" id="calendar-phone-toggle" class="calendar-phone-toggle" aria-expanded="'+phoneExpanded+'" aria-label="'+(phoneExpanded?'Свернуть телефоны':'Показать телефоны')+'"><span class="calendar-phone-toggle-label">Телефон</span>'+calendarPhoneHandsetIcon+'<svg class="calendar-phone-chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m15 18-6-6 6-6"/></svg></button></th><th class="calendar-notes sticky">Примечание</th>'+cells+'<th class="calendar-tail" aria-hidden="true"></th></tr>';
@@ -327,14 +326,14 @@ function renderCalendar(){
    const patientMeta='<small class="calendar-patient-meta">'+(p.noCourse?'<span>Без курса</span>':ctvDisplay?'<span class="calendar-patient-ctv">'+esc(ctvDisplay)+'</span>':'')+'</small>';
    const notes=contact.notes?'<span class="calendar-note-value">'+esc(contact.notes)+'</span>':'<span class="calendar-empty">—</span>';
    const tds=dates.map(d=>{
-     if(p.noCourse)return '<td class="calendar-no-course-day'+(d===todayForGlass?' glass-today':'')+(isWeekend(d)&&!isWorkingDay(state,d)?' glass-rest-day':'')+'"></td>';
+     if(p.noCourse)return '<td class="calendar-no-course-day'+(isWeekend(d)&&!isWorkingDay(state,d)?' glass-rest-day':'')+'"></td>';
      const c=plan.get(d),sessionCompletion=radiationSessionCompletion(c,d,localToday()),elapsed=sessionCompletion.source==='calendar',lab=labAt(state,p.id,d),chemo=state.events.some(e=>e.patientId===p.id&&e.date===d&&e.type==='chemo'&&['planned','administered','given'].includes(e.status)),key=cellKey(p.id,d);
      const chemoEvent=state.events.find(e=>e.patientId===p.id&&e.date===d&&e.type==='chemo'&&e.source==='hlt');
      const chemoCancelled=chemoEvent?.status==='cancelled';
      const chemoOutcome=chemoAdministrationState(chemoEvent,localToday());
      const chemoMissed=chemoOutcome==='not-given'||chemoCancelled;
      const working=isWorkingDay(state,d),weekend=isWeekend(d)&&!working;
-     const cl=['day',!working?'off':'',weekend?'weekend-day':'',effectiveDay(state,d)?.holiday?'holiday-day':'',c?.kind||'',c?.final?'final':'',c?.beforeMaintenance?'maintenance-final':'',c?.delivered?'delivered':'',elapsed?'elapsed':'',lab==='todo'?'lab':lab==='issued'?'issued':'',chemo?'chemo-day':'',lab||chemo?'has-treatment-event':'',lab?'has-lab-event':'',chemo?'has-chemo-event':'',chemoCancelled?'chemo-cancelled':'',selected.has(key)?'selected':'',d===todayForGlass?'glass-today':''].join(' ');
+     const cl=['day',!working?'off':'',weekend?'weekend-day':'',effectiveDay(state,d)?.holiday?'holiday-day':'',c?.kind||'',c?.final?'final':'',c?.beforeMaintenance?'maintenance-final':'',c?.delivered?'delivered':'',elapsed?'elapsed':'',lab==='todo'?'lab':lab==='issued'?'issued':'',chemo?'chemo-day':'',lab||chemo?'has-treatment-event':'',lab?'has-lab-event':'',chemo?'has-chemo-event':'',chemoCancelled?'chemo-cancelled':'',selected.has(key)?'selected':''].join(' ');
      const label=c?.label||'';
      const transfer=(state.transfers||[]).find(t=>t.patientId===p.id&&t.date===d);
      const treatmentContent=calendarTreatmentCellContent({label:c?.kind==='maintenance'?'':label,isSession:c?.kind==='session',isSkip:c?.kind==='skip',labStatus:lab,chemoPlanned:chemo||chemoCancelled,chemoNotGiven:chemoMissed});
