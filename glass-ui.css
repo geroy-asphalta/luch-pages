@@ -1047,3 +1047,40 @@ html[data-theme="dark"] .topbar .logo .brand-glass-mark{
  .topbar .logo .brand-rays-glow{display:none}
  .topbar .logo .brand-rays-core{filter:none}
 }
+
+
+/* Restoration controls share the existing cloud dialog, never overlay the
+   calendar or modify its scrolling and frozen-column composition. */
+.cloud-start-recovery{
+ margin-top:18px;padding-top:15px;
+ border-top:1px solid var(--glass-stroke);
+}
+.cloud-start-recovery h3{margin:0 0 5px;font-size:13px}
+.cloud-start-recovery > .muted{margin:0 0 12px;font-size:11px}
+.cloud-recovery-import{
+ display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;
+ font-size:11px;color:inherit
+}
+.cloud-recovery-import input{max-width:240px;font-size:11px}
+.course-recovery-preview{
+ margin-top:12px;padding:12px;border:1px solid var(--glass-stroke);
+ border-radius:13px;background:var(--glass-control);font-size:12px
+}
+.course-recovery-preview[hidden]{display:none!important}
+.course-recovery-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.course-recovery-head button{font-size:20px;min-width:30px;min-height:30px}
+.course-recovery-preview .muted{font-size:11px;line-height:1.45}
+.course-recovery-rows{display:grid;gap:5px;margin:10px 0}
+.course-recovery-row{
+ display:grid;grid-template-columns:minmax(110px,1fr) 80px minmax(145px,1.3fr);
+ align-items:center;gap:7px;padding:7px 8px;
+ border:1px solid var(--glass-stroke);border-radius:9px;
+ background:var(--glass-floating)
+}
+.course-recovery-row strong{font-size:11px;overflow-wrap:anywhere}
+.course-recovery-row small{font-size:10px;opacity:.7}
+.course-recovery-row select{min-width:0;width:100%;font-size:11px}
+@media(max-width:700px){
+ .course-recovery-row{grid-template-columns:1fr;gap:4px}
+ .cloud-recovery-import{width:100%}
+}
