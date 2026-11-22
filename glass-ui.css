@@ -1234,3 +1234,199 @@ html[data-theme="dark"] .workspace[data-panel="calendar"] .calendar tbody td.cal
   background-image:none
  }
 }
+
+
+
+/* LUCH Clinical Glass v6 — approved mockup brought into the existing table.
+   UI ONLY. Never change table geometry, scrolling containment, sticky offsets,
+   medical event fills or the user's current-day highlight preference.
+   Soft light is painted on static outer surfaces; no per-cell blur/shadows. */
+:root{
+ --clinical-ink:#223c43;
+ --clinical-subtle:#657a80;
+ --clinical-title:#263e43;
+ --clinical-surface:#fcfdfb;
+ --clinical-grid-vertical:rgba(110,135,137,.085);
+ --clinical-grid-horizontal:rgba(110,135,137,.135);
+ --clinical-week-seam:rgba(86,118,123,.32);
+ --clinical-sidebar-edge:rgba(125,153,152,.2);
+ --clinical-frozen-edge:rgba(66,100,102,.21)
+}
+html[data-theme="dark"]{
+ --clinical-ink:#e9f3f2;
+ --clinical-subtle:#b5c7c7;
+ --clinical-title:#e7f1ee;
+ --clinical-surface:#263137;
+ --clinical-grid-vertical:rgba(130,160,166,.10);
+ --clinical-grid-horizontal:rgba(130,160,166,.15);
+ --clinical-week-seam:rgba(140,181,181,.35);
+ --clinical-sidebar-edge:rgba(128,158,160,.22);
+ --clinical-frozen-edge:rgba(12,22,26,.55)
+}
+/* Coordinate the header, rail and patient panel with ONE material language.
+   These are static colors/gradients on outer areas, not live CSS filters. */
+.topbar{
+ background:linear-gradient(105deg,#17363b 0%,#143137 56%,#1b3037 100%)
+}
+html[data-theme="dark"] .topbar{
+ background:linear-gradient(105deg,#12282e 0%,#101f26 100%)
+}
+.sidebar{
+ background-color:#fbfdfb;
+ border-right-color:var(--clinical-sidebar-edge)
+}
+.sidebar.sidebar-glass-ready{
+ background-color:#fbfdfb;
+ background-image:linear-gradient(164deg,#fff 0%,#f8faf8 66%,#f5f8f6 100%);
+ border-right-color:var(--clinical-sidebar-edge)
+}
+html[data-theme="dark"] .sidebar,
+html[data-theme="dark"] .sidebar.sidebar-glass-ready{
+ background-color:#222e33;
+ background-image:linear-gradient(164deg,#27363b,#202b30)
+}
+.sidebar .sidebar-heading{color:#7b8f8c;letter-spacing:.11em}
+.sidebar .nav{color:#53696e}
+.sidebar .nav.active{color:#236c52}
+html[data-theme="dark"] .sidebar .nav{color:#b9ced0}
+html[data-theme="dark"] .sidebar .nav.active{color:#a7e7c9}
+.sidebar .sidebar-note{
+ background:#edf3ef;
+ color:#647a78;
+ border:1px solid rgba(124,157,141,.12)
+}
+html[data-theme="dark"] .sidebar .sidebar-note{
+ background:#293a3b;
+ color:#bdccca;
+ border-color:rgba(152,190,179,.16)
+}
+/* The slab keeps its current dimensions; only depth, contrast and trim change. */
+.workspace[data-panel="calendar"]{
+ background-color:var(--clinical-surface);
+ border-color:rgba(165,183,178,.45);
+ box-shadow:0 16px 38px rgba(28,65,65,.11),
+            0 3px 12px rgba(28,65,65,.055),
+            0 0 0 3px rgba(234,237,230,.32),
+            inset 0 1px 0 rgba(255,255,255,.95)
+}
+html[data-theme="dark"] .workspace[data-panel="calendar"]{
+ border-color:rgba(120,153,152,.28);
+ box-shadow:0 18px 43px rgba(0,0,0,.29),
+            0 0 0 2px rgba(82,101,97,.14),
+            inset 0 1px 0 rgba(241,252,247,.12)
+}
+.workspace[data-panel="calendar"] > .toolbar{
+ background:linear-gradient(115deg,#fff 0%,#fafbf9 56%,#f4f7f5 100%);
+ border-bottom-color:rgba(118,150,143,.24)
+}
+html[data-theme="dark"] .workspace[data-panel="calendar"] > .toolbar{
+ background:linear-gradient(115deg,#344347,#303e43 55%,#29383d 100%);
+ border-bottom-color:rgba(146,180,175,.22)
+}
+/* Patient identity is the anchor: surname > full name > CTV/auxiliary data.
+   Keep the exact existing two-line layout and ellipsis, no extra row height. */
+.workspace[data-panel="calendar"] .calendar tbody td.name.sticky
+ .calendar-patient-primary .patient-open{
+ font-size:13.6px;
+ font-weight:760;
+ line-height:1.12;
+ color:var(--clinical-ink);
+ letter-spacing:0
+}
+.workspace[data-panel="calendar"] .calendar tbody td.name.sticky .patient-name-surname{
+ color:var(--clinical-title);
+ font-weight:800
+}
+.workspace[data-panel="calendar"] .calendar tbody td.name.sticky .patient-name-remainder{
+ font-size:.91em;
+ font-weight:550;
+ color:var(--clinical-subtle);
+ letter-spacing:0
+}
+.workspace[data-panel="calendar"] .calendar tbody td.name.sticky .calendar-patient-meta{
+ margin-top:2px;
+ font-size:10px;
+ line-height:1.14;
+ color:var(--clinical-subtle)
+}
+.workspace[data-panel="calendar"] .calendar tbody td.sticky:is(.id,.machine,.calendar-phone,.calendar-notes){
+ font-size:10.8px;
+ color:var(--clinical-subtle)
+}
+/* Higher contrast fractions/dates, without changing cell width or height.
+   Maintenance and breakdown icon typography is intentionally left alone. */
+.workspace[data-panel="calendar"] .calendar tbody td.day:not(.maintenance):not(.breakdown){
+ font-size:11.7px;
+ font-weight:770
+}
+.workspace[data-panel="calendar"] .calendar thead th[data-date]{
+ font-size:10.7px;
+ font-weight:780;
+ letter-spacing:0
+}
+.workspace[data-panel="calendar"] .calendar thead th[data-date] small{
+ font-size:9.5px;
+ font-weight:500
+}
+.workspace[data-panel="calendar"] .calendar thead th.sticky{
+ font-size:10.5px;
+ font-weight:750
+}
+/* Vertical grid nearly disappears, while the quiet horizontal rhythm remains.
+   The date window ALWAYS begins on Monday (datesForMonth), after FIVE fixed
+   columns. Columns 13,20,27… begin subsequent Mondays in the existing DOM.
+   A 2px left border signals a new week without inserting any spacer columns. */
+.workspace[data-panel="calendar"] .calendar :is(th,td){
+ border-right-color:var(--clinical-grid-vertical);
+ border-bottom-color:var(--clinical-grid-horizontal)
+}
+.workspace[data-panel="calendar"] .calendar
+ :is(thead th[data-date],tbody td.day,tbody td.calendar-no-course-day):nth-child(7n + 13){
+ border-left:2px solid var(--clinical-week-seam)
+}
+/* Opaque frozen glass is always painted in FRONT of moving date cells.
+   Keep width/left offsets and z-index from the stable base CSS. */
+.workspace[data-panel="calendar"] .calendar
+ :is(thead th,tbody td).calendar-notes{
+ border-right-color:var(--clinical-frozen-edge)
+}
+.workspace[data-panel="calendar"] .calendar tbody td.name.sticky .calendar-patient-ctv{
+ color:var(--clinical-subtle)
+}
+/* Focus stays click-only. No hover effect is applied to every date in a row. */
+.workspace[data-panel="calendar"] .calendar tbody tr.patient-row-active > td.name.sticky .patient-name-surname{
+ color:var(--clinical-ink)
+}
+@media(min-width:1500px){
+ .workspace[data-panel="calendar"] .calendar tbody td.name.sticky
+  .calendar-patient-primary .patient-open{font-size:14.6px}
+ .workspace[data-panel="calendar"] .calendar tbody td.name.sticky .calendar-patient-meta{
+  font-size:10.4px
+ }
+ .workspace[data-panel="calendar"] .calendar tbody td.day:not(.maintenance):not(.breakdown){
+  font-size:12px
+ }
+}
+@media(min-width:701px) and (max-width:1100px){
+ .workspace[data-panel="calendar"] .calendar tbody td.name.sticky
+  .calendar-patient-primary .patient-open{font-size:12.4px}
+ .workspace[data-panel="calendar"] .calendar tbody td.name.sticky .patient-name-remainder{
+  font-size:.88em
+ }
+ .workspace[data-panel="calendar"] .calendar tbody td.sticky:is(.id,.machine,.calendar-phone,.calendar-notes){
+  font-size:10px
+ }
+}
+@media(max-width:700px){
+ /* The existing mobile view uses cards; leave desktop table density compact. */
+ .workspace[data-panel="calendar"]{border-radius:16px}
+ .workspace[data-panel="calendar"] .calendar tbody td.name.sticky
+  .calendar-patient-primary .patient-open{font-size:12px}
+ .workspace[data-panel="calendar"] .calendar tbody td.day:not(.maintenance):not(.breakdown){
+  font-size:11px
+ }
+}
+@media(prefers-reduced-transparency:reduce),(forced-colors:active),(prefers-contrast:more){
+ .workspace[data-panel="calendar"]{box-shadow:none}
+ .workspace[data-panel="calendar"] > .toolbar{background:var(--clinical-surface)}
+}
