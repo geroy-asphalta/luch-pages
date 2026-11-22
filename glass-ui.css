@@ -1031,3 +1031,206 @@ html[data-theme="dark"] .workspace[data-panel="calendar"] .calendar tbody td.cal
   background-image:none
  }
 }
+
+
+/* LUCH Liquid Glass v5 — approved Nov 2026 visual concept.
+   Keep ONE continuous grid with an opaque frozen patient band. This is a
+   presentation-only update: no layout geometry, scrolling handlers, blur,
+   backdrop-filter, cell transforms, animation or medical status overrides. */
+:root{
+ --luch-v5-canvas:#f4f7fc;
+ --luch-v5-shell-edge:rgba(196,212,236,.86);
+ --luch-v5-shell-glow:rgba(211,224,253,.54);
+ --luch-v5-surface:#f9fbff;
+ --luch-v5-toolbar-first:#eff6ff;
+ --luch-v5-toolbar-mid:#eef3ff;
+ --luch-v5-toolbar-last:#e8efff;
+ --luch-v5-control-top:#ffffff;
+ --luch-v5-control-bottom:#edf3fd;
+ --luch-v5-control-stroke:rgba(169,190,223,.46);
+ --luch-v5-head-bg:#e8f0fc;
+ --luch-v5-head-ink:#365a78;
+ --luch-v5-left-bg:#eaf3fc;
+ --luch-v5-left-alt:#e5effa;
+ --luch-v5-left-head:#e3eefc;
+ --luch-v5-left-hover:#daeafa;
+ --luch-v5-left-ink:#274664;
+ --luch-v5-left-muted:#69839d;
+ --luch-v5-rail:rgba(123,161,200,.28);
+ --luch-v5-line:rgba(126,159,199,.14);
+ --luch-v5-date-line:rgba(127,168,205,.095);
+ --luch-v5-weekend-head:#f4e7d6;
+ --luch-v5-weekend-body:#fcf3e6;
+ --luch-v5-weekend-ink:#84715b;
+ --luch-v5-focus-left:#cddff6;
+ --luch-v5-focus-wash:rgba(103,157,219,.072);
+ --luch-v5-focus-rail:#6da5d7
+}
+html[data-theme="dark"]{
+ --luch-v5-canvas:#16242f;
+ --luch-v5-shell-edge:rgba(131,164,199,.35);
+ --luch-v5-shell-glow:rgba(45,71,104,.17);
+ --luch-v5-surface:#1f303e;
+ --luch-v5-toolbar-first:#33485b;
+ --luch-v5-toolbar-mid:#2b3e54;
+ --luch-v5-toolbar-last:#2b3a50;
+ --luch-v5-control-top:#35495b;
+ --luch-v5-control-bottom:#293a4b;
+ --luch-v5-control-stroke:rgba(122,158,189,.39);
+ --luch-v5-head-bg:#30465b;
+ --luch-v5-head-ink:#cfe1ef;
+ --luch-v5-left-bg:#273c4e;
+ --luch-v5-left-alt:#2a4054;
+ --luch-v5-left-head:#30485b;
+ --luch-v5-left-hover:#345269;
+ --luch-v5-left-ink:#e6f1fa;
+ --luch-v5-left-muted:#aac3d4;
+ --luch-v5-rail:rgba(129,168,200,.35);
+ --luch-v5-line:rgba(124,162,194,.18);
+ --luch-v5-date-line:rgba(124,162,194,.10);
+ --luch-v5-weekend-head:#534b46;
+ --luch-v5-weekend-body:#3b3a3c;
+ --luch-v5-weekend-ink:#f0d7b3;
+ --luch-v5-focus-left:#375c79;
+ --luch-v5-focus-wash:rgba(121,178,228,.10);
+ --luch-v5-focus-rail:#99d8f0
+}
+/* Static illuminated shell. Depth belongs to the OUTSIDE of the timetable,
+   not to thousands of individual fraction cells. */
+.workspace[data-panel="calendar"]{
+ background:var(--luch-v5-surface);
+ border-color:var(--luch-v5-shell-edge);
+ border-radius:23px;
+ box-shadow:0 24px 52px rgba(51,83,124,.13),
+            0 5px 15px rgba(57,88,130,.075),
+            0 0 0 4px var(--luch-v5-shell-glow),
+            inset 0 1px 0 rgba(255,255,255,.95)
+}
+html[data-theme="dark"] .workspace[data-panel="calendar"]{
+ box-shadow:0 24px 55px rgba(0,0,0,.30),
+            0 0 0 3px var(--luch-v5-shell-glow),
+            inset 0 1px 0 rgba(232,246,255,.16)
+}
+/* Pearlescent tint on the STATIC toolbar only. */
+.workspace[data-panel="calendar"] > .toolbar{
+ background:linear-gradient(112deg,
+   var(--luch-v5-toolbar-first) 0%,
+   var(--luch-v5-toolbar-mid) 49%,
+   var(--luch-v5-toolbar-last) 100%);
+ border-bottom-color:var(--luch-v5-rail);
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.68)
+}
+html[data-theme="dark"] .workspace[data-panel="calendar"] > .toolbar{
+ box-shadow:inset 0 1px 0 rgba(221,244,255,.11)
+}
+/* Controls seem machined out of glass but are not individually blurred. */
+.workspace[data-panel="calendar"] .month-controls,
+.workspace[data-panel="calendar"] .toolbar .filters > :is(button.action-with-icon,select){
+ background:linear-gradient(165deg,var(--luch-v5-control-top),
+   var(--luch-v5-control-bottom));
+ border-color:var(--luch-v5-control-stroke);
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.50),
+            0 2px 7px rgba(49,87,132,.075)
+}
+html[data-theme="dark"] .workspace[data-panel="calendar"] .month-controls,
+html[data-theme="dark"] .workspace[data-panel="calendar"] .toolbar .filters > :is(button.action-with-icon,select){
+ box-shadow:inset 0 1px 0 rgba(226,244,255,.13),
+            0 2px 7px rgba(0,0,0,.12)
+}
+/* A single cool-blue header plane, leaving Saturdays and holidays distinct. */
+.workspace[data-panel="calendar"] .calendar thead th:not(.sticky):not(.off):not(.weekend-head):not(.holiday-head){
+ background:var(--luch-v5-head-bg);
+ color:var(--luch-v5-head-ink)
+}
+.workspace[data-panel="calendar"] .calendar thead th.sticky{
+ background-color:var(--luch-v5-left-head);
+ color:var(--luch-v5-left-ink);
+ border-bottom-color:var(--luch-v5-rail)
+}
+/* Matte-opaque pinned patient band. Never reduce opacity or blur the band:
+   its z-index stays ABOVE the moving date cells. */
+.workspace[data-panel="calendar"]{
+ --glass-band-bg:var(--luch-v5-left-bg);
+ --glass-band-header:var(--luch-v5-left-head);
+ --glass-band-hover:var(--luch-v5-left-hover);
+ --luch-lg-selected-left:var(--luch-v5-focus-left);
+ --luch-lg-selected-wash:var(--luch-v5-focus-wash);
+ --luch-lg-selected-rail:var(--luch-v5-focus-rail)
+}
+.workspace[data-panel="calendar"] .calendar tbody td.sticky:not(.calendar-note-editing){
+ background-color:var(--luch-v5-left-bg);
+ border-bottom-color:var(--luch-v5-line);
+ border-right-color:var(--luch-v5-date-line)
+}
+.workspace[data-panel="calendar"] .calendar tbody tr:nth-child(even) td.sticky:not(.calendar-note-editing){
+ background-color:var(--luch-v5-left-alt)
+}
+.workspace[data-panel="calendar"] .calendar tbody tr:hover td.sticky:not(.calendar-note-editing){
+ background-color:var(--luch-v5-left-hover)
+}
+.workspace[data-panel="calendar"] .calendar tbody td.name.sticky .patient-name-surname{
+ color:var(--luch-v5-left-ink);
+ font-weight:760
+}
+.workspace[data-panel="calendar"] .calendar tbody td.name.sticky .calendar-patient-ctv,
+.workspace[data-panel="calendar"] .calendar tbody td.name.sticky .calendar-patient-meta{
+ color:var(--luch-v5-left-muted)
+}
+/* Keep the date half unbroken. Clinical cells retain their original backgrounds. */
+.workspace[data-panel="calendar"] .calendar :is(th,td){
+ border-right-color:var(--luch-v5-date-line);
+ border-bottom-color:var(--luch-v5-line)
+}
+.workspace[data-panel="calendar"] .calendar tbody td.sticky:not(.calendar-note-editing){
+ border-right-color:var(--luch-v5-date-line)
+}
+/* Quieter champagne weekends, never overwriting holidays or treatment codes. */
+.workspace[data-panel="calendar"] .calendar thead th.weekend-head:not(.holiday-head){
+ background:var(--luch-v5-weekend-head);
+ color:var(--luch-v5-weekend-ink)
+}
+.workspace[data-panel="calendar"] .calendar thead th.weekend-head:not(.holiday-head) small{
+ color:var(--luch-v5-weekend-ink)
+}
+.workspace[data-panel="calendar"] .calendar tbody td.day.weekend-day.off:not(.holiday-day):not(.session):not(.final):not(.skip):not(.maintenance):not(.breakdown):not(.lab):not(.issued):not(.chemo-day):not(.delivered):not(.maintenance-final){
+ background:var(--luch-v5-weekend-body);
+ color:var(--luch-v5-weekend-ink)
+}
+.workspace[data-panel="calendar"] .calendar tbody tr.calendar-no-course-row td.calendar-no-course-day.glass-rest-day{
+ background:var(--luch-v5-weekend-body)
+}
+/* Focus is click-only. The user's selected session remains visually distinct.
+   No :hover wash across the calendar grid and no per-cell new shadows. */
+.workspace[data-panel="calendar"] .calendar tbody tr.patient-row-active > td.sticky:not(.calendar-note-editing){
+ background-color:var(--luch-v5-focus-left)
+}
+.workspace[data-panel="calendar"] .calendar tbody tr.patient-row-active > :is(td.day,td.calendar-no-course-day,td.calendar-tail){
+ background-image:linear-gradient(var(--luch-v5-focus-wash),var(--luch-v5-focus-wash))
+}
+/* A colored clinical event must remain exactly its own color even
+   when its patient is focused; the mint/pink/copper markers stay legible. */
+.workspace[data-panel="calendar"] .calendar tbody tr.patient-row-active > td.day:is(.session,.final,.skip,.maintenance,.breakdown,.lab,.issued,.chemo-day,.delivered,.maintenance-final){
+ background-image:none
+}
+.workspace[data-panel="calendar"] .calendar tbody td.calendar-notes.calendar-note-editing{
+ background-color:#f9fcfd;
+ z-index:8
+}
+html[data-theme="dark"] .workspace[data-panel="calendar"] .calendar tbody td.calendar-notes.calendar-note-editing{
+ background-color:#2b4c57
+}
+@media(max-width:700px){
+ .workspace[data-panel="calendar"]{border-radius:16px}
+}
+@media(prefers-reduced-transparency:reduce),(forced-colors:active),(prefers-contrast:more){
+ .workspace[data-panel="calendar"]{
+  border-color:currentColor;
+  box-shadow:none
+ }
+ .workspace[data-panel="calendar"] > .toolbar{
+  background:var(--luch-v5-toolbar-first)
+ }
+ .workspace[data-panel="calendar"] .calendar tbody tr.patient-row-active > :is(td.day,td.calendar-no-course-day,td.calendar-tail){
+  background-image:none
+ }
+}
