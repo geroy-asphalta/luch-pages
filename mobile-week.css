@@ -313,7 +313,12 @@
   border:0;border-bottom:1px solid var(--mobile-border);font-size:13px;text-align:left
  }
  .mobile-more-group>button:last-child{border-bottom:0}
- .mobile-more-group>button>span:first-child{width:23px;text-align:center;font-size:18px;color:var(--mobile-accent)}
+ .mobile-more-group>button>.mobile-more-icon{
+  display:inline-flex;align-items:center;justify-content:center;
+  flex:0 0 23px;width:23px;height:24px;line-height:1;
+  font-size:18px;color:var(--mobile-accent)
+ }
+ .mobile-more-icon svg{display:block;flex:none;width:22px;height:22px}
  .mobile-more-group>button>span:last-child{margin-left:auto;color:var(--mobile-muted)}
  .mobile-task-navigation{display:flex;align-items:center;justify-content:space-between;gap:9px;
   border-radius:16px;background:var(--mobile-surface);border:1px solid var(--mobile-border);padding:6px}

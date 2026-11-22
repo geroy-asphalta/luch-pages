@@ -102,6 +102,33 @@ export function renderMobilePatientCards(state,rows,{weekDate=localToday(),selec
   '</article>';
  }).join('');
 }
+/* Use the exact icon nodes already mounted in the desktop UI.
+   This keeps iPhone's "Ещё" in sync when PC artwork changes. */
+export const desktopMoreIconSources=[
+ ['section','ctv-catalog','.sidebar [data-view="ctv-catalog"] > span'],
+ ['section','workdays','.sidebar [data-view="workdays"] > span'],
+ ['section','maintenance','.sidebar [data-view="maintenance"] > span'],
+ ['section','breakdowns','.sidebar [data-view="breakdowns"] > span'],
+ ['section','transfers','.sidebar [data-view="transfers"] > span'],
+ ['section','journal','.sidebar [data-view="journal"] > span'],
+ ['command','register','.sidebar [data-view="calendar"] > span'],
+ ['command','export','#discharge-text-open .action-icon'],
+ ['command','cloud','#cloud-open > span:first-child'],
+ // The full table uses the existing calendar navigation glyph (no new artwork).
+ ['command','desktop','#mobile-bottom-nav [data-mobile-tab="calendar"] > svg'],
+ ['command','reset','#reset']
+];
+export function copyDesktopMoreIcons(root,documentRef=document){
+ for(const [kind,name,selector] of desktopMoreIconSources){
+  const icon=root.querySelector('[data-mobile-'+kind+'="'+name+'"] > .mobile-more-icon');
+  const source=documentRef.querySelector(selector);
+  if(!icon||!source)continue;
+  const nodes=source.id==='reset'?[source.firstChild]:
+   source.tagName.toLowerCase()==='svg'?[source]:[...source.childNodes];
+  icon.replaceChildren(...nodes.filter(Boolean).map(node=>node.cloneNode(true)));
+ }
+}
+
 export function createMobileWeekUI({
  root,tabbar,actionsDialog,getState,getRows,getSelected,getFilter=()=>'',onFilter=()=>{},
  onSelect,onPatient,onAdd,onOpenRegister,onOpenExport,onOpenCloud,onOpenView,onOpenDesktop,onReset,onClearSelection,
@@ -111,6 +138,7 @@ export function createMobileWeekUI({
  if(!root||!tabbar||!actionsDialog)throw new Error('Мобильный интерфейс ЛУЧ не найден.');
  let tab='patients',weekDate=today(),search='',taskDate=today(),lastCell=null,actionCell=null,desktop=false,fullDesktop=false,calendarAligned=false,activeView='calendar';
  const $=selector=>root.querySelector(selector);
+ copyDesktopMoreIcons(root);
  const searchControl=$('#mobile-search-expandable'),searchInput=$('#mobile-search');
  const searchToggle=$('#mobile-search-toggle'),searchClose=$('#mobile-search-close');
  let searchOpen=false;

@@ -21,7 +21,7 @@
 <link rel="stylesheet" href="./catalog-ui.css?v=3">
 <link rel="stylesheet" href="./theme-dark.css?v=4">
 <link rel="stylesheet" href="./glass-ui.css?v=27">
-<link rel="stylesheet" href="./mobile-week.css?v=5">
+<link rel="stylesheet" href="./mobile-week.css?v=6">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" type="image/svg+xml" href="./icon.svg">
 <title>ЛУЧ · Календарь</title>
@@ -131,20 +131,20 @@
  <section id="mobile-more-view" class="mobile-secondary-screen" aria-label="Другие разделы ЛУЧ" hidden>
   <div class="mobile-more-group">
    <h3>Рабочее пространство</h3>
-   <button type="button" data-mobile-section="ctv-catalog"><span>☰</span> Справочник CTV <span aria-hidden="true">›</span></button>
-   <button type="button" data-mobile-section="workdays"><span>▦</span> Рабочие дни и праздники <span aria-hidden="true">›</span></button>
-   <button type="button" data-mobile-section="maintenance"><span>⚒</span> ТО установок <span aria-hidden="true">›</span></button>
-   <button type="button" data-mobile-section="breakdowns"><span>⚠</span> Поломки аппаратов <span aria-hidden="true">›</span></button>
-   <button type="button" data-mobile-section="transfers"><span>⇄</span> Переводы пациентов <span aria-hidden="true">›</span></button>
-   <button type="button" data-mobile-section="journal"><span>◷</span> История действий <span aria-hidden="true">›</span></button>
+   <button type="button" data-mobile-section="ctv-catalog"><span class="mobile-more-icon" aria-hidden="true"></span> Справочник CTV <span aria-hidden="true">›</span></button>
+   <button type="button" data-mobile-section="workdays"><span class="mobile-more-icon" aria-hidden="true"></span> Рабочие дни и праздники <span aria-hidden="true">›</span></button>
+   <button type="button" data-mobile-section="maintenance"><span class="mobile-more-icon" aria-hidden="true"></span> ТО установок <span aria-hidden="true">›</span></button>
+   <button type="button" data-mobile-section="breakdowns"><span class="mobile-more-icon" aria-hidden="true"></span> Поломки аппаратов <span aria-hidden="true">›</span></button>
+   <button type="button" data-mobile-section="transfers"><span class="mobile-more-icon" aria-hidden="true"></span> Переводы пациентов <span aria-hidden="true">›</span></button>
+   <button type="button" data-mobile-section="journal"><span class="mobile-more-icon" aria-hidden="true"></span> История действий <span aria-hidden="true">›</span></button>
   </div>
   <div class="mobile-more-group">
    <h3>Инструменты</h3>
-   <button type="button" data-mobile-command="register"><span>♙</span> Все пациенты / архив <span aria-hidden="true">›</span></button>
-   <button type="button" data-mobile-command="export"><span>▤</span> Список выписок <span aria-hidden="true">›</span></button>
-   <button type="button" data-mobile-command="cloud"><span>☁</span> Синхронизация <span aria-hidden="true">›</span></button>
-   <button type="button" data-mobile-command="desktop"><span>▦</span> Полная таблица ПК <span aria-hidden="true">›</span></button>
-   <button type="button" data-mobile-command="reset"><span>↶</span> Сбросить демо-данные <span aria-hidden="true">›</span></button>
+   <button type="button" data-mobile-command="register"><span class="mobile-more-icon" aria-hidden="true"></span> Все пациенты / архив <span aria-hidden="true">›</span></button>
+   <button type="button" data-mobile-command="export"><span class="mobile-more-icon" aria-hidden="true"></span> Список выписок <span aria-hidden="true">›</span></button>
+   <button type="button" data-mobile-command="cloud"><span class="mobile-more-icon" aria-hidden="true"></span> Синхронизация <span aria-hidden="true">›</span></button>
+   <button type="button" data-mobile-command="desktop"><span class="mobile-more-icon" aria-hidden="true"></span> Полная таблица ПК <span aria-hidden="true">›</span></button>
+   <button type="button" data-mobile-command="reset"><span class="mobile-more-icon" aria-hidden="true"></span> Сбросить демо-данные <span aria-hidden="true">›</span></button>
   </div>
  </section>
  <div id="mobile-selection" class="mobile-selection" hidden>
@@ -447,5 +447,5 @@
  <p class="mobile-actions-footnote">Изменения расписания не являются клиническим подтверждением проведения процедур.</p>
 </dialog>
 <div role="status" aria-live="polite" id="toast" class="toast"></div>
-<script type="module" src="./app.mjs?v=1.94"></script>
+<script type="module" src="./app.mjs?v=1.95"></script>
 </body></html>
