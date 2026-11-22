@@ -489,8 +489,9 @@
     The original native select remains stretched over the circular icon. */
  .mobile-linac-filter{
   position:relative;display:grid;place-items:center;
-  flex:0 0 46px;width:46px;height:46px;min-width:46px;
+  flex:0 0 46px;width:46px;height:46px;min-width:46px;max-width:46px;
   border:1px solid var(--mobile-border);border-radius:50%;
+  overflow:hidden; /* Clip intrinsic select text on iOS WebKit. */
   background:var(--mobile-surface);box-shadow:var(--mobile-shadow);
   color:var(--mobile-text);-webkit-tap-highlight-color:transparent
  }
@@ -500,9 +501,12 @@
  }
  #mobile-filter{
   position:absolute;inset:0;z-index:1;display:block;
-  width:100%!important;max-width:none!important;min-width:0!important;
-  height:100%!important;margin:0!important;padding:0!important;
+  box-sizing:border-box;width:46px!important;max-width:46px!important;min-width:0!important;
+  height:46px!important;max-height:46px;margin:0!important;padding:0!important;
   border:0!important;border-radius:50%;background:transparent!important;
+  /* WebKit 284644/299698: select options inside flex items can extend
+     the document scroll width even when the select itself looks narrow. */
+  overflow-x:hidden!important;overflow-y:hidden!important;white-space:nowrap;
   box-shadow:none!important;opacity:1!important;cursor:pointer;
   color:transparent!important;-webkit-text-fill-color:transparent!important;
   -webkit-appearance:none;appearance:none;font-size:16px!important;
