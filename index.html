@@ -21,7 +21,7 @@
 <link rel="stylesheet" href="./catalog-ui.css?v=3">
 <link rel="stylesheet" href="./theme-dark.css?v=4">
 <link rel="stylesheet" href="./glass-ui.css?v=25">
-<link rel="stylesheet" href="./mobile-week.css?v=3">
+<link rel="stylesheet" href="./mobile-week.css?v=4">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" type="image/svg+xml" href="./icon.svg">
 <title>ЛУЧ · Календарь</title>
@@ -95,14 +95,16 @@
  </header>
  <div id="mobile-card-view">
   <div class="mobile-search-row">
-   <label class="mobile-search-label" for="mobile-search"><span aria-hidden="true">⌕</span><input id="mobile-search" type="search" placeholder="Поиск пациента, ID, схемы…" autocomplete="off" aria-label="Поиск пациентов"></label>
+   <div class="mobile-search-expandable" id="mobile-search-expandable">
+    <button type="button" id="mobile-search-toggle" class="mobile-search-toggle" aria-expanded="false" aria-controls="mobile-search" aria-label="Открыть поиск пациентов">
+     <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.2"/><path d="m15.4 15.4 4.1 4.1"/></svg>
+    </button>
+    <input id="mobile-search" type="search" placeholder="Поиск пациента…" autocomplete="off" aria-label="Поиск пациентов" disabled>
+    <button type="button" id="mobile-search-close" class="mobile-search-close" aria-label="Свернуть и очистить поиск" disabled>×</button>
+   </div>
    <select id="mobile-filter" aria-label="Фильтр установок"><option value="">Все установки</option></select>
   </div>
   <div class="mobile-week-toolbar">
-   <div class="mobile-mode" role="group" aria-label="Режим мобильного календаря">
-    <button type="button" id="mobile-segment-today" data-mobile-command="today" aria-pressed="true">Сегодня</button>
-    <button type="button" id="mobile-segment-week" data-mobile-command="week" aria-pressed="false">Неделя</button>
-   </div>
    <span id="mobile-patient-count" class="mobile-patient-count"></span>
   </div>
   <div class="mobile-week-navigation">
@@ -431,10 +433,10 @@
  <p class="cloud-explain">На втором устройстве подключись под тем же тестовым аккаунтом и нажми «Принять облачную версию». После этого изменения начнут приходить автоматически. Одновременные несовместимые правки не объединяются: при конфликте запись блокируется, локальная копия сохраняется.</p>
 </dialog>
 <nav id="mobile-bottom-nav" class="mobile-only mobile-bottom-nav" aria-label="Навигация по приложению">
- <button type="button" data-mobile-tab="patients" class="is-current" aria-current="page"><span aria-hidden="true">♙</span>Пациенты</button>
- <button type="button" data-mobile-tab="calendar"><span aria-hidden="true">▦</span>Календарь</button>
- <button type="button" data-mobile-tab="tasks"><span aria-hidden="true">☑</span>Задачи <small id="mobile-tab-tasks-count"></small></button>
- <button type="button" data-mobile-tab="more"><span aria-hidden="true">•••</span>Ещё</button>
+ <button type="button" data-mobile-tab="patients" class="is-current" aria-current="page"><svg class="mobile-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9.7" cy="5.6" r="4"/><path d="M6.7 10.8C4 11.6 2.5 13.7 2.5 16.6V20M12.7 10.8c2 .5 3.5 1.6 4.3 2.6M6.9 17V20"/><circle cx="17.3" cy="18" r="5.1"/><path d="M17.3 15.5v5M14.8 18h5"/></svg>Пациенты</button>
+ <button type="button" data-mobile-tab="calendar"><svg class="mobile-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="17" rx="2"/><path d="M7.5 2.5v4M16.5 2.5v4M2.5 9h19"/></svg>Календарь</button>
+ <button type="button" data-mobile-tab="tasks"><svg class="mobile-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="3.2"/><path d="m7.7 11.9 3 3 5.8-6"/></svg>Задачи <small id="mobile-tab-tasks-count"></small></button>
+ <button type="button" data-mobile-tab="more"><svg class="mobile-tab-icon" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>Ещё</button>
 </nav>
 <button id="mobile-exit-desktop" type="button" class="mobile-only mobile-desktop-exit">← Вернуться к карточкам</button>
 <dialog id="mobile-actions-dialog" class="mobile-actions-dialog" aria-labelledby="mobile-actions-title">
@@ -445,5 +447,5 @@
  <p class="mobile-actions-footnote">Изменения расписания не являются клиническим подтверждением проведения процедур.</p>
 </dialog>
 <div role="status" aria-live="polite" id="toast" class="toast"></div>
-<script type="module" src="./app.mjs?v=1.92"></script>
+<script type="module" src="./app.mjs?v=1.93"></script>
 </body></html>

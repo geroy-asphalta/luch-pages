@@ -111,6 +111,20 @@ export function createMobileWeekUI({
  if(!root||!tabbar||!actionsDialog)throw new Error('Мобильный интерфейс ЛУЧ не найден.');
  let tab='patients',weekDate=today(),search='',taskDate=today(),lastCell=null,actionCell=null,desktop=false,activeView='calendar';
  const $=selector=>root.querySelector(selector);
+ const searchControl=$('#mobile-search-expandable'),searchInput=$('#mobile-search');
+ const searchToggle=$('#mobile-search-toggle'),searchClose=$('#mobile-search-close');
+ let searchOpen=false;
+ function setSearchOpen(open,{clear=false}={}){
+  if(clear&&search){search='';renderCardsOnly();}
+  searchOpen=open;
+  searchControl.classList.toggle('is-open',open);
+  searchToggle.setAttribute('aria-expanded',String(open));
+  searchToggle.setAttribute('aria-label',open?'Поиск пациентов':'Открыть поиск пациентов');
+  searchInput.disabled=!open;
+  searchClose.disabled=!open;
+  if(open)searchInput.focus({preventScroll:true});
+  else if(document.activeElement===searchInput)searchInput.blur();
+ }
  const dates=()=>mobileWeekDates(weekDate);
  const two=date=>date.slice(8)+'.'+date.slice(5,7);
  const fullDate=date=>new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'long',year:'numeric'}).format(new Date(date+'T12:00:00'));
@@ -181,8 +195,6 @@ export function createMobileWeekUI({
   $('#mobile-filter').value=getFilter();
   $('#mobile-week-range').textContent=two(dates()[0])+' — '+two(dates()[6]);
   $('#mobile-week-date').value=weekDate;
-  $('#mobile-segment-today').setAttribute('aria-pressed',String(tab==='patients'));
-  $('#mobile-segment-week').setAttribute('aria-pressed',String(tab==='calendar'));
   const count=selected.size;
   $('#mobile-selection').hidden=count===0;
   $('#mobile-selection-count').textContent=count===1?'1 ячейка':'Выбрано: '+count;
@@ -197,6 +209,11 @@ export function createMobileWeekUI({
   renderTasks();
  }
  root.addEventListener('click',event=>{
+  if(event.target.closest('#mobile-search-toggle')){
+   if(searchOpen)searchInput.focus({preventScroll:true});else setSearchOpen(true);
+   return;
+  }
+  if(event.target.closest('#mobile-search-close')){setSearchOpen(false,{clear:true});return;}
   const target=event.target.closest('button[data-mobile-cell],button[data-mobile-patient],button[data-mobile-action-open],button[data-mobile-command],button[data-mobile-task],button[data-mobile-copy-discharge],button[data-mobile-section],button[data-mobile-week-shift],button[data-mobile-task-shift],button[data-mobile-tab-shortcut]');
   if(!target)return;
   if(target.dataset.mobileCell!==undefined){
@@ -234,6 +251,12 @@ export function createMobileWeekUI({
  root.addEventListener('input',event=>{
   if(event.target.id==='mobile-search'){search=event.target.value;renderCardsOnly();}
  });
+ root.addEventListener('keydown',event=>{
+  if(event.key==='Escape'&&searchOpen){event.preventDefault();setSearchOpen(false,{clear:true});searchToggle.focus();}
+ });
+ document.addEventListener('pointerdown',event=>{
+  if(searchOpen&&!search.trim()&&!searchControl.contains(event.target))setSearchOpen(false);
+ },{passive:true});
  function renderCardsOnly(){
   const rows=mobileVisibleRows(getState(),getRows(),{filter:getFilter(),search,today:today()});
   $('#mobile-patient-count').textContent='Пациентов: '+rows.length;
