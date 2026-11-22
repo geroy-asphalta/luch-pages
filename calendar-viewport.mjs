@@ -59,18 +59,19 @@ export function calendarNativeTrackpadAxes(env=typeof navigator==='undefined'?nu
  return /mac/i.test(platform)||/Macintosh|Mac OS X/i.test(String(env?.userAgent||''));
 }
 
-// On Windows the wheel MUST scroll vertically everywhere in the timetable.
-// Only the native scrollbar thumb/track moves the calendar sideways. Blocking
-// Shift+wheel and horizontal-dominant trackpad gestures prevents accidental
-// horizontal movement without cancelling an ordinary vertical wheel event.
-// This does not affect macOS or touch swipes on iPhone.
+// Windows Chrome should use the browser's compositor scrolling directly.
+// A non-passive wheel listener on the entire scrolling table makes Chrome wait
+// for the main JS thread on EVERY wheel tick, even when the handler does not
+// call preventDefault(). This is particularly costly with many sticky columns.
+// Ordinary vertical wheel remains vertical; horizontal gestures and Shift+wheel
+// are now natively allowed instead of being cancelled. Mac/iOS unchanged.
 export function calendarWindowsScrollbarOnly(env=typeof navigator==='undefined'?null:navigator){
  const platform=String(env?.userAgentData?.platform||env?.platform||'');
  return /^win/i.test(platform)||/Windows NT/i.test(String(env?.userAgent||''));
 }
 
-// macOS keeps independent native trackpad axes; Linux retains the earlier date-cell
-// wheel behaviour. On Windows the native scrollbar is the horizontal control.
+// Windows and macOS use independent browser-native scroll axes.
+// Linux retains the earlier date-cell wheel behaviour.
 export function enableCalendarHorizontalWheel(calendar,{
  nativeAxes=calendarNativeTrackpadAxes(),
  windowsScrollbarOnly=calendarWindowsScrollbarOnly()
@@ -78,17 +79,7 @@ export function enableCalendarHorizontalWheel(calendar,{
  const scroller=calendar?.closest('.scroll');
  if(!scroller?.addEventListener)return false;
  if(nativeAxes)return true; // macOS: both axes stay browser-native.
- if(windowsScrollbarOnly){
-  scroller.addEventListener('wheel',event=>{
-   if(event.ctrlKey||event.metaKey)return; // Browser zoom is unaffected.
-   // Vertical gestures are not intercepted, even when the cursor is over dates.
-   // Chrome/Edge can treat Shift+wheel as a horizontal scroll on Windows.
-   const horizontal=event.shiftKey||(
-    Math.abs(event.deltaX)>0&&Math.abs(event.deltaX)>=Math.abs(event.deltaY));
-   if(horizontal&&event.cancelable)event.preventDefault();
-  },{passive:false});
-  return true;
- }
+ if(windowsScrollbarOnly)return true; // Windows: zero wheel handlers, native compositor scrolling.
  // Preserve the existing non-Windows/non-Mac behaviour.
  scroller.addEventListener('wheel',event=>{
   if(event.ctrlKey||event.metaKey)return; // Keep browser zoom gestures.
