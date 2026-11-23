@@ -851,3 +851,39 @@
 @media(prefers-reduced-motion:reduce){
  .mobile-patient-week.is-step-forward,.mobile-patient-week.is-step-back{animation:none!important}
 }
+
+/* iOS native date ribbon: follow the finger continuously, without snapping.
+   The visible strip is viewport-clipped, with recyclable days beyond the edge. */
+@media(max-width:700px){
+ .mobile-week-carousel{
+  width:100%;max-width:100%;min-width:0;overflow:hidden;
+  touch-action:auto;overscroll-behavior-x:contain
+ }
+ .mobile-patient-week{
+  position:relative;display:flex;flex-wrap:nowrap;
+  grid-template-columns:none;gap:3px;
+  width:100%;max-width:100%;min-width:0;
+  overflow-x:auto;overflow-y:hidden;
+  -webkit-overflow-scrolling:touch;
+  scroll-behavior:auto;scroll-snap-type:none;
+  overscroll-behavior-x:contain;touch-action:pan-x pan-y;
+  scrollbar-width:none;overflow-anchor:none
+ }
+ .mobile-patient-week::-webkit-scrollbar{display:none}
+ .mobile-patient-week:focus-visible{
+  outline:2px solid var(--mobile-accent);outline-offset:-2px
+ }
+ .mobile-patient-week .mobile-date-cell{
+  flex:0 0 calc((100% - 18px)/7);
+  width:calc((100% - 18px)/7);
+  min-width:44px;max-width:none;
+  touch-action:auto;scroll-snap-align:none
+ }
+}
+@media(max-width:370px){
+ .mobile-patient-week{gap:2px}
+ .mobile-patient-week .mobile-date-cell{
+  flex-basis:calc((100% - 12px)/7);
+  width:calc((100% - 12px)/7)
+ }
+}

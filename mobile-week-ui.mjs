@@ -76,48 +76,63 @@ export function compactPatientName(name){
  if(parts.length<2)return parts[0]||'Пациент';
  return parts[0]+' '+parts.slice(1,3).map(part=>part.charAt(0).toLocaleUpperCase('ru')+'.').join(' ');
 }
-export function renderMobilePatientCards(state,rows,{weekDate=localToday(),selected=new Set(),expanded=new Set(),windowStarts=new Map(),today=localToday()}={}){
+// A recycled date buffer uses Safari's native scroll (including momentum).
+// Dates extend in either direction when close to the end of the buffer.
+export const MOBILE_CAROUSEL_BUFFER_DAYS=42;
+export const MOBILE_CAROUSEL_CHUNK_DAYS=35;
+export const MOBILE_CAROUSEL_MAX_DAYS=161;
+export function mobileCarouselInitialRange(weekDate){
+ const anchor=mobileWeekStart(weekDate)||weekDate;
+ return {start:addDays(anchor,-MOBILE_CAROUSEL_BUFFER_DAYS),
+  count:MOBILE_CAROUSEL_BUFFER_DAYS*2+7,left:null};
+}
+export function renderMobileDateCells(state,course,{start,count=7,selected=new Set(),today=localToday()}={}){
+ if(!start||!Number.isInteger(count)||count<1)return '';
+ const dates=Array.from({length:count},(_,i)=>addDays(start,i));
+ const plan=course.noCourse?new Map():schedule(course,state,dates.at(-1));
+ return dates.map(date=>{
+  const data=mobileDayState(state,course,date,today,plan),key=course.id+'|'+date;
+  const daySelected=selected.has(key),todayCell=date===today;
+  const weekday=weekDays[(new Date(date+'T12:00:00Z').getUTCDay()+6)%7];
+  const fraction=data.fraction!=null?'№'+data.fraction:'—';
+  const icons=[
+   data.completed&&data.isSession?'<span class="mobile-date-completion" title="Сеанс учтён"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m3 8 3.1 3 6.8-7"/></svg></span>':'',
+   data.labStatus?bloodTubeIcon:'',
+   data.chemoPlanned?(data.chemoMissed?chemoInfusionMissedIcon:chemoInfusionIcon):'',
+   data.maintenance?maintenanceWrenchSvg:'',
+   data.breakdown?'<span class="mobile-date-alert" aria-hidden="true">!</span>':'',
+   data.skip?skippedFractionIcon:''
+  ].join('');
+  return '<button type="button" class="mobile-date-cell mobile-date-'+data.kind+
+   (data.weekend?' mobile-date-weekend':'')+
+   (data.isSession?(data.completed?' is-session-complete':' is-session-planned'):'')+
+   (todayCell?' is-today':'')+(daySelected?' is-selected':'')+
+   '" data-mobile-cell data-course-id="'+esc(course.id)+'" data-date="'+date+
+   '"'+(course.noCourse?' disabled':'')+' aria-pressed="'+daySelected+'" aria-label="'+esc(course.name+', '+data.title+
+   (daySelected?', выделено':'') )+'" title="'+esc(data.title)+'">'+
+   '<span class="mobile-date-weekday">'+weekday+'</span>'+
+   '<span class="mobile-date-day">'+date.slice(8)+'</span>'+
+   '<span class="mobile-date-symbol">'+(data.skip?'—':esc(fraction))+'</span>'+
+   '<span class="mobile-date-events" aria-hidden="true">'+icons+'</span></button>';
+ }).join('');
+}
+export function renderMobilePatientCards(state,rows,{weekDate=localToday(),selected=new Set(),expanded=new Set(),carouselRanges=new Map(),today=localToday()}={}){
  return rows.map(course=>{
-  const start=windowStarts.get(course.id)||mobileWeekStart(weekDate)||weekDate;
-  const dates=Array.from({length:7},(_,i)=>addDays(start,i)),end=dates.at(-1);
+  const isExpanded=expanded.has(course.id);
+  const range=isExpanded?(carouselRanges.get(course.id)||mobileCarouselInitialRange(weekDate)):null;
+  const start=range?.start||mobileWeekStart(weekDate)||weekDate;
+  const count=range?.count||7;
   const contact=calendarContact(state,course);
-  const plan=course.noCourse?new Map():schedule(course,state,end);
   const ctv=course.noCourse?'Без курса':currentCtvName(state,course)||course.courseName||'Схема не указана';
   const phoneDigits=contact.phone.replace(/[^\d+]/g,'');
   const machine=course.noCourse?'Установка не назначена':machineAt(course,state,weekDate);
   const progress=course.noCourse?null:courseProgress(state,course,today);
-  const cells=dates.map(date=>{
-   const data=mobileDayState(state,course,date,today,plan),key=course.id+'|'+date;
-   const daySelected=selected.has(key),todayCell=date===today;
-   const weekday=weekDays[(new Date(date+'T12:00:00Z').getUTCDay()+6)%7];
-   const fraction=data.fraction!=null?'№'+data.fraction:'—';
-   const icons=[
-    data.completed&&data.isSession?'<span class="mobile-date-completion" title="Сеанс учтён"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m3 8 3.1 3 6.8-7"/></svg></span>':'',
-    data.labStatus?bloodTubeIcon:'',
-    data.chemoPlanned?(data.chemoMissed?chemoInfusionMissedIcon:chemoInfusionIcon):'',
-    data.maintenance?maintenanceWrenchSvg:'',
-    data.breakdown?'<span class="mobile-date-alert" aria-hidden="true">!</span>':'',
-    data.skip?skippedFractionIcon:''
-   ].join('');
-   return '<button type="button" class="mobile-date-cell mobile-date-'+data.kind+
-    (data.weekend?' mobile-date-weekend':'')+
-    (data.isSession?(data.completed?' is-session-complete':' is-session-planned'):'')+
-    (todayCell?' is-today':'')+(daySelected?' is-selected':'')+
-    '" data-mobile-cell data-course-id="'+esc(course.id)+'" data-date="'+date+
-    '"'+(course.noCourse?' disabled':'')+' aria-pressed="'+daySelected+'" aria-label="'+esc(course.name+', '+data.title+
-    (daySelected?', выделено':'') )+'" title="'+esc(data.title)+'">'+
-    '<span class="mobile-date-weekday">'+weekday+'</span>'+
-    '<span class="mobile-date-day">'+date.slice(8)+'</span>'+
-    '<span class="mobile-date-symbol">'+(data.skip?'—':esc(fraction))+'</span>'+
-    '<span class="mobile-date-events" aria-hidden="true">'+icons+'</span></button>';
-  }).join('');
+  const cells=renderMobileDateCells(state,course,{start,count,selected,today});
   const carousel='<div class="mobile-week-carousel" data-mobile-course-carousel="'+esc(course.id)+'">'+
-   '<div class="mobile-week-carousel-head">'+
-    '<button type="button" class="mobile-week-carousel-nav" data-mobile-carousel-shift="-1" data-course-id="'+esc(course.id)+'" aria-label="Предыдущий день">‹</button>'+
-    '<span class="mobile-week-carousel-range">'+dates[0].slice(8)+'.'+dates[0].slice(5,7)+' — '+dates.at(-1).slice(8)+'.'+dates.at(-1).slice(5,7)+'</span>'+
-    '<button type="button" class="mobile-week-carousel-nav" data-mobile-carousel-shift="1" data-course-id="'+esc(course.id)+'" aria-label="Следующий день">›</button>'+
-   '</div><div class="mobile-patient-week" role="group" aria-label="Даты и сеансы пациента: '+esc(course.name)+'">'+cells+'</div></div>';
-  const isExpanded=expanded.has(course.id),patientName=esc(course.name);
+   '<div class="mobile-patient-week" tabindex="0" role="group" data-range-start="'+start+
+   '" aria-label="Даты и номера сеансов пациента '+esc(course.name)+'. Прокручивайте горизонтально">'+cells+
+   '</div></div>';
+  const patientName=esc(course.name);
   const isChemoradiation=!course.noCourse&&course.treatmentType==='ХЛТ';
   const elnActive=contact.eln==='Да';
   const callIcon='<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.2 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.96.34 1.91.67 2.83a2 2 0 0 1-.45 2.11L8.06 9.94a16 16 0 0 0 6 6l1.28-1.27a2 2 0 0 1 2.11-.45c.92.33 1.87.55 2.83.67A2 2 0 0 1 22 16.92z"/></svg>';
@@ -187,7 +202,9 @@ export function createMobileWeekUI({
 }){
  if(!root||!tabbar||!actionsDialog)throw new Error('Мобильный интерфейс ЛУЧ не найден.');
  let tab='patients',weekDate=today(),search='',taskDate=today(),lastCell=null,actionCell=null,desktop=false,fullDesktop=false,calendarAligned=false,activeView='calendar';
- const expandedCards=new Set(),carouselStarts=new Map();
+ const expandedCards=new Set(),carouselRanges=new Map();
+ let resetCarouselPending=false;
+ function resetCarouselRanges(){carouselRanges.clear();resetCarouselPending=true;}
  const $=selector=>root.querySelector(selector);
  copyDesktopMoreIcons(root);
  const searchControl=$('#mobile-search-expandable'),searchInput=$('#mobile-search');
@@ -266,6 +283,95 @@ export function createMobileWeekUI({
    '" aria-label="'+esc((item.done?'Снять выполнение: ':'Выполнить: ')+item.label)+'">'+(item.done?'✓':'○')+'</button>'+
    '<span>'+esc(item.label)+'</span>'+call+dischargeCopy+'</div>';
  }
+
+ // Native overflow preserves drag distance and Safari's momentum.
+ const cardList=$('#mobile-card-list');
+ let currentRows=[];
+ function rangeFor(id){
+  if(!carouselRanges.has(id))carouselRanges.set(id,mobileCarouselInitialRange(weekDate));
+  return carouselRanges.get(id);
+ }
+ function saveCarouselPositions(){
+  for(const strip of cardList.querySelectorAll('.mobile-patient-card.is-expanded .mobile-patient-week')){
+   const id=strip.closest('.mobile-patient-card')?.dataset.mobileCourseId;
+   // Hidden panels have zero measurable width in Safari: retain the saved position.
+   if(id&&strip.clientWidth>0)rangeFor(id).left=strip.scrollLeft;
+  }
+ }
+ function restoreCarousel(strip,id){
+  // Safari reports zero-width scrollports for hidden tabs; never overwrite
+  // a real stored offset with a zero from display:none.
+  if(strip.clientWidth<=0)return;
+  const range=rangeFor(id),first=strip.firstElementChild;
+  if(!first)return;
+  const anchor=strip.children[MOBILE_CAROUSEL_BUFFER_DAYS];
+  const natural=anchor?anchor.offsetLeft-first.offsetLeft:0;
+  strip.scrollLeft=Math.max(0,range.left==null?natural:range.left);
+  range.left=strip.scrollLeft;
+ }
+ function restoreCarouselPositions(){
+  for(const strip of cardList.querySelectorAll('.mobile-patient-card.is-expanded .mobile-patient-week')){
+   const id=strip.closest('.mobile-patient-card')?.dataset.mobileCourseId;
+   if(id)restoreCarousel(strip,id);
+  }
+ }
+ function hydrateExpandedCarousel(card,id){
+  const course=currentRows.find(row=>row.id===id);
+  const strip=card?.querySelector('.mobile-patient-week');
+  if(!course||!strip)return;
+  const range=rangeFor(id);
+  strip.innerHTML=renderMobileDateCells(getState(),course,{
+   start:range.start,count:range.count,selected:getSelected(),today:today()
+  });
+  strip.dataset.rangeStart=range.start;
+  restoreCarousel(strip,id);
+ }
+ function extendCarousel(strip,direction){
+  if(!strip.isConnected)return;
+  const id=strip.closest('.mobile-patient-card')?.dataset.mobileCourseId;
+  if(!id||!expandedCards.has(id))return;
+  const course=currentRows.find(row=>row.id===id);
+  if(!course)return;
+  const range=rangeFor(id),days=MOBILE_CAROUSEL_CHUNK_DAYS;
+  const oldWidth=strip.scrollWidth,before=direction<0;
+  const addition=renderMobileDateCells(getState(),course,{
+   start:before?addDays(range.start,-days):addDays(range.start,range.count),
+   count:days,selected:getSelected(),today:today()
+  });
+  if(before){
+   strip.insertAdjacentHTML('afterbegin',addition);
+   range.start=addDays(range.start,-days);
+   strip.dataset.rangeStart=range.start;
+   strip.scrollLeft+=strip.scrollWidth-oldWidth;
+  }else strip.insertAdjacentHTML('beforeend',addition);
+  range.count+=days;
+  if(range.count>MOBILE_CAROUSEL_MAX_DAYS){
+   const beforeTrim=strip.scrollWidth;
+   for(let i=0;i<days;i++){
+    const item=before?strip.lastElementChild:strip.firstElementChild;
+    item?.remove();
+   }
+   if(!before){
+    range.start=addDays(range.start,days);
+    strip.dataset.rangeStart=range.start;
+    strip.scrollLeft-=beforeTrim-strip.scrollWidth;
+   }
+   range.count-=days;
+  }
+  range.left=strip.scrollLeft;
+ }
+ cardList.addEventListener('scroll',event=>{
+  const strip=event.target;
+  if(!strip.classList?.contains('mobile-patient-week'))return;
+  const id=strip.closest('.mobile-patient-card')?.dataset.mobileCourseId;
+  if(!id||!expandedCards.has(id)||strip.clientWidth<=0)return;
+  rangeFor(id).left=strip.scrollLeft;
+  const width=strip.firstElementChild?.getBoundingClientRect().width||48;
+  const edge=width*12;
+  if(strip.scrollLeft<edge)extendCarousel(strip,-1);
+  else if(strip.scrollWidth-strip.clientWidth-strip.scrollLeft<edge)extendCarousel(strip,1);
+ },true);
+
  function render(){
   if(!isMobile())return;
   const appState=getState(),selected=getSelected(),mobilePanel=activeView==='calendar'&&!desktop;
@@ -294,39 +400,25 @@ export function createMobileWeekUI({
   $('#mobile-selection').hidden=count===0;
   $('#mobile-selection-count').textContent=count===1?'1 ячейка':'Выбрано: '+count;
   const rows=mobileVisibleRows(appState,getRows(),{filter:getFilter(),search,today:today()});
-  $('#mobile-card-list').innerHTML=renderMobilePatientCards(appState,rows,{weekDate,selected,expanded:expandedCards,windowStarts:carouselStarts,today:today()})||
+  if(resetCarouselPending)resetCarouselPending=false;
+  else saveCarouselPositions();
+  currentRows=rows;
+  cardList.innerHTML=renderMobilePatientCards(appState,rows,{weekDate,selected,expanded:expandedCards,carouselRanges,today:today()})||
    '<p class="mobile-empty">По выбранным условиям пациентов нет</p>';
+  restoreCarouselPositions();
   const pending=todayTasks(appState,today()).filter(x=>!x.done).length;
   tabbar.querySelector('#mobile-tab-tasks-count').textContent=pending?String(pending):'';
   renderTasks();
  }
- function shiftPatientCarousel(courseId,days){
-  if(!expandedCards.has(courseId)||!Number.isInteger(days)||Math.abs(days)!==1)return;
-  const start=carouselStarts.get(courseId)||mobileWeekStart(weekDate);
-  if(!start)return;
-  carouselStarts.set(courseId,addDays(start,days));
-  renderCardsOnly();
-  const card=[...$('#mobile-card-list').querySelectorAll('.mobile-patient-card')]
-   .find(node=>node.dataset.mobileCourseId===courseId);
-  const strip=card?.querySelector('.mobile-patient-week');
-  if(strip)strip.classList.add(days>0?'is-step-forward':'is-step-back');
- }
- let lastCarouselSwipeAt=0;
  root.addEventListener('click',event=>{
-  // A horizontal swipe over a date button must never also select the date.
-  if(Date.now()-lastCarouselSwipeAt<450&&event.target.closest('.mobile-week-carousel')){
-   event.preventDefault();return;
-  }
   if(event.target.closest('#mobile-search-toggle')){
    if(searchOpen)searchInput.focus({preventScroll:true});else setSearchOpen(true);
    return;
   }
   if(event.target.closest('#mobile-search-close')){setSearchOpen(false,{clear:true});return;}
-  const target=event.target.closest('button[data-mobile-cell],button[data-mobile-carousel-shift],button[data-mobile-expand],button[data-mobile-patient],button[data-mobile-action-open],button[data-mobile-command],button[data-mobile-task],button[data-mobile-copy-discharge],button[data-mobile-section],button[data-mobile-week-shift],button[data-mobile-task-shift],button[data-mobile-tab-shortcut]');
+  const target=event.target.closest('button[data-mobile-cell],button[data-mobile-expand],button[data-mobile-patient],button[data-mobile-action-open],button[data-mobile-command],button[data-mobile-task],button[data-mobile-copy-discharge],button[data-mobile-section],button[data-mobile-week-shift],button[data-mobile-task-shift],button[data-mobile-tab-shortcut]');
   if(!target)return;
-  if(target.dataset.mobileCarouselShift!==undefined){
-   shiftPatientCarousel(target.dataset.courseId,Number(target.dataset.mobileCarouselShift));
-  }else if(target.dataset.mobileCell!==undefined){
+  if(target.dataset.mobileCell!==undefined){
    lastCell={patientId:target.dataset.courseId,date:target.dataset.date};
    onSelect(lastCell.patientId,lastCell.date,{metaKey:true,ctrlKey:false,shiftKey:false});
   }else if(target.dataset.mobileExpand!==undefined){
@@ -334,7 +426,9 @@ export function createMobileWeekUI({
    if(!card)return;
    const open=!expandedCards.has(id);
    if(open)expandedCards.add(id);else expandedCards.delete(id);
+   if(!open){const strip=card.querySelector('.mobile-patient-week');if(strip)rangeFor(id).left=strip.scrollLeft;}
    card.classList.toggle('is-expanded',open);
+   if(open)hydrateExpandedCarousel(card,id);
    target.setAttribute('aria-expanded',String(open));
    target.setAttribute('aria-label',(open?'Свернуть':'Развернуть')+' пациента '+(card.querySelector('.mobile-summary-name-full')?.textContent||''));
    const extra=card.querySelector('.mobile-summary-extras');
@@ -357,7 +451,7 @@ export function createMobileWeekUI({
    const result=onToggleTask(target.dataset.mobileTask,taskDate);
    if(result?.error)onNotice(result.error);render();
   }else if(target.dataset.mobileWeekShift){
-   weekDate=addDays(weekDate,7*Number(target.dataset.mobileWeekShift));carouselStarts.clear();render();
+   weekDate=addDays(weekDate,7*Number(target.dataset.mobileWeekShift));resetCarouselRanges();render();
   }else if(target.dataset.mobileTaskShift){
    const value=addDays(taskDate,Number(target.dataset.mobileTaskShift));
    if(value<=today()){taskDate=value;render();}
@@ -372,7 +466,7 @@ export function createMobileWeekUI({
    else if(cmd==='export')onOpenExport();
    else if(cmd==='cloud')onOpenCloud();
    else if(cmd==='clear'){lastCell=null;onClearSelection();}
-   else if(cmd==='today'){weekDate=today();carouselStarts.clear();tab='patients';render();}
+   else if(cmd==='today'){weekDate=today();resetCarouselRanges();tab='patients';render();}
    else if(cmd==='week'){tab='calendar';render();}
    else if(cmd==='tasks-today'){taskDate=today();render();}
    else if(cmd==='desktop'){desktop=true;fullDesktop=true;onOpenDesktop();render();}
@@ -389,8 +483,12 @@ export function createMobileWeekUI({
  },{passive:true});
  function renderCardsOnly(){
   const rows=mobileVisibleRows(getState(),getRows(),{filter:getFilter(),search,today:today()});
-  $('#mobile-card-list').innerHTML=renderMobilePatientCards(getState(),rows,{weekDate,selected:getSelected(),expanded:expandedCards,windowStarts:carouselStarts,today:today()})||
+  if(resetCarouselPending)resetCarouselPending=false;
+  else saveCarouselPositions();
+  currentRows=rows;
+  cardList.innerHTML=renderMobilePatientCards(getState(),rows,{weekDate,selected:getSelected(),expanded:expandedCards,carouselRanges,today:today()})||
    '<p class="mobile-empty">По выбранным условиям пациентов нет</p>';
+  restoreCarouselPositions();
  }
  root.addEventListener('change',event=>{
   if(event.target.id==='mobile-filter'){
@@ -400,7 +498,7 @@ export function createMobileWeekUI({
    requestAnimationFrame(()=>select.blur());
   }
   else if(event.target.id==='mobile-week-date'&&/^\d{4}-\d\d-\d\d$/.test(event.target.value)){
-   weekDate=event.target.value;carouselStarts.clear();render();
+   weekDate=event.target.value;resetCarouselRanges();render();
   }else if(event.target.id==='mobile-task-date'&&/^\d{4}-\d\d-\d\d$/.test(event.target.value)&&event.target.value<=today()){
    taskDate=event.target.value;render();
   }
@@ -418,28 +516,7 @@ export function createMobileWeekUI({
   }else if(event.target.closest('[data-mobile-actions-close]'))closeActions();
   else if(event.target===actionsDialog)closeActions();
  });
- // Swipe only the expanded patient's date carousel, one day at a time.
- // Vertical page scrolling and the existing card-list gestures stay available.
- let dateSwipe=null;
- const cardList=$('#mobile-card-list');
- cardList.addEventListener('touchstart',event=>{
-  const strip=event.target.closest('.mobile-patient-week');
-  if(!strip||event.touches.length!==1){dateSwipe=null;return;}
-  const card=strip.closest('.mobile-patient-card');
-  dateSwipe=card?{courseId:card.dataset.mobileCourseId,
-   x:event.touches[0].clientX,y:event.touches[0].clientY}:null;
- },{passive:true});
- cardList.addEventListener('touchend',event=>{
-  if(!dateSwipe||!event.changedTouches.length)return;
-  const dx=event.changedTouches[0].clientX-dateSwipe.x;
-  const dy=event.changedTouches[0].clientY-dateSwipe.y;
-  const id=dateSwipe.courseId;
-  dateSwipe=null;
-  if(Math.abs(dx)>43&&Math.abs(dx)>Math.abs(dy)*1.45){
-   lastCarouselSwipeAt=Date.now();
-   shiftPatientCarousel(id,dx<0?1:-1);
-  }
- },{passive:true});
+ // The date strip scrolls natively on iOS; no touchend jump or forced snap.
  // Outside the carousel, the whole-card gesture still switches weeks.
  let swipe=null;
  $('#mobile-card-list').addEventListener('touchstart',event=>{
@@ -451,7 +528,7 @@ export function createMobileWeekUI({
   const dx=event.changedTouches[0].clientX-swipe.x,dy=event.changedTouches[0].clientY-swipe.y;
   swipe=null;
   if(Math.abs(dx)>65&&Math.abs(dx)>Math.abs(dy)*1.6){
-   weekDate=addDays(weekDate,dx<0?7:-7);carouselStarts.clear();render();
+   weekDate=addDays(weekDate,dx<0?7:-7);resetCarouselRanges();render();
   }
  },{passive:true});
  function syncView(next){
