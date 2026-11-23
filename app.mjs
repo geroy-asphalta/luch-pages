@@ -32,7 +32,7 @@ import {installPhotoCourseAssignments} from './demo-photo-course-assignments.mjs
 import {calendarRosterRows} from './calendar-roster-rows.mjs';
 import {syncCourseStartStatusesDraft} from './course-start-status.mjs';
 import {installImportedLabColors} from './demo-lab-colors.mjs?v=1';
-import {createFirebaseDemoSync} from './firebase-demo-state-ui.mjs?v=2';
+import {createFirebaseDemoSync} from './firebase-demo-state-ui.mjs?v=3';
 import {setupCourseStartRecovery} from './course-start-recovery-ui.mjs';
 import {setupDischargeTextReportUI} from './discharge-text-ui.mjs?v=4';
 import {setupThemeUI} from './theme-ui.mjs';

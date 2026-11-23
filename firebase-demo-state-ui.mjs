@@ -4,7 +4,7 @@ import {parseFirebaseWebConfig} from './sync-lab-core.mjs';
 import {DEMO_COLLECTION,CONFIG_STORE,LOCAL_BACKUP_PREFIX,META_PREFIX,
  CONFLICT_BACKUP_PREFIX,createConflictBackup,assertConflictRecoverySnapshot,
  encodeDemoState,decodeDemoState,parseCloudDemoDocument,readAck,
- determineCloudAction,assertCloudVersion,makeCloudWrite} from './firebase-demo-state-core.mjs';
+ determineCloudAction,assertCloudVersion,makeCloudWrite} from './firebase-demo-state-core.mjs?v=2';
 
 const $=id=>document.getElementById(id);
 const info=msg=>{$('cloud-status').textContent=msg;};
