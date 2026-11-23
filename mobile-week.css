@@ -755,3 +755,99 @@
  .mobile-summary-name-short,.mobile-summary-name-full,.mobile-summary-extras,
  .mobile-summary-action .mobile-summary-call,.mobile-summary-edit{transition:none!important}
 }
+
+/* iOS variant C: quiet session fills, clear fraction numbers and small
+   existing desktop event symbols. Green remains exclusive to final RT. */
+@media(max-width:700px){
+ .mobile-week-carousel{
+  min-width:0;touch-action:pan-y;overscroll-behavior-x:contain
+ }
+ .mobile-week-carousel-head{
+  display:flex;align-items:center;justify-content:center;
+  gap:9px;min-height:38px;margin:0 0 4px;
+  color:var(--mobile-muted);font-size:10px;font-weight:750;
+  font-variant-numeric:tabular-nums
+ }
+ .mobile-week-carousel-nav{
+  display:grid;place-items:center;min-width:38px;width:38px;height:38px;
+  border:1px solid var(--mobile-border);border-radius:50%;
+  background:var(--mobile-surface-2);color:var(--mobile-text);
+  font-size:23px;font-weight:500;line-height:1;
+  -webkit-tap-highlight-color:transparent
+ }
+ .mobile-week-carousel-nav:active{background:var(--mobile-accent-soft)}
+ .mobile-week-carousel-nav:focus-visible{outline:2px solid var(--mobile-accent);outline-offset:2px}
+ .mobile-week-carousel-range{text-align:center;min-width:108px;white-space:nowrap}
+ .mobile-patient-week{
+  display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;touch-action:pan-y
+ }
+ .mobile-date-cell{
+  min-height:83px;padding:6px 1px 5px;gap:1px;
+  justify-content:space-between;box-shadow:inset 0 1px 0 rgba(255,255,255,.35)
+ }
+ .mobile-date-cell.mobile-date-session.is-session-complete{
+  background:#e8eef7;border-color:#d0dce9;color:#273c50
+ }
+ .mobile-date-cell.mobile-date-session.is-session-planned{
+  background:#fbfcfe;border-color:#dbe4ec;color:#334b60
+ }
+ .mobile-date-cell.mobile-date-final{
+  background:#cdf0dc;color:#246e48;border-color:#95d2ae
+ }
+ .mobile-date-weekday{font-size:9px;line-height:1.05}
+ .mobile-date-day{font-size:12px;font-weight:850;line-height:1.2;font-variant-numeric:tabular-nums}
+ .mobile-date-symbol{font-size:10px;min-height:12px;line-height:1.15;font-weight:750}
+ .mobile-date-events{
+  display:flex;align-items:center;justify-content:center;
+  gap:1px;min-height:16px;max-height:16px;width:100%;overflow:hidden
+ }
+ .mobile-date-events .calendar-event-icon{
+  display:block;flex:0 0 auto;width:12px;height:16px;max-width:12px
+ }
+ .mobile-date-events .calendar-maintenance-wrench{
+  display:block;flex:0 0 auto;width:15px;height:15px;color:inherit
+ }
+ .mobile-date-completion{
+  display:grid;place-items:center;width:13px;height:13px;flex:0 0 13px;
+  border-radius:50%;background:#829ab3;color:#fff
+ }
+ .mobile-date-completion svg{display:block;width:11px;height:11px}
+ .mobile-date-final .mobile-date-completion{background:#3e9b65}
+ .mobile-date-alert{
+  display:grid;place-items:center;background:#aa5052;color:#fff;
+  border-radius:50%;font-size:10px;font-weight:900;width:13px;height:13px
+ }
+ .mobile-date-cell.mobile-date-skip .mobile-date-events .calendar-skip-icon{
+  display:block;width:15px!important;height:15px!important;margin:0!important;color:inherit
+ }
+ .mobile-date-cell.is-today{
+  box-shadow:inset 0 0 0 1.5px #68b7ad
+ }
+ .mobile-date-cell.is-step-forward{animation:none}
+ .mobile-patient-week.is-step-forward{animation:mobile-carousel-arrive-forward .25s ease-out both}
+ .mobile-patient-week.is-step-back{animation:mobile-carousel-arrive-back .25s ease-out both}
+ html[data-theme="dark"] .mobile-date-cell.mobile-date-session.is-session-complete{
+  background:#34485c;border-color:#476179;color:#e4edf6
+ }
+ html[data-theme="dark"] .mobile-date-cell.mobile-date-session.is-session-planned{
+  background:#263747;border-color:#3c5263;color:#d8e4ee
+ }
+ html[data-theme="dark"] .mobile-date-cell.mobile-date-final{
+  background:#2a6046;border-color:#498b63;color:#c4f3db
+ }
+}
+@keyframes mobile-carousel-arrive-forward{
+ from{opacity:.5;transform:translateX(13px)}to{opacity:1;transform:translateX(0)}
+}
+@keyframes mobile-carousel-arrive-back{
+ from{opacity:.5;transform:translateX(-13px)}to{opacity:1;transform:translateX(0)}
+}
+@media(max-width:370px){
+ .mobile-patient-week{gap:2px}
+ .mobile-date-cell{min-height:78px;padding:5px 0 4px}
+ .mobile-date-day{font-size:11px}
+ .mobile-date-symbol{font-size:9px}
+}
+@media(prefers-reduced-motion:reduce){
+ .mobile-patient-week.is-step-forward,.mobile-patient-week.is-step-back{animation:none!important}
+}

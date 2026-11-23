@@ -8,7 +8,8 @@ import {currentCtvName} from './ctv-display.mjs';
 import {courseProgress,localToday,radiationSessionCompletion} from './course-progress.mjs';
 import {tasksForDate,todayTasks} from './today-tasks.mjs';
 import {calendarCellContextActions} from './calendar-cell-context-menu.mjs';
-import {skippedFractionIcon} from './calendar-event-icons.mjs?v=4';
+import {skippedFractionIcon,bloodTubeIcon,chemoInfusionIcon,chemoInfusionMissedIcon} from './calendar-event-icons.mjs?v=4';
+import {maintenanceWrenchSvg} from './calendar-maintenance-icon.mjs';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 const weekDays=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
@@ -53,7 +54,10 @@ export function mobileDayState(state,course,date,today=localToday(),plan=null){
   completion.source==='calendar'?'ЛТ учтена автоматически по прошедшей дате, не клиническое подтверждение':'',
   item?.beforeMaintenance?'Последняя фракция до ТО':''].filter(Boolean).join(' · ');
  return {kind,label,secondary,title,completed:completion.completed,weekend:isWeekend(date)&&!working,
-  final:Boolean(item?.final),selected:false};
+  final:Boolean(item?.final),selected:false,fraction:item?.kind==='session'?item.n:null,
+  isSession:item?.kind==='session',labStatus:lab,chemoPlanned:chemo,chemoMissed:infusionMissed,
+  maintenance:item?.kind==='maintenance'||Boolean(item?.beforeMaintenance),
+  breakdown:item?.kind==='breakdown',skip:item?.kind==='skip',completionSource:completion.source};
 }
 export function mobileVisibleRows(state,scheduled,{filter='',search='',today=localToday()}={}){
  const rows=calendarRosterRows(state,scheduled,{filter});
@@ -72,28 +76,47 @@ export function compactPatientName(name){
  if(parts.length<2)return parts[0]||'Пациент';
  return parts[0]+' '+parts.slice(1,3).map(part=>part.charAt(0).toLocaleUpperCase('ru')+'.').join(' ');
 }
-export function renderMobilePatientCards(state,rows,{weekDate=localToday(),selected=new Set(),expanded=new Set(),today=localToday()}={}){
- const dates=mobileWeekDates(weekDate),end=dates.at(-1);
+export function renderMobilePatientCards(state,rows,{weekDate=localToday(),selected=new Set(),expanded=new Set(),windowStarts=new Map(),today=localToday()}={}){
  return rows.map(course=>{
+  const start=windowStarts.get(course.id)||mobileWeekStart(weekDate)||weekDate;
+  const dates=Array.from({length:7},(_,i)=>addDays(start,i)),end=dates.at(-1);
   const contact=calendarContact(state,course);
   const plan=course.noCourse?new Map():schedule(course,state,end);
   const ctv=course.noCourse?'Без курса':currentCtvName(state,course)||course.courseName||'Схема не указана';
   const phoneDigits=contact.phone.replace(/[^\d+]/g,'');
   const machine=course.noCourse?'Установка не назначена':machineAt(course,state,weekDate);
   const progress=course.noCourse?null:courseProgress(state,course,today);
-  const cells=dates.map((date,i)=>{
+  const cells=dates.map(date=>{
    const data=mobileDayState(state,course,date,today,plan),key=course.id+'|'+date;
    const daySelected=selected.has(key),todayCell=date===today;
+   const weekday=weekDays[(new Date(date+'T12:00:00Z').getUTCDay()+6)%7];
+   const fraction=data.fraction!=null?'№'+data.fraction:'—';
+   const icons=[
+    data.completed&&data.isSession?'<span class="mobile-date-completion" title="Сеанс учтён"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m3 8 3.1 3 6.8-7"/></svg></span>':'',
+    data.labStatus?bloodTubeIcon:'',
+    data.chemoPlanned?(data.chemoMissed?chemoInfusionMissedIcon:chemoInfusionIcon):'',
+    data.maintenance?maintenanceWrenchSvg:'',
+    data.breakdown?'<span class="mobile-date-alert" aria-hidden="true">!</span>':'',
+    data.skip?skippedFractionIcon:''
+   ].join('');
    return '<button type="button" class="mobile-date-cell mobile-date-'+data.kind+
-    (data.weekend?' mobile-date-weekend':'')+(todayCell?' is-today':'')+(daySelected?' is-selected':'')+
+    (data.weekend?' mobile-date-weekend':'')+
+    (data.isSession?(data.completed?' is-session-complete':' is-session-planned'):'')+
+    (todayCell?' is-today':'')+(daySelected?' is-selected':'')+
     '" data-mobile-cell data-course-id="'+esc(course.id)+'" data-date="'+date+
     '"'+(course.noCourse?' disabled':'')+' aria-pressed="'+daySelected+'" aria-label="'+esc(course.name+', '+data.title+
     (daySelected?', выделено':'') )+'" title="'+esc(data.title)+'">'+
-    '<span class="mobile-date-weekday">'+weekDays[i]+'</span>'+
+    '<span class="mobile-date-weekday">'+weekday+'</span>'+
     '<span class="mobile-date-day">'+date.slice(8)+'</span>'+
-    '<span class="mobile-date-symbol">'+(data.kind==='skip'?skippedFractionIcon:esc(data.label))+'</span>'+
-    (data.secondary?'<span class="mobile-date-secondary">'+esc(data.secondary)+'</span>':'')+'</button>';
+    '<span class="mobile-date-symbol">'+(data.skip?'—':esc(fraction))+'</span>'+
+    '<span class="mobile-date-events" aria-hidden="true">'+icons+'</span></button>';
   }).join('');
+  const carousel='<div class="mobile-week-carousel" data-mobile-course-carousel="'+esc(course.id)+'">'+
+   '<div class="mobile-week-carousel-head">'+
+    '<button type="button" class="mobile-week-carousel-nav" data-mobile-carousel-shift="-1" data-course-id="'+esc(course.id)+'" aria-label="Предыдущий день">‹</button>'+
+    '<span class="mobile-week-carousel-range">'+dates[0].slice(8)+'.'+dates[0].slice(5,7)+' — '+dates.at(-1).slice(8)+'.'+dates.at(-1).slice(5,7)+'</span>'+
+    '<button type="button" class="mobile-week-carousel-nav" data-mobile-carousel-shift="1" data-course-id="'+esc(course.id)+'" aria-label="Следующий день">›</button>'+
+   '</div><div class="mobile-patient-week" role="group" aria-label="Даты и сеансы пациента: '+esc(course.name)+'">'+cells+'</div></div>';
   const isExpanded=expanded.has(course.id),patientName=esc(course.name);
   const isChemoradiation=!course.noCourse&&course.treatmentType==='ХЛТ';
   const elnActive=contact.eln==='Да';
@@ -124,7 +147,7 @@ export function renderMobilePatientCards(state,rows,{weekDate=localToday(),selec
      '</div><div class="mobile-patient-description">'+esc(ctv)+'</div>'+
      '<div class="mobile-patient-meta"><span>'+esc(machine)+'</span>'+
       (phoneDigits?'<a class="mobile-patient-phone" href="tel:'+esc(phoneDigits)+'" aria-label="Позвонить пациенту '+patientName+': '+esc(contact.phone)+'">'+esc(contact.phone)+'</a>':'')+
-     '</div><div class="mobile-patient-week" role="group" aria-label="Неделя пациента: '+patientName+'">'+cells+'</div>'+
+     '</div>'+carousel+
      (contact.notes?'<p class="mobile-patient-note" title="'+esc(contact.notes)+'">'+esc(contact.notes)+'</p>':'')+
     '</div></div></article>';
  }).join('');
@@ -164,7 +187,7 @@ export function createMobileWeekUI({
 }){
  if(!root||!tabbar||!actionsDialog)throw new Error('Мобильный интерфейс ЛУЧ не найден.');
  let tab='patients',weekDate=today(),search='',taskDate=today(),lastCell=null,actionCell=null,desktop=false,fullDesktop=false,calendarAligned=false,activeView='calendar';
- const expandedCards=new Set();
+ const expandedCards=new Set(),carouselStarts=new Map();
  const $=selector=>root.querySelector(selector);
  copyDesktopMoreIcons(root);
  const searchControl=$('#mobile-search-expandable'),searchInput=$('#mobile-search');
@@ -271,21 +294,39 @@ export function createMobileWeekUI({
   $('#mobile-selection').hidden=count===0;
   $('#mobile-selection-count').textContent=count===1?'1 ячейка':'Выбрано: '+count;
   const rows=mobileVisibleRows(appState,getRows(),{filter:getFilter(),search,today:today()});
-  $('#mobile-card-list').innerHTML=renderMobilePatientCards(appState,rows,{weekDate,selected,expanded:expandedCards,today:today()})||
+  $('#mobile-card-list').innerHTML=renderMobilePatientCards(appState,rows,{weekDate,selected,expanded:expandedCards,windowStarts:carouselStarts,today:today()})||
    '<p class="mobile-empty">По выбранным условиям пациентов нет</p>';
   const pending=todayTasks(appState,today()).filter(x=>!x.done).length;
   tabbar.querySelector('#mobile-tab-tasks-count').textContent=pending?String(pending):'';
   renderTasks();
  }
+ function shiftPatientCarousel(courseId,days){
+  if(!expandedCards.has(courseId)||!Number.isInteger(days)||Math.abs(days)!==1)return;
+  const start=carouselStarts.get(courseId)||mobileWeekStart(weekDate);
+  if(!start)return;
+  carouselStarts.set(courseId,addDays(start,days));
+  renderCardsOnly();
+  const card=[...$('#mobile-card-list').querySelectorAll('.mobile-patient-card')]
+   .find(node=>node.dataset.mobileCourseId===courseId);
+  const strip=card?.querySelector('.mobile-patient-week');
+  if(strip)strip.classList.add(days>0?'is-step-forward':'is-step-back');
+ }
+ let lastCarouselSwipeAt=0;
  root.addEventListener('click',event=>{
+  // A horizontal swipe over a date button must never also select the date.
+  if(Date.now()-lastCarouselSwipeAt<450&&event.target.closest('.mobile-week-carousel')){
+   event.preventDefault();return;
+  }
   if(event.target.closest('#mobile-search-toggle')){
    if(searchOpen)searchInput.focus({preventScroll:true});else setSearchOpen(true);
    return;
   }
   if(event.target.closest('#mobile-search-close')){setSearchOpen(false,{clear:true});return;}
-  const target=event.target.closest('button[data-mobile-cell],button[data-mobile-expand],button[data-mobile-patient],button[data-mobile-action-open],button[data-mobile-command],button[data-mobile-task],button[data-mobile-copy-discharge],button[data-mobile-section],button[data-mobile-week-shift],button[data-mobile-task-shift],button[data-mobile-tab-shortcut]');
+  const target=event.target.closest('button[data-mobile-cell],button[data-mobile-carousel-shift],button[data-mobile-expand],button[data-mobile-patient],button[data-mobile-action-open],button[data-mobile-command],button[data-mobile-task],button[data-mobile-copy-discharge],button[data-mobile-section],button[data-mobile-week-shift],button[data-mobile-task-shift],button[data-mobile-tab-shortcut]');
   if(!target)return;
-  if(target.dataset.mobileCell!==undefined){
+  if(target.dataset.mobileCarouselShift!==undefined){
+   shiftPatientCarousel(target.dataset.courseId,Number(target.dataset.mobileCarouselShift));
+  }else if(target.dataset.mobileCell!==undefined){
    lastCell={patientId:target.dataset.courseId,date:target.dataset.date};
    onSelect(lastCell.patientId,lastCell.date,{metaKey:true,ctrlKey:false,shiftKey:false});
   }else if(target.dataset.mobileExpand!==undefined){
@@ -316,7 +357,7 @@ export function createMobileWeekUI({
    const result=onToggleTask(target.dataset.mobileTask,taskDate);
    if(result?.error)onNotice(result.error);render();
   }else if(target.dataset.mobileWeekShift){
-   weekDate=addDays(weekDate,7*Number(target.dataset.mobileWeekShift));render();
+   weekDate=addDays(weekDate,7*Number(target.dataset.mobileWeekShift));carouselStarts.clear();render();
   }else if(target.dataset.mobileTaskShift){
    const value=addDays(taskDate,Number(target.dataset.mobileTaskShift));
    if(value<=today()){taskDate=value;render();}
@@ -331,7 +372,7 @@ export function createMobileWeekUI({
    else if(cmd==='export')onOpenExport();
    else if(cmd==='cloud')onOpenCloud();
    else if(cmd==='clear'){lastCell=null;onClearSelection();}
-   else if(cmd==='today'){weekDate=today();tab='patients';render();}
+   else if(cmd==='today'){weekDate=today();carouselStarts.clear();tab='patients';render();}
    else if(cmd==='week'){tab='calendar';render();}
    else if(cmd==='tasks-today'){taskDate=today();render();}
    else if(cmd==='desktop'){desktop=true;fullDesktop=true;onOpenDesktop();render();}
@@ -348,7 +389,7 @@ export function createMobileWeekUI({
  },{passive:true});
  function renderCardsOnly(){
   const rows=mobileVisibleRows(getState(),getRows(),{filter:getFilter(),search,today:today()});
-  $('#mobile-card-list').innerHTML=renderMobilePatientCards(getState(),rows,{weekDate,selected:getSelected(),expanded:expandedCards,today:today()})||
+  $('#mobile-card-list').innerHTML=renderMobilePatientCards(getState(),rows,{weekDate,selected:getSelected(),expanded:expandedCards,windowStarts:carouselStarts,today:today()})||
    '<p class="mobile-empty">По выбранным условиям пациентов нет</p>';
  }
  root.addEventListener('change',event=>{
@@ -359,7 +400,7 @@ export function createMobileWeekUI({
    requestAnimationFrame(()=>select.blur());
   }
   else if(event.target.id==='mobile-week-date'&&/^\d{4}-\d\d-\d\d$/.test(event.target.value)){
-   weekDate=event.target.value;render();
+   weekDate=event.target.value;carouselStarts.clear();render();
   }else if(event.target.id==='mobile-task-date'&&/^\d{4}-\d\d-\d\d$/.test(event.target.value)&&event.target.value<=today()){
    taskDate=event.target.value;render();
   }
@@ -377,11 +418,32 @@ export function createMobileWeekUI({
   }else if(event.target.closest('[data-mobile-actions-close]'))closeActions();
   else if(event.target===actionsDialog)closeActions();
  });
- // Horizontal card-list gesture changes a WEEK only if it is clearly not a
- // vertical scroll or a press on a button or phone link.
+ // Swipe only the expanded patient's date carousel, one day at a time.
+ // Vertical page scrolling and the existing card-list gestures stay available.
+ let dateSwipe=null;
+ const cardList=$('#mobile-card-list');
+ cardList.addEventListener('touchstart',event=>{
+  const strip=event.target.closest('.mobile-patient-week');
+  if(!strip||event.touches.length!==1){dateSwipe=null;return;}
+  const card=strip.closest('.mobile-patient-card');
+  dateSwipe=card?{courseId:card.dataset.mobileCourseId,
+   x:event.touches[0].clientX,y:event.touches[0].clientY}:null;
+ },{passive:true});
+ cardList.addEventListener('touchend',event=>{
+  if(!dateSwipe||!event.changedTouches.length)return;
+  const dx=event.changedTouches[0].clientX-dateSwipe.x;
+  const dy=event.changedTouches[0].clientY-dateSwipe.y;
+  const id=dateSwipe.courseId;
+  dateSwipe=null;
+  if(Math.abs(dx)>43&&Math.abs(dx)>Math.abs(dy)*1.45){
+   lastCarouselSwipeAt=Date.now();
+   shiftPatientCarousel(id,dx<0?1:-1);
+  }
+ },{passive:true});
+ // Outside the carousel, the whole-card gesture still switches weeks.
  let swipe=null;
  $('#mobile-card-list').addEventListener('touchstart',event=>{
-  if(event.touches.length!==1||event.target.closest('button,a,input,select')){swipe=null;return;}
+  if(event.touches.length!==1||event.target.closest('.mobile-week-carousel,button,a,input,select')){swipe=null;return;}
   swipe={x:event.touches[0].clientX,y:event.touches[0].clientY};
  },{passive:true});
  $('#mobile-card-list').addEventListener('touchend',event=>{
@@ -389,7 +451,7 @@ export function createMobileWeekUI({
   const dx=event.changedTouches[0].clientX-swipe.x,dy=event.changedTouches[0].clientY-swipe.y;
   swipe=null;
   if(Math.abs(dx)>65&&Math.abs(dx)>Math.abs(dy)*1.6){
-   weekDate=addDays(weekDate,dx<0?7:-7);render();
+   weekDate=addDays(weekDate,dx<0?7:-7);carouselStarts.clear();render();
   }
  },{passive:true});
  function syncView(next){
