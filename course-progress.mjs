@@ -52,10 +52,11 @@ export function dischargeCandidates(state,today=localToday()){
   const person=people.get(course.personId);
   if(!activeCourse(course)||person?.archived)continue;
   const progress=courseProgress(state,course,today);
-  // A missed final-day question must still be asked after refreshing the page
-  // or returning on a later date. Only an explicit decision resolves it.
+  // A missed final-day question must remain actionable after refresh.
+  // Postponing discharge ("no") is not a completed discharge: the course
+  // remains on the pending list until the physician actually discharges it.
   if(!progress.finalDate||progress.finalDate>today)continue;
-  if(['yes','no'].includes(course.dischargeReview?.decision)&&
+  if(course.dischargeReview?.decision==='yes'&&
    course.dischargeReview.finalDate===progress.finalDate)continue;
   candidates.push({course,person,progress});
  }

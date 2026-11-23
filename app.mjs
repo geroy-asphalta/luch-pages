@@ -6,7 +6,7 @@ import {ensurePatientModel} from './patient-model.mjs';
 import {createPatientUI} from './patient-ui.mjs?v=13';
 import {createCatalogUI} from './catalog-ui.mjs';
 import {currentCtvName} from './ctv-display.mjs';
-import {courseProgress,localToday,radiationSessionCompletion,dischargeCandidates,dischargeBatchDraft} from './course-progress.mjs?v=4';
+import {courseProgress,localToday,radiationSessionCompletion,dischargeCandidates,dischargeBatchDraft} from './course-progress.mjs?v=5';
 import {activePatientCount,todayTasks,toggleTodayTaskDraft,tasksForDate,captureTodayTaskHistoryDraft} from './today-tasks.mjs?v=6';
 import {orderedPersonIds,comparePatientEntries,reorderPatientDraft} from './patient-order.mjs';
 import {setupPatientReordering} from './patient-drag.mjs?v=2';
@@ -504,15 +504,17 @@ function showDischargeDialog(courseId=null){
  dischargePendingIds=entries.map(x=>x.course.id);
  el('discharge-dialog-title').textContent=entries.length===1?'Подтверждение выписки':'Выписка пациентов · '+entries.length;
  const overdue=entries.filter(({progress})=>progress.finalDate<today).length;
- const intro=overdue
-  ?'Нужно решить вопрос о выписке: '+overdue+' курс(а) завершились по плану раньше сегодня. Для них галочки сняты — подтверди проведённую последнюю фракцию и выбери пациентов для выписки. Снятая галочка означает «оставить на лечении».'
+ const postponed=entries.filter(({course})=>course.dischargeReview?.decision==='no').length;
+ const intro=overdue||postponed
+  ?'Ожидают решения о выписке: '+entries.length+' курс(а), из них '+overdue+
+    ' с прошедшей плановой датой и '+postponed+' с ранее отложенной выпиской. Для этих пациентов галочки сняты. Проверь последнюю фракцию и выбери, кого выписываем; остальные останутся в напоминаниях.'
   :'Отметь тех, кого выписываем. По умолчанию выбраны все '+entries.length+' курс(а). Сними галочку, если выписку нужно отложить.';
  el('discharge-info').innerHTML='<p class="discharge-list-intro">'+intro+'</p>'+
   '<div class="discharge-list">'+entries.map(({course,person,progress})=>{
    const chemoAfter=course.treatmentType==='ХЛТ'&&(state.events||[]).some(event=>
     event.patientId===course.id&&event.type==='chemo'&&event.source==='hlt'&&
     event.status!=='cancelled'&&event.date>progress.finalDate);
-   const checked=progress.finalDate===today?' checked':'';
+   const checked=progress.finalDate===today&&course.dischargeReview?.decision!=='no'?' checked':'';
    return '<label class="discharge-choice"><input type="checkbox" data-discharge-course="'+esc(course.id)+'"'+checked+'>'+
     '<span class="discharge-choice-content"><b>'+esc(person?.name||course.name)+'</b><span>'+esc(course.courseName||'Курс')+
     ' · '+esc(course.machine)+' · '+esc(progress.finalDate)+' · '+progress.total+' фр.</span>'+
@@ -537,6 +539,11 @@ function confirmDischargeBatch(){
  }
  const result=dischargeBatchDraft(state,choices,{today:dischargeDialogDay});
  if(result.error){notice(result.error);return;}
+ // Suppress postponed choices in this tab until a reload or day rollover.
+ // "No" does not resolve the pending discharge question permanently.
+ for(const choice of choices){
+  if(!choice.discharge)dischargeSuppressed.add(choice.courseId+'|'+dischargeDialogDay);
+ }
  state=result.state;save();
  closeDischargeDialog();
  render();
