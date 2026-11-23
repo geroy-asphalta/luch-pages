@@ -86,6 +86,14 @@ export function mobileCarouselInitialRange(weekDate){
  return {start:addDays(anchor,-MOBILE_CAROUSEL_BUFFER_DAYS),
   count:MOBILE_CAROUSEL_BUFFER_DAYS*2+7,left:null};
 }
+// Reuse approved desktop actions; TO and breakdowns have their own sections.
+const MOBILE_DATE_ACTIONS=new Set(['skip','lab','issue','chemo-move','chemo-cancel',
+ 'chemo-restore','chemo-not-given','chemo-outcome-reset']);
+export function mobileDateContextActions(state,cell,today=localToday()){
+ if(!cell?.patientId||!cell?.date)return [];
+ return calendarCellContextActions(state,[cell],cell,today)
+  .filter(item=>MOBILE_DATE_ACTIONS.has(item.id));
+}
 export function renderMobileDateCells(state,course,{start,count=7,selected=new Set(),today=localToday()}={}){
  if(!start||!Number.isInteger(count)||count<1)return '';
  const dates=Array.from({length:count},(_,i)=>addDays(start,i));
@@ -107,7 +115,7 @@ export function renderMobileDateCells(state,course,{start,count=7,selected=new S
    (data.weekend?' mobile-date-weekend':'')+
    (data.isSession?(data.completed?' is-session-complete':' is-session-planned'):'')+
    (todayCell?' is-today':'')+(daySelected?' is-selected':'')+
-   '" data-mobile-cell data-course-id="'+esc(course.id)+'" data-date="'+date+
+   '" data-mobile-cell aria-haspopup="menu" data-course-id="'+esc(course.id)+'" data-date="'+date+
    '"'+(course.noCourse?' disabled':'')+' aria-pressed="'+daySelected+'" aria-label="'+esc(course.name+', '+data.title+
    (daySelected?', выделено':'') )+'" title="'+esc(data.title)+'">'+
    '<span class="mobile-date-weekday">'+weekday+'</span>'+
@@ -207,6 +215,42 @@ export function createMobileWeekUI({
  function resetCarouselRanges(){carouselRanges.clear();resetCarouselPending=true;}
  const $=selector=>root.querySelector(selector);
  copyDesktopMoreIcons(root);
+ // Appended outside the clipped date ribbon, like the desktop context menu.
+ const dateMenu=document.createElement('div');
+ dateMenu.id='mobile-date-popover';
+ dateMenu.className='mobile-date-popover';
+ dateMenu.setAttribute('role','menu');
+ dateMenu.setAttribute('aria-label','Действия с датой пациента');
+ dateMenu.hidden=true;
+ document.body.appendChild(dateMenu);
+ let dateMenuCell=null;
+ function closeDateMenu(){
+  dateMenu.hidden=true;dateMenu.classList.remove('is-open');
+  dateMenuCell=null;dateMenu.innerHTML='';
+ }
+ function positionDateMenu(cellButton){
+  const box=cellButton.getBoundingClientRect(),rect=dateMenu.getBoundingClientRect();
+  const margin=12,availableBottom=window.innerHeight-92;
+  const left=Math.max(margin,Math.min(box.left+(box.width-rect.width)/2,
+   window.innerWidth-rect.width-margin));
+  const below=box.bottom+8,above=box.top-rect.height-8;
+  const preferred=below+rect.height<=availableBottom?below:above;
+  const top=Math.max(margin,Math.min(preferred,window.innerHeight-rect.height-margin));
+  dateMenu.style.left=left+'px';dateMenu.style.top=top+'px';
+ }
+ function openDateMenu(cell,cellButton){
+  const actions=mobileDateContextActions(getState(),cell,today());
+  const person=currentRows.find(row=>row.id===cell.patientId);
+  const label=(person?.name||'Пациент')+' · '+cell.date.slice(8)+'.'+cell.date.slice(5,7);
+  dateMenu.innerHTML='<div class="mobile-date-popover-heading">'+esc(label)+'</div>'+
+   actions.map(item=>'<button type="button" role="menuitem" data-mobile-date-action="'+
+    esc(item.id)+'" title="'+esc(item.title)+'"'+(item.disabled?' disabled':'')+'>'+
+    '<span class="mobile-date-popover-icon" aria-hidden="true">'+item.icon+'</span>'+
+    '<span>'+esc(item.label)+'</span></button>').join('');
+  dateMenuCell=cell;
+  dateMenu.hidden=false;dateMenu.classList.add('is-open');
+  positionDateMenu(cellButton);
+ }
  const searchControl=$('#mobile-search-expandable'),searchInput=$('#mobile-search');
  const searchToggle=$('#mobile-search-toggle'),searchClose=$('#mobile-search-close');
  let searchOpen=false;
@@ -225,6 +269,7 @@ export function createMobileWeekUI({
  const two=date=>date.slice(8)+'.'+date.slice(5,7);
  const fullDate=date=>new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'long',year:'numeric'}).format(new Date(date+'T12:00:00'));
  function tabTo(next){
+  closeDateMenu();
   tab=next;
   // The "Календарь" tab shows the EXISTING desktop grid, not a second copy
   // of schedule logic. The patient tab keeps its touch-friendly cards.
@@ -288,7 +333,7 @@ export function createMobileWeekUI({
  const cardList=$('#mobile-card-list');
  let currentRows=[];
  function rangeFor(id){
-  if(!carouselRanges.has(id))carouselRanges.set(id,mobileCarouselInitialRange(weekDate));
+  if(!carouselRanges.has(id))carouselRanges.set(id,mobileCarouselInitialRange(today()));
   return carouselRanges.get(id);
  }
  function saveCarouselPositions(){
@@ -397,7 +442,7 @@ export function createMobileWeekUI({
   $('#mobile-week-range').textContent=two(dates()[0])+' — '+two(dates()[6]);
   $('#mobile-week-date').value=weekDate;
   const count=selected.size;
-  $('#mobile-selection').hidden=count===0;
+  $('#mobile-selection').hidden=count===0||tab==='patients';
   $('#mobile-selection-count').textContent=count===1?'1 ячейка':'Выбрано: '+count;
   const rows=mobileVisibleRows(appState,getRows(),{filter:getFilter(),search,today:today()});
   if(resetCarouselPending)resetCarouselPending=false;
@@ -419,14 +464,27 @@ export function createMobileWeekUI({
   const target=event.target.closest('button[data-mobile-cell],button[data-mobile-expand],button[data-mobile-patient],button[data-mobile-action-open],button[data-mobile-command],button[data-mobile-task],button[data-mobile-copy-discharge],button[data-mobile-section],button[data-mobile-week-shift],button[data-mobile-task-shift],button[data-mobile-tab-shortcut]');
   if(!target)return;
   if(target.dataset.mobileCell!==undefined){
+   closeDateMenu();
    lastCell={patientId:target.dataset.courseId,date:target.dataset.date};
-   onSelect(lastCell.patientId,lastCell.date,{metaKey:true,ctrlKey:false,shiftKey:false});
+   onSelect(lastCell.patientId,lastCell.date,{
+    metaKey:false,ctrlKey:false,shiftKey:false,mobileSingle:true
+   });
+   const key=lastCell.patientId+'|'+lastCell.date;
+   if(getSelected().has(key)){
+    const selectedCell=[...cardList.querySelectorAll('button[data-mobile-cell]')]
+     .find(btn=>btn.dataset.courseId===lastCell.patientId&&btn.dataset.date===lastCell.date);
+    if(selectedCell)openDateMenu(lastCell,selectedCell);
+   }
   }else if(target.dataset.mobileExpand!==undefined){
    const id=target.dataset.mobileExpand,card=target.closest('.mobile-patient-card');
    if(!card)return;
    const open=!expandedCards.has(id);
    if(open)expandedCards.add(id);else expandedCards.delete(id);
-   if(!open){const strip=card.querySelector('.mobile-patient-week');if(strip)rangeFor(id).left=strip.scrollLeft;}
+   if(!open){
+    // New expansion always starts at the current week, not a previous scroll.
+    carouselRanges.delete(id);
+    if(dateMenuCell?.patientId===id)closeDateMenu();
+   }
    card.classList.toggle('is-expanded',open);
    if(open)hydrateExpandedCarousel(card,id);
    target.setAttribute('aria-expanded',String(open));
@@ -443,6 +501,12 @@ export function createMobileWeekUI({
    }
    const detail=card.querySelector('.mobile-patient-expansion');
    if(detail){detail.inert=!open;detail.setAttribute('aria-hidden',String(!open));}
+   // Safari may measure the opening 0fr panel as zero-width in this click;
+   // place the selected week's dates once the expansion has a real layout.
+   if(open)requestAnimationFrame(()=>{
+    const strip=card.querySelector('.mobile-patient-week');
+    if(card.isConnected&&expandedCards.has(id)&&strip)restoreCarousel(strip,id);
+   });
   }else if(target.dataset.mobilePatient){onPatient(target.dataset.mobilePatient);}
   else if(target.dataset.mobileActionOpen!==undefined)mobileActions();
   else if(target.dataset.mobileCopyDischarge){
@@ -472,6 +536,38 @@ export function createMobileWeekUI({
    else if(cmd==='desktop'){desktop=true;fullDesktop=true;onOpenDesktop();render();}
   }
  });
+ dateMenu.addEventListener('click',event=>{
+  const button=event.target.closest('button[data-mobile-date-action]');
+  if(!button||button.disabled||!dateMenuCell)return;
+  const which=button.dataset.mobileDateAction,cell=dateMenuCell;
+  if(!MOBILE_DATE_ACTIONS.has(which))return;
+  closeDateMenu();
+  onAction(which,cell); // Reuse approved desktop calendar actions.
+ });
+ document.addEventListener('pointerdown',event=>{
+  if(dateMenu.hidden||dateMenu.contains(event.target)||
+   event.target.closest?.('button[data-mobile-cell]'))return;
+  closeDateMenu();
+  // Do not erase a new selection until the outside tap has completed.
+  requestAnimationFrame(()=>{
+   if(dateMenu.hidden&&!dateMenuCell&&getSelected().size)onClearSelection();
+  });
+ },true);
+ document.addEventListener('keydown',event=>{
+  if(dateMenu.hidden)return;
+  if(event.key==='Escape'){
+   event.preventDefault();closeDateMenu();
+   onClearSelection();
+  }else if(['ArrowDown','ArrowUp'].includes(event.key)){
+   const buttons=[...dateMenu.querySelectorAll('button:not(:disabled)')];
+   const i=buttons.indexOf(document.activeElement);
+   if(buttons.length){
+    buttons[(i+(event.key==='ArrowDown'?1:-1)+buttons.length)%buttons.length].focus();
+    event.preventDefault();
+   }
+  }
+ },true);
+ window.addEventListener('resize',()=>closeDateMenu());
  root.addEventListener('input',event=>{
   if(event.target.id==='mobile-search'){search=event.target.value;renderCardsOnly();}
  });
@@ -532,6 +628,7 @@ export function createMobileWeekUI({
   }
  },{passive:true});
  function syncView(next){
+  closeDateMenu();
   activeView=next;
   if(next!=='calendar'){desktop=false;fullDesktop=false;}
   render();

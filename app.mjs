@@ -38,7 +38,7 @@ import {setupDischargeTextReportUI} from './discharge-text-ui.mjs?v=4';
 import {setupThemeUI} from './theme-ui.mjs';
 import {setupGlassUI,isGlassSuccessNotice} from './glass-ui.mjs?v=4';
 import {setupSidebarGlass} from './sidebar-glass.mjs?v=1';
-import {createMobileWeekUI} from './mobile-week-ui.mjs?v=14';
+import {createMobileWeekUI} from './mobile-week-ui.mjs?v=15';
 import {setupMachineFilterGlass} from './calendar-machine-filter-glass.mjs?v=1';
 
 setupThemeUI();
@@ -178,7 +178,7 @@ function selectCell(id,date,event){
    }
  }else{
    selected=calendarClickSelection(selected,key,{
-     additive:event.metaKey||event.ctrlKey||window.matchMedia('(pointer: coarse)').matches
+     additive:!event?.mobileSingle&&(event.metaKey||event.ctrlKey||window.matchMedia('(pointer: coarse)').matches)
    });
  }
  // An empty selection should have no shift-range anchor. If one of several

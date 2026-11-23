@@ -887,3 +887,79 @@
   width:calc((100% - 12px)/7)
  }
 }
+
+/* iPhone date actions: a compact anchored Liquid Glass popover, replacing
+   the large lower selection panel in patient cards. No TO/breakdown controls. */
+.mobile-date-popover[hidden]{display:none!important}
+@media(max-width:700px){
+ .mobile-date-popover{
+  position:fixed;z-index:160;
+  width:min(276px,calc(100vw - 24px));
+  max-height:min(380px,calc(100dvh - 36px));
+  overflow-y:auto;overscroll-behavior:contain;
+  border:1px solid rgba(192,212,222,.9);
+  border-radius:20px;padding:6px;
+  background:rgba(248,252,255,.89);
+  -webkit-backdrop-filter:blur(22px) saturate(1.35);
+  backdrop-filter:blur(22px) saturate(1.35);
+  box-shadow:0 14px 38px rgba(20,54,69,.19),0 2px 8px rgba(20,54,69,.08);
+  color:var(--mobile-text);
+  animation:mobile-date-popover-in .2s cubic-bezier(.2,.85,.25,1) both;
+ }
+ .mobile-date-popover-heading{
+  padding:9px 12px 7px;font-size:11px;line-height:1.3;
+  font-weight:750;letter-spacing:.02em;
+  color:var(--mobile-muted);
+  border-bottom:1px solid var(--mobile-border);margin-bottom:3px
+ }
+ .mobile-date-popover button{
+  display:flex;align-items:center;gap:10px;
+  width:100%;min-height:44px;border:0;
+  background:transparent;color:var(--mobile-text);
+  text-align:left;padding:8px 10px;border-radius:12px;
+  font-size:13px;font-weight:650;line-height:1.2;
+  -webkit-tap-highlight-color:transparent
+ }
+ .mobile-date-popover button:active,.mobile-date-popover button:focus-visible{
+  background:var(--mobile-accent-soft);outline:none
+ }
+ .mobile-date-popover button:disabled{opacity:.38}
+ .mobile-date-popover-icon{
+  display:grid;place-items:center;flex:0 0 22px;
+  width:22px;height:22px;font-size:19px
+ }
+ .mobile-date-popover-icon svg{display:block;width:21px;height:21px}
+ .mobile-patient-week .mobile-date-cell.is-selected{
+  z-index:3;outline:none;outline-offset:0;
+  border-color:#2b9fb1;
+  box-shadow:0 0 0 2px rgba(46,170,179,.53),
+   0 6px 12px rgba(23,96,109,.18),inset 0 1px 0 rgba(255,255,255,.6);
+  transform:translateY(-2px) scale(1.035);
+  animation:mobile-date-chosen .24s cubic-bezier(.2,.9,.28,1) both
+ }
+ html[data-theme="dark"] .mobile-date-popover{
+  background:rgba(30,47,61,.93);
+  border-color:rgba(112,143,160,.6);
+  box-shadow:0 14px 38px rgba(0,0,0,.32)
+ }
+ html[data-theme="dark"] .mobile-patient-week .mobile-date-cell.is-selected{
+  border-color:#78d6d7;
+  box-shadow:0 0 0 2px rgba(85,214,211,.62),0 6px 14px rgba(0,0,0,.27)
+ }
+}
+@keyframes mobile-date-popover-in{
+ from{opacity:0;transform:translateY(5px) scale(.97)}
+ to{opacity:1;transform:translateY(0) scale(1)}
+}
+@keyframes mobile-date-chosen{
+ from{transform:translateY(0) scale(1)}
+ to{transform:translateY(-2px) scale(1.035)}
+}
+@media(prefers-reduced-motion:reduce){
+ .mobile-date-popover,.mobile-patient-week .mobile-date-cell.is-selected{
+  animation:none!important;transition:none!important
+ }
+}
+@media(prefers-reduced-transparency:reduce),(forced-colors:active){
+ .mobile-date-popover{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:var(--mobile-surface)!important}
+}
