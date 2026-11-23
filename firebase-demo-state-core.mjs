@@ -77,3 +77,22 @@ export function makeCloudWrite(payload,expectedVersion){
   throw new Error('Некорректная версия облачной записи.');
  return {version:expectedVersion+1,payload};
 }
+
+/* Manual conflict recovery is deliberately a separate operation. It must not
+   weaken the optimistic checks used by ordinary background synchronization. */
+export const CONFLICT_BACKUP_PREFIX='luch-demo-conflict-pair-';
+export function createConflictBackup(localPayload,cloud,exportedAt=new Date().toISOString()){
+ const local=decodeDemoState(localPayload);
+ if(!cloud||!Number.isSafeInteger(cloud.version)||cloud.version<1)
+  throw new Error('Нет подтверждённой облачной версии для резервного копирования.');
+ const remote=decodeDemoState(cloud.payload);
+ return {
+  format:'luch-demo-conflict-pair-v1',exportedAt,
+  local,cloud:{version:cloud.version,state:remote}
+ };
+}
+export function assertConflictRecoverySnapshot(localPayload,cloud,prepared){
+ if(!prepared||!prepared.cloud||localPayload!==prepared.localPayload)
+  throw new Error('Локальные данные изменились после сохранения копий. Скачай обе версии заново.');
+ assertCloudVersion(cloud,prepared.cloud);
+}

@@ -425,6 +425,19 @@
   <button type="button" id="cloud-retry" hidden>Повторить отправку</button>
   <button type="button" id="cloud-export">Скачать локальную копию JSON</button>
  </div>
+ <div id="cloud-conflict-tools" class="cloud-start-recovery" hidden>
+  <h3>Разрешить конфликт: оставить версию этого устройства</h3>
+  <p class="muted">Вся облачная таблица будет заменена локальной, включая расписания и отметки. Сначала сохрани обе версии в один JSON-файл и проверь его в загрузках.</p>
+  <div class="discharge-actions">
+   <button type="button" id="cloud-conflict-download">1. Скачать обе версии JSON</button>
+  </div>
+  <div id="cloud-conflict-confirm-row" hidden>
+   <label class="cloud-synthetic"><input type="checkbox" id="cloud-conflict-confirm"> Проверил скачанный файл с обеими версиями и выбираю данные этого устройства как основные.</label>
+  </div>
+  <div class="discharge-actions">
+   <button type="button" id="cloud-promote-local" disabled>2. Сделать эту версию основной</button>
+  </div>
+ </div>
  <div class="cloud-start-recovery">
   <h3>Восстановление исчезнувших дат ЛТ</h3>
   <p class="muted">Только из ранее сохранённой истории и локальных копий. Никакие даты не придумываются.</p>
@@ -453,5 +466,5 @@
  <p class="mobile-actions-footnote">Изменения расписания не являются клиническим подтверждением проведения процедур.</p>
 </dialog>
 <div role="status" aria-live="polite" id="toast" class="toast"></div>
-<script type="module" src="./app.mjs?v=1.102"></script>
+<script type="module" src="./app.mjs?v=1.103"></script>
 </body></html>

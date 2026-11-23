@@ -2,6 +2,7 @@
 // are compiled into the site. Auth credentials are handled solely by Firebase SDK.
 import {parseFirebaseWebConfig} from './sync-lab-core.mjs';
 import {DEMO_COLLECTION,CONFIG_STORE,LOCAL_BACKUP_PREFIX,META_PREFIX,
+ CONFLICT_BACKUP_PREFIX,createConflictBackup,assertConflictRecoverySnapshot,
  encodeDemoState,decodeDemoState,parseCloudDemoDocument,readAck,
  determineCloudAction,assertCloudVersion,makeCloudWrite} from './firebase-demo-state-core.mjs';
 
@@ -9,10 +10,10 @@ const $=id=>document.getElementById(id);
 const info=msg=>{$('cloud-status').textContent=msg;};
 const text=error=>String(error?.message||error||'Неизвестная ошибка');
 const escapeText=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function fileBackup(payload){
+function fileBackup(payload,prefix='luch-demo-local'){
  const blob=new Blob([payload],{type:'application/json;charset=utf-8'});
  const url=URL.createObjectURL(blob),link=document.createElement('a');
- link.href=url;link.download='luch-demo-local-'+new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')+'.json';
+ link.href=url;link.download=prefix+'-'+new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')+'.json';
  document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
 }
 
@@ -20,6 +21,8 @@ export function createFirebaseDemoSync({getState,replaceState,canApplyRemote}){
  let app=null,auth=null,db=null,api=null,unsub=null,authUnsub=null,ref=null;
  let remote=null,remoteReady=false,ack=null,writeBusy=false,initBusy=false,paused=false;
  let signedUser=null,projectId='',mode='disconnected',lastFailure='';
+ // Only held in memory; a reload requires saving and checking both versions again.
+ let preparedRecovery=null;
  const metaKey=()=>META_PREFIX+projectId+'-'+signedUser.uid;
  const localPayload=()=>encodeDemoState(getState());
  const canApply=()=>canApplyRemote();
@@ -43,7 +46,23 @@ export function createFirebaseDemoSync({getState,replaceState,canApplyRemote}){
   $('cloud-retry').hidden=!(connected&&['unsent','conflict','upload'].includes(mode));
   $('cloud-retry').disabled=mode==='conflict'||writeBusy;
   $('cloud-export').disabled=false;
-  $('cloud-signout').disabled=!signedUser;
+  $('cloud-signout').disabled=!signedUser||writeBusy;
+  const conflictReady=connected&&mode==='conflict'&&Boolean(remote)&&!writeBusy;
+  if(preparedRecovery){
+   try{
+    if(!conflictReady)throw new Error('Восстановление больше не активно.');
+    assertConflictRecoverySnapshot(localPayload(),remote,preparedRecovery);
+   }catch{discardRecovery();}
+  }
+  $('cloud-conflict-tools').hidden=!conflictReady;
+  $('cloud-conflict-download').disabled=!conflictReady;
+  $('cloud-conflict-confirm-row').hidden=!conflictReady||!preparedRecovery;
+  $('cloud-promote-local').disabled=!conflictReady||!preparedRecovery||
+   !$('cloud-conflict-confirm').checked||!$('cloud-synthetic').checked;
+ }
+ function discardRecovery(){
+  preparedRecovery=null;
+  $('cloud-conflict-confirm').checked=false;
  }
  function saveAck(record){
   localStorage.setItem(metaKey(),JSON.stringify(record));
@@ -59,6 +78,7 @@ export function createFirebaseDemoSync({getState,replaceState,canApplyRemote}){
  function stopListener(){
   if(unsub)unsub();unsub=null;ref=null;remote=null;remoteReady=false;
   signedUser=null;ack=null;paused=false;writeBusy=false;
+  discardRecovery();
  }
  function refresh(){
   if(!signedUser||!remoteReady||initBusy)return;
@@ -165,8 +185,81 @@ export function createFirebaseDemoSync({getState,replaceState,canApplyRemote}){
    status('Первое сохранение не удалось: '+lastFailure,'unsent');
   }finally{writeBusy=false;refresh();}
  }
+
+ /* Manual "this device wins" flow. The prior cloud state and the complete local
+    state are saved to a single JSON bundle before confirmation. A transaction
+    then checks the exact server revision represented in that bundle. */
+ function downloadConflictPair(){
+  if(mode!=='conflict'||!signedUser||!remoteReady||!remote||writeBusy)return;
+  try{
+   const payload=localPayload(),cloud={version:remote.version,payload:remote.payload};
+   const bundle=createConflictBackup(payload,cloud);
+   const serialized=JSON.stringify(bundle,null,2);
+   // If browser storage is full, do not offer an unsafe overwrite.
+   localStorage.setItem(CONFLICT_BACKUP_PREFIX+Date.now()+'-'+
+    Math.random().toString(36).slice(2,6),serialized);
+   fileBackup(serialized,'luch-demo-both-versions');
+   preparedRecovery={localPayload:payload,cloud};
+   $('cloud-conflict-confirm').checked=false;
+   status('Запрошено скачивание обеих версий в одном JSON-файле. Проверь файл в «Загрузках», затем подтверди сохранение и выбор этого компьютера.','conflict');
+  }catch(e){
+   discardRecovery();
+   status('Не удалось подготовить обе резервные копии: '+text(e)+'. Перезапись запрещена.','conflict');
+  }
+ }
+ async function promoteLocalAfterConflict(){
+  if(mode!=='conflict'||!signedUser||!remoteReady||!remote||writeBusy||!ref||
+   !preparedRecovery)return;
+  if(!$('cloud-synthetic').checked||!$('cloud-conflict-confirm').checked){
+   status('Подтверди учебные данные и проверь скачанный файл с обеими версиями.','conflict');return;
+  }
+  if(!canApply()){
+   status('Закрой редактирование пациента и несохранённые формы перед публикацией версии.','conflict');return;
+  }
+  const prepared=preparedRecovery,identity=signedUser.uid,cloudRef=ref;
+  try{
+   assertConflictRecoverySnapshot(localPayload(),remote,prepared);
+   if(!confirm('Сделать данные ЭТОГО устройства основными для всего тестового аккаунта? Облачный список будет целиком заменён. Другая версия сохранена в JSON-копии. Продолжить?'))return;
+   assertConflictRecoverySnapshot(localPayload(),remote,prepared);
+  }catch(e){discardRecovery();status(text(e),'conflict');return;}
+  writeBusy=true;status('Проверяем сервер и отправляем выбранную локальную версию…','upload');
+  let succeeded=false;
+  try{
+   if(!signedUser||signedUser.uid!==identity)throw new Error('Учётная запись изменилась.');
+   const current=await api.fs.getDocFromServer(cloudRef);
+   const currentCloud=parseCloudDemoDocument(current.exists()?current.data():null);
+   assertConflictRecoverySnapshot(localPayload(),currentCloud,prepared);
+   if(!canApply())throw new Error('Во время подготовки началось редактирование пациента.');
+   await api.fs.runTransaction(db,async transaction=>{
+    const snap=await transaction.get(cloudRef);
+    const server=parseCloudDemoDocument(snap.exists()?snap.data():null);
+    assertConflictRecoverySnapshot(localPayload(),server,prepared);
+    if(!canApply())throw new Error('Открыто редактирование пациента. Запись отменена.');
+    transaction.set(cloudRef,{
+     ...makeCloudWrite(prepared.localPayload,prepared.cloud.version),
+     updatedAt:api.fs.serverTimestamp()
+    });
+   },{maxAttempts:3});
+   const updated={version:prepared.cloud.version+1,payload:prepared.localPayload};
+   if(!remote||remote.version<=updated.version)remote=updated;
+   saveAck(updated);
+   paused=false;lastFailure='';succeeded=true;
+  }catch(e){
+   paused=true;lastFailure=text(e);
+   try{
+    const snap=await api.fs.getDocFromServer(cloudRef);
+    if(ref===cloudRef)remote=parseCloudDemoDocument(snap.exists()?snap.data():null);
+   }catch{}
+  }finally{
+   writeBusy=false;discardRecovery();
+   if(succeeded)refresh();
+   else status('Облачная запись НЕ заменена или её подтверждение не получено: '+
+    lastFailure+'. Локальная таблица сохранена. Повтори сверку и скачивание обеих версий.','conflict');
+  }
+ }
  function listen(user){
   if(unsub)unsub();
+  discardRecovery();
   signedUser=user;projectId=app.options.projectId;
   try{ack=readAck(JSON.parse(localStorage.getItem(metaKey())||'null'))}catch{ack=null}
   remoteReady=false;remote=null;paused=false;
@@ -245,6 +338,14 @@ export function createFirebaseDemoSync({getState,replaceState,canApplyRemote}){
    applyCloud(true);
   };
   $('cloud-retry').onclick=()=>{paused=false;refresh()};
+  $('cloud-conflict-download').onclick=downloadConflictPair;
+  const updatePromoteEnabled=()=>{
+   $('cloud-promote-local').disabled=!(mode==='conflict'&&preparedRecovery&&!writeBusy&&
+    $('cloud-conflict-confirm').checked&&$('cloud-synthetic').checked);
+  };
+  $('cloud-conflict-confirm').onchange=updatePromoteEnabled;
+  $('cloud-synthetic').addEventListener('change',updatePromoteEnabled);
+  $('cloud-promote-local').onclick=()=>void promoteLocalAfterConflict();
   $('cloud-export').onclick=()=>{try{fileBackup(localPayload());info('Локальная JSON-копия сохранена в загрузки.')}catch(e){info(text(e))}};
   window.addEventListener('online',()=>{if(mode==='unsent'&&ack){paused=false;refresh();}});
   // A pending remote revision is safe to adopt after patient editing has closed.
