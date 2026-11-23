@@ -6,7 +6,7 @@ import {ensurePatientModel} from './patient-model.mjs';
 import {createPatientUI} from './patient-ui.mjs?v=13';
 import {createCatalogUI} from './catalog-ui.mjs';
 import {currentCtvName} from './ctv-display.mjs';
-import {courseProgress,localToday,radiationSessionCompletion,dischargeCandidates,dischargeBatchDraft} from './course-progress.mjs?v=3';
+import {courseProgress,localToday,radiationSessionCompletion,dischargeCandidates,dischargeBatchDraft} from './course-progress.mjs?v=4';
 import {activePatientCount,todayTasks,toggleTodayTaskDraft,tasksForDate,captureTodayTaskHistoryDraft} from './today-tasks.mjs?v=6';
 import {orderedPersonIds,comparePatientEntries,reorderPatientDraft} from './patient-order.mjs';
 import {setupPatientReordering} from './patient-drag.mjs?v=2';
@@ -503,14 +503,20 @@ function showDischargeDialog(courseId=null){
  dischargeDialogDay=today;
  dischargePendingIds=entries.map(x=>x.course.id);
  el('discharge-dialog-title').textContent=entries.length===1?'Подтверждение выписки':'Выписка пациентов · '+entries.length;
- el('discharge-info').innerHTML='<p class="discharge-list-intro">Отметь тех, кого выписываем. По умолчанию выбраны все '+entries.length+' курс(а). Сними галочку, если выписку нужно отложить.</p>'+
+ const overdue=entries.filter(({progress})=>progress.finalDate<today).length;
+ const intro=overdue
+  ?'Нужно решить вопрос о выписке: '+overdue+' курс(а) завершились по плану раньше сегодня. Для них галочки сняты — подтверди проведённую последнюю фракцию и выбери пациентов для выписки. Снятая галочка означает «оставить на лечении».'
+  :'Отметь тех, кого выписываем. По умолчанию выбраны все '+entries.length+' курс(а). Сними галочку, если выписку нужно отложить.';
+ el('discharge-info').innerHTML='<p class="discharge-list-intro">'+intro+'</p>'+
   '<div class="discharge-list">'+entries.map(({course,person,progress})=>{
    const chemoAfter=course.treatmentType==='ХЛТ'&&(state.events||[]).some(event=>
     event.patientId===course.id&&event.type==='chemo'&&event.source==='hlt'&&
     event.status!=='cancelled'&&event.date>progress.finalDate);
-   return '<label class="discharge-choice"><input type="checkbox" data-discharge-course="'+esc(course.id)+'" checked>'+
+   const checked=progress.finalDate===today?' checked':'';
+   return '<label class="discharge-choice"><input type="checkbox" data-discharge-course="'+esc(course.id)+'"'+checked+'>'+
     '<span class="discharge-choice-content"><b>'+esc(person?.name||course.name)+'</b><span>'+esc(course.courseName||'Курс')+
     ' · '+esc(course.machine)+' · '+esc(progress.finalDate)+' · '+progress.total+' фр.</span>'+
+    (progress.finalDate<today?'<small class="discharge-deferred">Ранее запланированная дата последней фракции. Требуется решение врача.</small>':'')+
     (chemoAfter?'<small class="discharge-deferred">По плану ХЛТ есть введения ХТ после последней фракции ЛТ. Проверь план до выписки.</small>':'')+
     (course.dischargeReview?.decision==='no'?'<small class="discharge-deferred">Ранее выписка была отложена.</small>':'')+
     '</span></label>';

@@ -46,11 +46,20 @@ export function courseProgress(state,course,today=localToday()){
   completedByCalendar:Boolean(finalDate&&finalDate<today)};
 }
 export function dischargeCandidates(state,today=localToday()){
- return (state.patients||[]).filter(c=>{
-   if(!activeCourse(c)||state.people?.find(p=>p.id===c.personId)?.archived)return false;
-   if(c.dischargeReview?.finalDate===today)return false; // answered on this last-fraction date
-   return courseProgress(state,c,today).finalToday;
- }).map(c=>({course:c,person:state.people?.find(p=>p.id===c.personId),progress:courseProgress(state,c,today)}));
+ const people=new Map((state.people||[]).map(person=>[person.id,person]));
+ const candidates=[];
+ for(const course of state.patients||[]){
+  const person=people.get(course.personId);
+  if(!activeCourse(course)||person?.archived)continue;
+  const progress=courseProgress(state,course,today);
+  // A missed final-day question must still be asked after refreshing the page
+  // or returning on a later date. Only an explicit decision resolves it.
+  if(!progress.finalDate||progress.finalDate>today)continue;
+  if(['yes','no'].includes(course.dischargeReview?.decision)&&
+   course.dischargeReview.finalDate===progress.finalDate)continue;
+  candidates.push({course,person,progress});
+ }
+ return candidates;
 }
 // A YES is an explicit user attestation for the last fraction, not an automatic
 // inference from the date. It finishes this course but NEVER archives the whole
