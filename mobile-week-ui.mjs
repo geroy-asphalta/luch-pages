@@ -8,6 +8,7 @@ import {currentCtvName} from './ctv-display.mjs';
 import {courseProgress,localToday,radiationSessionCompletion} from './course-progress.mjs';
 import {tasksForDate,todayTasks} from './today-tasks.mjs';
 import {calendarCellContextActions} from './calendar-cell-context-menu.mjs';
+import {createMobileTabLens} from './mobile-tab-lens.mjs';
 import {skippedFractionIcon,bloodTubeIcon,chemoInfusionIcon,chemoInfusionMissedIcon} from './calendar-event-icons.mjs?v=4';
 import {maintenanceWrenchSvg} from './calendar-maintenance-icon.mjs';
 
@@ -215,6 +216,7 @@ export function createMobileWeekUI({
  function resetCarouselRanges(){carouselRanges.clear();resetCarouselPending=true;}
  const $=selector=>root.querySelector(selector);
  copyDesktopMoreIcons(root);
+ const mobileTabLens=createMobileTabLens(tabbar,tabTo);
  // Appended outside the clipped date ribbon, like the desktop context menu.
  const dateMenu=document.createElement('div');
  dateMenu.id='mobile-date-popover';
@@ -425,6 +427,7 @@ export function createMobileWeekUI({
    const active=activeView!=='calendar'?b.dataset.mobileTab==='more':b.dataset.mobileTab===tab;
    b.classList.toggle('is-current',active);b.setAttribute('aria-current',active?'page':'false');
   });
+  mobileTabLens.sync();
   document.body.classList.toggle('mobile-desktop-table',desktop&&activeView==='calendar');
   document.body.classList.toggle('mobile-full-table',fullDesktop&&desktop&&activeView==='calendar');
   if(!mobilePanel)return; // never repaint card lists beneath other sections

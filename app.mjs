@@ -38,7 +38,7 @@ import {setupDischargeTextReportUI} from './discharge-text-ui.mjs?v=4';
 import {setupThemeUI} from './theme-ui.mjs';
 import {setupGlassUI,isGlassSuccessNotice} from './glass-ui.mjs?v=4';
 import {setupSidebarGlass} from './sidebar-glass.mjs?v=1';
-import {createMobileWeekUI} from './mobile-week-ui.mjs?v=15';
+import {createMobileWeekUI} from './mobile-week-ui.mjs?v=16';
 import {setupMachineFilterGlass} from './calendar-machine-filter-glass.mjs?v=1';
 
 setupThemeUI();
